@@ -346,8 +346,11 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
 import { getGoodsList } from '@/api/index.js'
+
+const router = useRouter()
 
 // 数据状态
 const loading = ref(false)
@@ -499,8 +502,7 @@ const goToBanner = (index) => {
 // 点击商品跳转到详情页
 const click = (id) => {
   console.log('点击商品ID:', id)
-  // 添加路由跳转逻辑
-  // router.push({ name: 'ProductDetail', params: { id } })
+  router.push(`/product/${id}`)
 }
 
 // 格式化日期

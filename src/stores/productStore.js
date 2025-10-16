@@ -78,7 +78,11 @@ export const useProductStore = defineStore('product', {
     async fetchProductById(id) {
       try {
         const response = await getProductDetail(id)
-        if (response.data?.success) {
+        console.log('API返回的商品详情:', response.data)
+
+        // 根据实际API返回结构处理数据
+        if (response.data?.code === 200 && response.data?.data) {
+          // 返回完整的data对象，包含product、reviews、related_products
           return response.data.data
         } else if (response.data?.data) {
           return response.data.data
