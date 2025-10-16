@@ -1,38 +1,4 @@
-import axios from 'axios'
-
-const request = axios.create({
-  baseURL: 'https://www.xingyunfeicui.xyz/api',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-// 请求拦截器
-request.interceptors.request.use(
-  (config) => {
-    // 可以在这里添加token等
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  },
-)
-
-// 响应拦截器
-request.interceptors.response.use(
-  (response) => {
-    return response
-  },
-  (error) => {
-    console.error('API请求错误:', error)
-    return Promise.reject(error)
-  },
-)
+import request from '@/utils/request'
 
 // 获取首页数据
 export const getGoodsList = () => request.get('/home')

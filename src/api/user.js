@@ -1,12 +1,14 @@
-import axios from 'axios'
-
-const request = axios.create({
-  baseURL: 'https://xingyunfeicui.xyz/api',
-})
+import request from '@/utils/request'
 
 // 注册请求
-export const userRegisterService = ({ username, password, phone }) =>
-  request.post('/auth/register', { username, password, phone })
+export const userRegisterService = ({
+  username,
+  password,
+  confirm_password,
+  phone,
+  verification_code,
+}) =>
+  request.post('/auth/register', { username, password, confirm_password, phone, verification_code })
 
 // 登录请求
 export const userLoginService = ({ username, password }) =>

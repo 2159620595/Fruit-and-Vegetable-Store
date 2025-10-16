@@ -31,6 +31,11 @@
 
             <!-- 注册表单 -->
             <div v-if="activeTab === 'signup'" class="form-content">
+              <!-- 错误提示 -->
+              <div v-if="signupError" class="error-message">
+                {{ signupError }}
+              </div>
+
               <!-- 用户名 -->
               <div class="form-group">
                 <label class="form-label">
@@ -38,8 +43,9 @@
                   <input
                     type="text"
                     v-model="signupForm.username"
-                    placeholder="请输入用户名"
+                    placeholder="请输入用户名（4-20个字符）"
                     class="form-input"
+                    @keyup.enter="handleSignup"
                   />
                 </label>
               </div>
@@ -51,8 +57,9 @@
                   <input
                     type="password"
                     v-model="signupForm.password"
-                    placeholder="请输入密码"
+                    placeholder="请输入密码（至少6个字符）"
                     class="form-input"
+                    @keyup.enter="handleSignup"
                   />
                 </label>
               </div>
@@ -63,29 +70,49 @@
                   <p class="label-text">确认密码</p>
                   <input
                     type="password"
-                    v-model="signupForm.confirmPassword"
-                    placeholder="请确认密码"
+                    v-model="signupForm.confirm_password"
+                    placeholder="请再次输入密码"
                     class="form-input"
+                    @keyup.enter="handleSignup"
                   />
                 </label>
               </div>
 
-              <!-- 手机号和验证码 -->
-              <div class="form-group-row">
+              <!-- 手机号 -->
+              <div class="form-group">
                 <label class="form-label">
-                  <p class="label-text">email</p>
+                  <p class="label-text">手机号</p>
                   <input
-                    type="email"
+                    type="tel"
                     v-model="signupForm.phone"
-                    placeholder="请输入phone"
+                    placeholder="请输入手机号"
                     class="form-input"
+                    @keyup.enter="handleSignup"
                   />
+                </label>
+              </div>
+
+              <!-- 验证码 -->
+              <div class="form-group">
+                <label class="form-label">
+                  <p class="label-text">验证码</p>
+                  <div class="verification-code-wrapper">
+                    <input
+                      type="text"
+                      v-model="signupForm.verification_code"
+                      placeholder="请输入验证码（测试：123456）"
+                      class="form-input"
+                      @keyup.enter="handleSignup"
+                    />
+                  </div>
                 </label>
               </div>
 
               <!-- 注册按钮 -->
               <div class="form-submit">
-                <button class="submit-btn" @click="handleSignup">注册</button>
+                <button class="submit-btn" @click="handleSignup" :disabled="signupLoading">
+                  {{ signupLoading ? '注册中...' : '注册' }}
+                </button>
               </div>
 
               <!-- 切换到登录 -->
@@ -103,6 +130,11 @@
 
             <!-- 登录表单 -->
             <div v-if="activeTab === 'login'" class="form-content">
+              <!-- 错误提示 -->
+              <div v-if="loginError" class="error-message">
+                {{ loginError }}
+              </div>
+
               <!-- 用户名 -->
               <div class="form-group">
                 <label class="form-label">
@@ -112,6 +144,7 @@
                     v-model="loginForm.username"
                     placeholder="请输入用户名"
                     class="form-input"
+                    @keyup.enter="handleLogin"
                   />
                 </label>
               </div>
@@ -125,13 +158,16 @@
                     v-model="loginForm.password"
                     placeholder="请输入密码"
                     class="form-input"
+                    @keyup.enter="handleLogin"
                   />
                 </label>
               </div>
 
               <!-- 登录按钮 -->
               <div class="form-submit">
-                <button class="submit-btn" @click="handleLogin">登录</button>
+                <button class="submit-btn" @click="handleLogin" :disabled="loginLoading">
+                  {{ loginLoading ? '登录中...' : '登录' }}
+                </button>
               </div>
 
               <!-- 切换到注册 -->
@@ -155,52 +191,166 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import router from '@/router'
-import { userRegisterService, userLoginService } from '@/api/user.js'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
 
+const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
 const activeTab = ref('login')
 
+// 表单数据
 const signupForm = ref({
   username: '',
   password: '',
+  confirm_password: '',
   phone: '',
+  verification_code: '',
 })
 
 const loginForm = ref({
   username: '',
   password: '',
 })
-console.log(signupForm.value)
 
+// 使用store的loading状态
+const loginLoading = computed(() => userStore.loading && activeTab.value === 'login')
+const signupLoading = computed(() => userStore.loading && activeTab.value === 'signup')
+
+// 错误消息
+const loginError = ref('')
+const signupError = ref('')
+
+// 验证登录表单
+const validateLogin = () => {
+  loginError.value = ''
+
+  if (!loginForm.value.username.trim()) {
+    loginError.value = '请输入用户名'
+    return false
+  }
+
+  if (!loginForm.value.password) {
+    loginError.value = '请输入密码'
+    return false
+  }
+
+  return true
+}
+
+// 验证注册表单
+const validateSignup = () => {
+  signupError.value = ''
+
+  if (!signupForm.value.username.trim()) {
+    signupError.value = '请输入用户名'
+    return false
+  }
+
+  if (signupForm.value.username.length < 4) {
+    signupError.value = '用户名至少4个字符'
+    return false
+  }
+
+  if (!signupForm.value.password) {
+    signupError.value = '请输入密码'
+    return false
+  }
+
+  if (signupForm.value.password.length < 6) {
+    signupError.value = '密码至少6个字符'
+    return false
+  }
+
+  if (!signupForm.value.confirm_password) {
+    signupError.value = '请确认密码'
+    return false
+  }
+
+  if (signupForm.value.password !== signupForm.value.confirm_password) {
+    signupError.value = '两次输入的密码不一致'
+    return false
+  }
+
+  if (!signupForm.value.phone.trim()) {
+    signupError.value = '请输入手机号'
+    return false
+  }
+
+  if (!/^1[3-9]\d{9}$/.test(signupForm.value.phone)) {
+    signupError.value = '请输入有效的手机号'
+    return false
+  }
+
+  if (!signupForm.value.verification_code.trim()) {
+    signupError.value = '请输入验证码'
+    return false
+  }
+
+  return true
+}
+
+// 处理注册
 const handleSignup = async () => {
+  console.log('📝 注册表单数据:', signupForm.value)
+
+  if (!validateSignup()) {
+    console.log('❌ 表单验证失败')
+    return
+  }
+
+  console.log('✅ 表单验证通过，准备提交')
+  signupError.value = ''
+
   try {
-    const res = await userRegisterService(signupForm.value)
-    console.log('注册成功:', res)
-    // 注册成功后可以自动切换到登录或直接登录
+    await userStore.register(signupForm.value)
+    console.log('✅ 注册成功')
+
+    // 显示成功消息
+    alert('注册成功！请登录')
+
+    // 切换到登录并填充用户名
+    loginForm.value.username = signupForm.value.username
     activeTab.value = 'login'
-    alert('注册成功，请登录')
+
+    // 清空注册表单
+    signupForm.value = {
+      username: '',
+      password: '',
+      confirm_password: '',
+      phone: '',
+      verification_code: '',
+    }
   } catch (error) {
-    console.error('注册失败:', error)
-    // 错误提示已由拦截器处理
+    console.error('❌ 注册失败:', error)
+    signupError.value = error.message || userStore.error || '注册失败，请稍后重试'
   }
 }
 
+// 处理登录
 const handleLogin = async () => {
+  if (!validateLogin()) return
+
+  loginError.value = ''
+
   try {
-    const res = await userLoginService(loginForm.value)
-    console.log('登录成功:', res)
+    await userStore.login(loginForm.value)
+    console.log('✅ 登录成功')
 
-    // 保存token和用户信息（如果后端返回）
-    if (res.data?.token) {
-      localStorage.setItem('token', res.data.token)
-    }
+    // 获取重定向地址（从query参数）
+    const redirect = route.query.redirect || '/'
 
-    // 登录成功，跳转到首页
-    router.push('/')
+    console.log('🔄 准备跳转到:', redirect)
+
+    // 跳转到目标页面或首页
+    setTimeout(() => {
+      router.push(redirect)
+    }, 500)
   } catch (error) {
-    console.error('登录失败:', error)
-    // 错误提示已由拦截器处理
+    console.error('❌ 登录失败:', error)
+    loginError.value =
+      userStore.error || error.response?.data?.message || '登录失败，请检查用户名和密码'
   }
 }
 </script>
@@ -458,6 +608,31 @@ const handleLogin = async () => {
 
 .submit-btn:hover {
   background-color: #0ec50e;
+}
+
+.submit-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 错误消息样式 */
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  padding: 12px 16px;
+  margin: 0 16px 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 验证码输入框样式 */
+.verification-code-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .switch-text {

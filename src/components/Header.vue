@@ -116,22 +116,85 @@
               ></path>
             </svg>
           </button>
-          <button class="icon-btn" @click="router.push('/profile')">
-            <svg
-              t="1760099249589"
-              class="icon"
-              viewBox="0 0 1024 1024"
-              version="1.1"
-              xmlns="http://www.w3.org/2000/svg"
-              p-id="4707"
-            >
-              <path
-                d="M512 170.666667a341.333333 341.333333 0 1 1 0 682.666666 341.333333 341.333333 0 0 1 0-682.666666z m42.666667 362.666666h-85.333334a128 128 0 0 0-128 128h341.333334l-0.213334-7.509333A128 128 0 0 0 554.666667 533.333333z m-42.666667-213.333333a85.333333 85.333333 0 1 0 0 170.666667 85.333333 85.333333 0 0 0 0-170.666667z"
-                fill="#444444"
-                p-id="4708"
-              ></path>
-            </svg>
-          </button>
+          <!-- 用户菜单 -->
+          <div class="user-menu-container">
+            <button class="icon-btn user-btn" @click="toggleUserMenu">
+              <svg
+                t="1760099249589"
+                class="icon"
+                viewBox="0 0 1024 1024"
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                p-id="4707"
+              >
+                <path
+                  d="M512 170.666667a341.333333 341.333333 0 1 1 0 682.666666 341.333333 341.333333 0 0 1 0-682.666666z m42.666667 362.666666h-85.333334a128 128 0 0 0-128 128h341.333334l-0.213334-7.509333A128 128 0 0 0 554.666667 533.333333z m-42.666667-213.333333a85.333333 85.333333 0 1 0 0 170.666667 85.333333 85.333333 0 0 0 0-170.666667z"
+                  fill="#444444"
+                  p-id="4708"
+                ></path>
+              </svg>
+              <span v-if="userStore.isLoggedIn" class="user-badge"></span>
+            </button>
+
+            <!-- 用户下拉菜单 -->
+            <div v-if="showUserMenu" class="user-dropdown">
+              <div v-if="userStore.isLoggedIn" class="user-info-section">
+                <div class="user-greeting">
+                  <span class="greeting-text">你好，</span>
+                  <span class="username">{{ userStore.user?.username || '用户' }}</span>
+                </div>
+                <div class="user-menu-items">
+                  <a href="#" @click.prevent="goToProfile" class="user-menu-item">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"
+                      ></path>
+                    </svg>
+                    我的资料
+                  </a>
+                  <a href="#" @click.prevent="goToOrders" class="user-menu-item">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M216,64H176a48,48,0,0,0-96,0H40A16,16,0,0,0,24,80V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64ZM128,32a32,32,0,0,1,32,32H96A32,32,0,0,1,128,32Zm88,168H40V80H216V200Z"
+                      ></path>
+                    </svg>
+                    我的订单
+                  </a>
+                  <div class="menu-divider"></div>
+                  <a href="#" @click.prevent="handleLogout" class="user-menu-item logout">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M112,216a8,8,0,0,1-8,8H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32h56a8,8,0,0,1,0,16H48V208h56A8,8,0,0,1,112,216Zm109.66-93.66-40-40a8,8,0,0,0-11.32,11.32L196.69,120H104a8,8,0,0,0,0,16h92.69l-26.35,26.34a8,8,0,0,0,11.32,11.32l40-40A8,8,0,0,0,221.66,122.34Z"
+                      ></path>
+                    </svg>
+                    退出登录
+                  </a>
+                </div>
+              </div>
+              <div v-else class="user-login-section">
+                <p class="login-prompt">登录以查看更多功能</p>
+                <button @click="goToLogin" class="login-btn">登录 / 注册</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -141,12 +204,19 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import router from '@/router'
+import { useUserStore } from '@/stores/userStore'
+
+// 用户store
+const userStore = useUserStore()
 
 // 搜索相关状态
 const searchKeyword = ref('')
 const showSuggestions = ref(false)
 const searchHistory = ref([])
 const hotSearches = ref(['苹果', '香蕉', '西红柿', '黄瓜', '橙汁', '有机蔬菜'])
+
+// 用户菜单状态
+const showUserMenu = ref(false)
 
 // 从localStorage加载搜索历史
 onMounted(() => {
@@ -214,6 +284,44 @@ const handleBlur = () => {
     showSuggestions.value = false
   }, 200)
 }
+
+// 切换用户菜单
+const toggleUserMenu = () => {
+  showUserMenu.value = !showUserMenu.value
+}
+
+// 去登录页
+const goToLogin = () => {
+  showUserMenu.value = false
+  router.push('/login')
+}
+
+// 去个人资料页
+const goToProfile = () => {
+  showUserMenu.value = false
+  router.push('/profile')
+}
+
+// 去订单页
+const goToOrders = () => {
+  showUserMenu.value = false
+  router.push('/orders')
+}
+
+// 处理登出
+const handleLogout = () => {
+  if (confirm('确定要退出登录吗？')) {
+    userStore.logout()
+    showUserMenu.value = false
+    alert('已退出登录')
+    router.push('/')
+  }
+}
+
+// 初始化用户状态
+onMounted(() => {
+  userStore.initFromStorage()
+})
 </script>
 
 <style scoped>
@@ -412,6 +520,124 @@ const handleBlur = () => {
 
 .icon-btn:hover {
   background: #e9e9e9;
+}
+
+/* 用户菜单样式 */
+.user-menu-container {
+  position: relative;
+}
+
+.user-btn {
+  position: relative;
+}
+
+.user-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 220px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.user-info-section {
+  padding: 16px;
+}
+
+.user-greeting {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 12px;
+}
+
+.greeting-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.username {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-left: 4px;
+}
+
+.user-menu-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.user-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.user-menu-item.logout {
+  color: #f44336;
+}
+
+.user-menu-item.logout:hover {
+  background-color: #ffebee;
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: #f0f0f0;
+  margin: 8px 0;
+}
+
+.user-login-section {
+  padding: 20px;
+  text-align: center;
+}
+
+.login-prompt {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login-btn:hover {
+  background-color: #45a049;
 }
 
 @media (max-width: 960px) {
