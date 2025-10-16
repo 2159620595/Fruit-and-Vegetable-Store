@@ -203,10 +203,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import router from '@/router'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 
-// 用户store
+const router = useRouter()
 const userStore = useUserStore()
 
 // 搜索相关状态

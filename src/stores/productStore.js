@@ -1,6 +1,6 @@
 // src/stores/productStore.js
 import { defineStore } from 'pinia'
-import { getProducts, getProductDetail, getCategories, getGoodsList } from '@/api/index.js'
+import { getGoodsList, getProductDetail } from '@/api/index.js'
 
 export const useProductStore = defineStore('product', {
   state: () => ({
@@ -16,12 +16,14 @@ export const useProductStore = defineStore('product', {
       return Array.isArray(state.products) ? state.products : []
     },
     // 获取指定分类的商品
-    productsByCategory: (state) => (category) => {
-      return state.productList.filter((p) => p.category === category)
+    productsByCategory: (state) => {
+      const products = Array.isArray(state.products) ? state.products : []
+      return (category) => products.filter((p) => p.category === category)
     },
     // 获取价格范围内的商品
-    productsByPriceRange: (state) => (min, max) => {
-      return state.productList.filter((p) => p.price >= min && p.price <= max)
+    productsByPriceRange: (state) => {
+      const products = Array.isArray(state.products) ? state.products : []
+      return (min, max) => products.filter((p) => p.price >= min && p.price <= max)
     },
   },
 
@@ -30,47 +32,42 @@ export const useProductStore = defineStore('product', {
       this.loading = true
       this.error = null
       try {
-        // 尝试从/products端点获取
-        let response = await getProducts(params)
-        console.log('=== 商品API响应 ===')
-        console.log('响应数据:', response.data)
+        console.log('=== 开始加载商品数据 ===')
 
-        // 处理不同的响应格式
-        if (response.data?.success && response.data?.data) {
-          // 格式: { success: true, data: [...] }
-          this.products = Array.isArray(response.data.data) ? response.data.data : []
-        } else if (response.data?.data) {
-          // 格式: { data: [...] }
-          this.products = Array.isArray(response.data.data) ? response.data.data : []
-        } else if (Array.isArray(response.data)) {
-          // 格式: [...]
-          this.products = response.data
+        // 直接从首页接口获取商品数据
+        const response = await getGoodsList()
+        console.log('首页API响应:', response.data)
+
+        if (response.data?.data) {
+          const data = response.data.data
+
+          // 从首页数据中提取所有商品
+          const allProducts = [
+            ...(data.popular_picks || []),
+            ...(data.customer_favorites || []),
+            ...(data.new_arrivals || []),
+            ...(data.limited_offers || []),
+          ]
+
+          // 去重（使用id作为唯一标识）
+          const uniqueProducts = Array.from(
+            new Map(allProducts.map((item) => [item.id, item])).values(),
+          )
+
+          this.products = uniqueProducts
+
+          // 同时提取分类
+          this.extractCategoriesFromHomeData(data)
+
+          console.log('✅ 商品加载成功')
+          console.log('商品数量:', this.products.length)
+          console.log('分类数量:', this.categories.length)
         } else {
-          console.warn('商品数据格式不正确，尝试使用首页数据')
-          // 如果/products失败，尝试从/home获取
-          response = await getGoodsList()
-          if (response.data?.data?.popular_picks) {
-            // 从首页数据中提取商品
-            const allProducts = [
-              ...(response.data.data.popular_picks || []),
-              ...(response.data.data.customer_favorites || []),
-              ...(response.data.data.new_arrivals || []),
-              ...(response.data.data.limited_offers || []),
-            ]
-            // 去重
-            const uniqueProducts = Array.from(
-              new Map(allProducts.map((item) => [item.id, item])).values(),
-            )
-            this.products = uniqueProducts
-          } else {
-            this.products = []
-          }
+          console.warn('⚠️ 首页数据格式不正确')
+          this.products = []
         }
-
-        console.log('最终商品列表:', this.products)
-        console.log('商品数量:', this.products.length)
       } catch (error) {
-        console.error('获取商品列表失败:', error)
+        console.error('❌ 获取商品列表失败:', error)
         this.error = error.message
         this.products = []
       } finally {
@@ -93,19 +90,57 @@ export const useProductStore = defineStore('product', {
       }
     },
 
-    async fetchCategories() {
+    // 从已加载的商品中提取分类
+    fetchCategories() {
       try {
-        const response = await getCategories()
-        if (response.data?.success) {
-          this.categories = response.data.data || []
-        } else if (Array.isArray(response.data)) {
-          this.categories = response.data
+        if (this.products.length > 0) {
+          const categorySet = new Set()
+          this.products.forEach((product) => {
+            if (product.category) {
+              categorySet.add(product.category)
+            }
+          })
+          this.categories = Array.from(categorySet).sort()
+          console.log('✅ 从商品数据中提取到的分类:', this.categories)
         } else {
+          console.warn('⚠️ 没有商品数据，无法提取分类')
           this.categories = []
         }
       } catch (error) {
-        console.error('获取分类失败:', error)
+        console.error('提取分类失败:', error)
         this.categories = []
+      }
+    },
+
+    // 从首页数据中提取并保存分类
+    extractCategoriesFromHomeData(homeData) {
+      if (homeData?.categories && Array.isArray(homeData.categories)) {
+        // 如果首页数据包含categories字段
+        if (homeData.categories[0] && typeof homeData.categories[0] === 'object') {
+          // 对象数组，提取name字段
+          this.categories = homeData.categories.map((cat) => cat.name || cat.category_name)
+        } else {
+          // 字符串数组
+          this.categories = homeData.categories
+        }
+        console.log('✅ 从首页数据中获取到的分类:', this.categories)
+      } else {
+        // 从商品数据中提取分类
+        const allProducts = [
+          ...(homeData?.popular_picks || []),
+          ...(homeData?.customer_favorites || []),
+          ...(homeData?.new_arrivals || []),
+          ...(homeData?.limited_offers || []),
+        ]
+
+        const categorySet = new Set()
+        allProducts.forEach((product) => {
+          if (product.category) {
+            categorySet.add(product.category)
+          }
+        })
+        this.categories = Array.from(categorySet).sort()
+        console.log('✅ 从首页商品中提取到的分类:', this.categories)
       }
     },
   },
