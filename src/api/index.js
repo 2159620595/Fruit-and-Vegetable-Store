@@ -20,3 +20,9 @@ export const getProductDetail = (id) => {
 
 // 评价列表
 export const getCommentList = () => request.get('/reviews')
+
+// 导出购物车相关 API
+export * from './cart'
+
+// 导出订单相关 API
+export * from './order'

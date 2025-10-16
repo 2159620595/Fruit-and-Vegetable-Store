@@ -6,17 +6,46 @@
         <!-- 主内容区开始 -->
         <div class="main">
           <div class="main-content">
-            <!-- 标题 -->
+            <!-- 标题和批量操作 -->
             <div class="page-title">
               <p>您的购物车</p>
+              <div class="batch-actions" v-if="cartItems.length > 0">
+                <button
+                  class="batch-btn"
+                  @click="handleBatchDelete"
+                  :disabled="!cartStore.hasSelected"
+                >
+                  删除选中
+                </button>
+                <button class="batch-btn" @click="handleClearCart">清空购物车</button>
+              </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div v-if="cartStore.loading" class="loading-state">
+              <p>加载中...</p>
+            </div>
+
+            <!-- 错误提示 -->
+            <div v-else-if="cartStore.error" class="error-state">
+              <p>{{ cartStore.error }}</p>
+              <button @click="reloadCart" class="reload-btn">重新加载</button>
             </div>
 
             <!-- 购物车表格 -->
-            <div class="cart-table-wrapper">
+            <div v-else class="cart-table-wrapper">
               <div class="cart-table-container">
                 <table class="cart-table">
                   <thead>
                     <tr>
+                      <th class="col-select">
+                        <input
+                          type="checkbox"
+                          :checked="cartStore.isAllSelected"
+                          @change="toggleAllSelected"
+                          :disabled="cartItems.length === 0"
+                        />
+                      </th>
                       <th class="col-product">商品</th>
                       <th class="col-price">价格</th>
                       <th class="col-quantity">数量</th>
@@ -26,11 +55,23 @@
                   </thead>
                   <tbody>
                     <tr v-if="cartItems.length === 0">
-                      <td colspan="5" style="text-align: center; padding: 40px; color: #999">
+                      <td colspan="6" style="text-align: center; padding: 40px; color: #999">
                         购物车为空，快去添加商品吧~
                       </td>
                     </tr>
-                    <tr v-for="item in cartItems" :key="item.id" class="cart-row">
+                    <tr
+                      v-for="item in cartItems"
+                      :key="item.id"
+                      class="cart-row"
+                      :class="{ selected: item.selected }"
+                    >
+                      <td class="col-select">
+                        <input
+                          type="checkbox"
+                          :checked="item.selected"
+                          @change="toggleItemSelected(item.id)"
+                        />
+                      </td>
                       <td class="col-product">
                         <div class="product-info">
                           <div
@@ -49,7 +90,13 @@
                           >
                             -
                           </button>
-                          <span>{{ item.quantity }}</span>
+                          <input
+                            type="number"
+                            v-model.number="item.quantity"
+                            @change="updateQuantity(item.id, item.quantity)"
+                            min="1"
+                            max="999"
+                          />
                           <button @click="updateQuantity(item.id, item.quantity + 1)">+</button>
                         </div>
                       </td>
@@ -64,27 +111,31 @@
             </div>
 
             <!-- 订单汇总 -->
-            <h3 class="summary-title">订单汇总</h3>
-            <div class="summary-content">
-              <div class="summary-row">
-                <p class="summary-label">小计</p>
-                <p class="summary-value">{{ orderSummary.subtotal }}</p>
+            <div v-if="cartItems.length > 0">
+              <h3 class="summary-title">订单汇总</h3>
+              <div class="summary-content">
+                <div class="summary-row">
+                  <p class="summary-label">小计 ({{ cartStore.selectedCount }} 件已选商品)</p>
+                  <p class="summary-value">{{ orderSummary.subtotal }}</p>
+                </div>
+                <div class="summary-row">
+                  <p class="summary-label">运费</p>
+                  <p class="summary-value">{{ orderSummary.shipping }}</p>
+                </div>
+                <div class="summary-row total-row">
+                  <p class="summary-label">总计</p>
+                  <p class="summary-value total-value">{{ orderSummary.total }}</p>
+                </div>
               </div>
-              <div class="summary-row">
-                <p class="summary-label">运费</p>
-                <p class="summary-value">{{ orderSummary.shipping }}</p>
-              </div>
-              <div class="summary-row">
-                <p class="summary-label">总计</p>
-                <p class="summary-value">{{ orderSummary.total }}</p>
-              </div>
-            </div>
 
-            <!-- 按钮组 -->
-            <div class="action-buttons">
-              <div class="button-container">
-                <button class="continue-btn" @click="continueShopping">继续购物</button>
-                <button class="checkout-btn" @click="checkout">结账</button>
+              <!-- 按钮组 -->
+              <div class="action-buttons">
+                <div class="button-container">
+                  <button class="continue-btn" @click="continueShopping">继续购物</button>
+                  <button class="checkout-btn" @click="checkout" :disabled="!cartStore.hasSelected">
+                    结账 ({{ cartStore.selectedCount }})
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -97,12 +148,18 @@
 
 <script setup>
 import router from '@/router'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useCartStore } from '@/stores/cartStore'
 import Back from '../components/Back.vue'
 
 const cartStore = useCartStore()
 
+// 组件挂载时加载购物车数据
+onMounted(async () => {
+  await cartStore.fetchCartList()
+})
+
+// 购物车商品列表（格式化显示）
 const cartItems = computed(() => {
   return cartStore.items.map((item) => ({
     ...item,
@@ -112,8 +169,9 @@ const cartItems = computed(() => {
   }))
 })
 
+// 订单汇总（基于已选中的商品）
 const orderSummary = computed(() => {
-  const subtotal = cartStore.subtotal.toFixed(2)
+  const subtotal = cartStore.selectedTotal.toFixed(2)
   return {
     subtotal: `$${subtotal}`,
     shipping: '免费',
@@ -121,26 +179,74 @@ const orderSummary = computed(() => {
   }
 })
 
+// 继续购物
 const continueShopping = () => {
   router.push('/shop')
 }
 
+// 结账
 const checkout = () => {
   if (cartStore.items.length === 0) {
     alert('购物车为空，请先添加商品')
     return
   }
+
+  if (!cartStore.hasSelected) {
+    alert('请先选择要结账的商品')
+    return
+  }
+
+  // 跳转到结账页面
   router.push('/checkout')
 }
 
-const removeItem = (id) => {
+// 删除单个商品
+const removeItem = async (id) => {
   if (confirm('确定要删除这个商品吗？')) {
-    cartStore.removeFromCart(id)
+    await cartStore.removeFromCart(id)
   }
 }
 
-const updateQuantity = (id, quantity) => {
-  cartStore.updateQuantity(id, quantity)
+// 更新商品数量
+const updateQuantity = async (id, quantity) => {
+  // 确保数量至少为1
+  const validQuantity = Math.max(1, Math.min(999, parseInt(quantity) || 1))
+  await cartStore.updateQuantity(id, validQuantity)
+}
+
+// 切换商品选中状态
+const toggleItemSelected = async (id) => {
+  await cartStore.toggleItemSelected(id)
+}
+
+// 全选/取消全选
+const toggleAllSelected = async () => {
+  await cartStore.toggleAllSelected()
+}
+
+// 批量删除选中商品
+const handleBatchDelete = async () => {
+  if (!cartStore.hasSelected) {
+    alert('请先选择要删除的商品')
+    return
+  }
+
+  const selectedCount = cartStore.selectedCount
+  if (confirm(`确定要删除选中的 ${selectedCount} 件商品吗？`)) {
+    await cartStore.removeSelectedItems()
+  }
+}
+
+// 清空购物车
+const handleClearCart = async () => {
+  if (confirm('确定要清空购物车吗？此操作不可恢复！')) {
+    await cartStore.clearCart()
+  }
+}
+
+// 重新加载购物车
+const reloadCart = async () => {
+  await cartStore.fetchCartList()
 }
 </script>
 
@@ -329,6 +435,7 @@ const updateQuantity = (id, quantity) => {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
   padding: 16px;
 }
@@ -340,6 +447,67 @@ const updateQuantity = (id, quantity) => {
   line-height: 1.2;
   letter-spacing: -0.015em;
   min-width: 288px;
+}
+
+/* 批量操作按钮 */
+.batch-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.batch-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #dbe6db;
+  background-color: #f0f4f0;
+  color: #111811;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.batch-btn:hover:not(:disabled) {
+  background-color: #e5ebe5;
+  border-color: #c8d8c8;
+}
+
+.batch-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 加载和错误状态 */
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-state p {
+  color: #618961;
+  font-size: 16px;
+}
+
+.error-state p {
+  color: #dc3545;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.reload-btn {
+  padding: 8px 24px;
+  border-radius: 6px;
+  border: none;
+  background-color: #11d411;
+  color: #111811;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reload-btn:hover {
+  background-color: #0ec50e;
 }
 
 /* 购物车表格 */
@@ -374,12 +542,24 @@ const updateQuantity = (id, quantity) => {
   line-height: 1.5;
 }
 
+.col-select {
+  width: 50px;
+  text-align: center;
+}
+
+.col-select input[type='checkbox'] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #11d411;
+}
+
 .col-product {
-  width: 400px;
+  width: 350px;
 }
 
 .col-price {
-  width: 150px;
+  width: 120px;
 }
 
 .col-quantity {
@@ -387,7 +567,7 @@ const updateQuantity = (id, quantity) => {
 }
 
 .col-subtotal {
-  width: 150px;
+  width: 120px;
 }
 
 .col-actions {
@@ -396,6 +576,15 @@ const updateQuantity = (id, quantity) => {
 
 .cart-row {
   border-top: 1px solid #dbe6db;
+  transition: background-color 0.2s;
+}
+
+.cart-row.selected {
+  background-color: #f8fdf8;
+}
+
+.cart-row:hover {
+  background-color: #fafbfa;
 }
 
 .cart-table td {
@@ -436,25 +625,28 @@ const updateQuantity = (id, quantity) => {
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .quantity-controls button {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border: 1px solid #dbe6db;
   background-color: #f0f4f0;
   border-radius: 4px;
   cursor: pointer;
   color: #111811;
   font-size: 16px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
 }
 
 .quantity-controls button:hover:not(:disabled) {
   background-color: #e5ebe5;
+  border-color: #c8d8c8;
 }
 
 .quantity-controls button:disabled {
@@ -462,9 +654,35 @@ const updateQuantity = (id, quantity) => {
   cursor: not-allowed;
 }
 
-.quantity-controls span {
-  min-width: 30px;
+.quantity-controls input[type='number'] {
+  width: 50px;
+  height: 28px;
   text-align: center;
+  border: 1px solid #dbe6db;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #111811;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 4px;
+  outline: none;
+}
+
+.quantity-controls input[type='number']:focus {
+  border-color: #11d411;
+}
+
+/* 隐藏数字输入框的上下箭头 */
+.quantity-controls input[type='number']::-webkit-inner-spin-button,
+.quantity-controls input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.quantity-controls input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* 删除按钮 */
@@ -517,6 +735,24 @@ const updateQuantity = (id, quantity) => {
   text-align: right;
 }
 
+.total-row {
+  border-top: 1px solid #dbe6db;
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+.total-row .summary-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111811;
+}
+
+.total-row .total-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #11d411;
+}
+
 /* 按钮组 */
 .action-buttons {
   display: flex;
@@ -565,8 +801,14 @@ const updateQuantity = (id, quantity) => {
   color: #111811;
 }
 
-.checkout-btn:hover {
+.checkout-btn:hover:not(:disabled) {
   background-color: #0ec50e;
+}
+
+.checkout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #11d411;
 }
 
 /* 响应式设计 */

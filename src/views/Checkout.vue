@@ -42,37 +42,17 @@
         <div class="form-section">
           <h2 class="section-title">送货地址</h2>
           <div class="form-row">
-            <input
-              type="text"
-              placeholder="Full Name"
-              class="form-input full-width"
-            />
+            <input type="text" placeholder="Full Name" class="form-input full-width" />
           </div>
           <div class="form-row">
-            <input
-              type="text"
-              placeholder="Address"
-              class="form-input full-width"
-            />
+            <input type="text" placeholder="Address" class="form-input full-width" />
           </div>
           <div class="form-row">
-            <input
-              type="text"
-              placeholder="City"
-              class="form-input full-width"
-            />
+            <input type="text" placeholder="City" class="form-input full-width" />
           </div>
           <div class="form-row">
-            <input
-              type="text"
-              placeholder="State"
-              class="form-input half-width"
-            />
-            <input
-              type="text"
-              placeholder="Zip Code"
-              class="form-input half-width"
-            />
+            <input type="text" placeholder="State" class="form-input half-width" />
+            <input type="text" placeholder="Zip Code" class="form-input half-width" />
           </div>
         </div>
 
@@ -84,18 +64,14 @@
               <input type="radio" name="delivery" value="standard" checked />
               <div class="radio-content">
                 <div class="radio-title">标准配送</div>
-                <div class="radio-description">
-                  3-5个工作日内送达
-                </div>
+                <div class="radio-description">3-5个工作日内送达</div>
               </div>
             </label>
             <label class="radio-option">
               <input type="radio" name="delivery" value="express" />
               <div class="radio-content">
                 <div class="radio-title">特快配送</div>
-                <div class="radio-description">
-                  1-2 个工作日内送达
-                </div>
+                <div class="radio-description">1-2 个工作日内送达</div>
               </div>
             </label>
           </div>
@@ -120,23 +96,11 @@
           </div>
           <div class="payment-fields">
             <div class="form-row">
-              <input
-                type="text"
-                placeholder="Card Number"
-                class="form-input full-width"
-              />
+              <input type="text" placeholder="Card Number" class="form-input full-width" />
             </div>
             <div class="form-row">
-              <input
-                type="text"
-                placeholder="Expiration Date"
-                class="form-input half-width"
-              />
-              <input
-                type="text"
-                placeholder="CVV"
-                class="form-input half-width"
-              />
+              <input type="text" placeholder="Expiration Date" class="form-input half-width" />
+              <input type="text" placeholder="CVV" class="form-input half-width" />
             </div>
           </div>
         </div>
@@ -176,8 +140,7 @@
               <div class="image-placeholder carrot">🥕</div>
             </div>
             <div class="product-info">
-              <div class="product-quantity">1 根胡萝卜
-                </div>
+              <div class="product-quantity">1 根胡萝卜</div>
               <div class="product-name">有机胡萝卜</div>
             </div>
           </div>
@@ -225,9 +188,8 @@ const shippingInfo = ref({
   address: '',
   city: '',
   state: '',
-  zipCode: ''
+  zipCode: '',
 })
-
 
 const deliveryMethod = ref('standard')
 const paymentMethod = ref('credit-card')
@@ -235,20 +197,28 @@ const paymentMethod = ref('credit-card')
 const cardInfo = ref({
   number: '',
   expiry: '',
-  cvv: ''
+  cvv: '',
 })
 
-const discount = ref(2.50)
+const discount = ref(2.5)
 
 const shippingCost = computed(() => {
-  return deliveryMethod.value === 'express' ? 5.00 : 0.00
+  return deliveryMethod.value === 'express' ? 5.0 : 0.0
 })
 
 const totalAmount = computed(() => {
-  return cartStore.subtotal + shippingCost.value - discount.value
+  // 使用已选中商品的总价
+  return cartStore.selectedTotal + shippingCost.value - discount.value
 })
 
 const submitOrder = async () => {
+  // 检查是否有选中的商品
+  if (cartStore.selectedItems.length === 0) {
+    alert('请先选择要结账的商品')
+    router.push('/cart')
+    return
+  }
+
   if (!shippingInfo.value.name || !shippingInfo.value.address) {
     alert('Please fill in all shipping information')
     return
@@ -260,26 +230,29 @@ const submitOrder = async () => {
   }
 
   try {
+    // 只提交已选中的商品
     const orderData = {
-      items: cartStore.items.map(item => ({
+      items: cartStore.selectedItems.map((item) => ({
         productId: item.id,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        image: item.image
+        image: item.image,
       })),
       shippingAddress: shippingInfo.value,
       deliveryMethod: deliveryMethod.value,
       paymentMethod: paymentMethod.value,
-      subtotal: cartStore.subtotal,
+      subtotal: cartStore.selectedTotal,
       shipping: shippingCost.value,
       discount: discount.value,
-      total: totalAmount.value
+      total: totalAmount.value,
     }
 
     const order = await orderStore.createOrder(orderData)
-    cartStore.clearCart()
-    
+
+    // 只清除已选中的商品
+    await cartStore.removeSelectedItems()
+
     alert('Order placed successfully!')
     router.push(`/orders/${order._id}`)
   } catch (error) {
@@ -293,7 +266,7 @@ const submitOrder = async () => {
 .checkout-page {
   min-height: 100vh;
   background-color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Header Styles */
@@ -495,7 +468,7 @@ const submitOrder = async () => {
   border-color: #2d5a27;
 }
 
-.radio-option input[type="radio"] {
+.radio-option input[type='radio'] {
   margin-right: 12px;
   width: 16px;
   height: 16px;

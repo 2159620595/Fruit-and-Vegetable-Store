@@ -70,6 +70,16 @@ export const useUserStore = defineStore('user', {
 
         console.log('✅ 登录状态已保存')
 
+        // 登录成功后同步购物车
+        try {
+          const { useCartStore } = await import('./cartStore')
+          const cartStore = useCartStore()
+          await cartStore.syncLocalCartToBackend()
+          console.log('✅ 购物车同步完成')
+        } catch (cartError) {
+          console.warn('⚠️ 购物车同步失败（不影响登录）:', cartError)
+        }
+
         return response.data
       } catch (error) {
         console.error('❌ 登录失败:', error)
