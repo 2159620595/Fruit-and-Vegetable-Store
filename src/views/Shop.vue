@@ -19,16 +19,46 @@
         <aside class="filters">
           <div class="filter-group">
             <h3>分类</h3>
-            <label v-for="cat in categories" :key="cat">
-              <input type="checkbox" :value="cat" v-model="selectedCategories" />
-              {{ cat }}
-            </label>
+            <div v-if="categories.length > 0">
+              <label v-for="cat in categories" :key="cat">
+                <input type="checkbox" :value="cat" v-model="selectedCategories" />
+                {{ cat }}
+              </label>
+            </div>
+            <p v-else class="no-data">暂无分类</p>
           </div>
 
           <div class="filter-group">
             <h3>价格区间</h3>
-            <input type="range" min="0" max="50" v-model="maxPrice" />
-            <p>最高 ${{ maxPrice }}</p>
+            <div class="price-range">
+              <input
+                type="number"
+                v-model.number="minPrice"
+                placeholder="最低价"
+                min="0"
+                class="price-input"
+              />
+              <span>-</span>
+              <input
+                type="number"
+                v-model.number="maxPrice"
+                placeholder="最高价"
+                min="0"
+                class="price-input"
+              />
+            </div>
+            <input
+              type="range"
+              min="0"
+              :max="priceRangeMax"
+              v-model="maxPrice"
+              class="price-slider"
+            />
+            <p class="price-label">¥{{ minPrice }} - ¥{{ maxPrice }}</p>
+          </div>
+
+          <div class="filter-group">
+            <button class="reset-btn" @click="resetFilters">重置筛选</button>
           </div>
         </aside>
 
@@ -59,14 +89,37 @@
               @click="goToProduct(product.id)"
             >
               <div class="product-image">
-                <img v-if="product.image_url" :src="product.image_url" :alt="product.name" />
+                <img
+                  v-if="product.image_url"
+                  :data-src="product.image_url"
+                  :alt="product.name"
+                  class="lazy-img"
+                  loading="lazy"
+                />
                 <div v-else class="placeholder">🍎</div>
+                <!-- 图片加载骨架屏 -->
+                <div class="image-loading"></div>
               </div>
               <div class="product-info">
                 <h3>{{ product.name }}</h3>
-                <p class="price">¥{{ product.price }}</p>
+                <div class="product-meta">
+                  <p class="price">¥{{ product.price }}</p>
+                  <p v-if="product.unit" class="unit">/ {{ product.unit }}</p>
+                </div>
+                <p v-if="product.description" class="description">{{ product.description }}</p>
                 <div class="product-actions">
                   <button class="add-to-cart-btn" @click.stop="addToCart(product)">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M222.14,58.87A8,8,0,0,0,216,56H54.68L49.79,29.14A16,16,0,0,0,34.05,16H16a8,8,0,0,0,0,16h18L59.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,152,204a28,28,0,1,0,28-28H83.17a8,8,0,0,1-7.87-6.57L72.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,222.14,58.87Z"
+                      ></path>
+                    </svg>
                     加入购物车
                   </button>
                 </div>
@@ -110,11 +163,22 @@ const route = useRoute()
 const productStore = useProductStore()
 const cartStore = useCartStore()
 const selectedCategories = ref([])
-const maxPrice = ref(50)
+const minPrice = ref(0)
+const maxPrice = ref(1000)
+const priceRangeMax = ref(1000)
 const sortBy = ref('name')
 const searchKeyword = ref('')
 
-const categories = ['水果', '蔬菜', '绿叶菜', '果汁']
+// 从商品数据中提取分类
+const categories = computed(() => {
+  const cats = new Set()
+  productStore.productList.forEach((p) => {
+    if (p.category) {
+      cats.add(p.category)
+    }
+  })
+  return Array.from(cats)
+})
 
 // 监听路由查询参数变化
 watch(
@@ -153,7 +217,9 @@ const filteredProducts = computed(() => {
     }
 
     // 价格过滤
-    products = products.filter((p) => p.price && p.price <= maxPrice.value)
+    products = products.filter(
+      (p) => p.price && p.price >= minPrice.value && p.price <= maxPrice.value,
+    )
 
     return products
   } catch (error) {
@@ -195,23 +261,79 @@ const clearSearch = () => {
   router.push({ path: '/shop' })
 }
 
+// 重置筛选
+const resetFilters = () => {
+  selectedCategories.value = []
+  minPrice.value = 0
+  maxPrice.value = priceRangeMax.value
+  searchKeyword.value = ''
+  router.push({ path: '/shop' })
+}
+
+// 计算价格范围
+const calculatePriceRange = () => {
+  if (productStore.productList.length > 0) {
+    const prices = productStore.productList.map((p) => p.price || 0)
+    const max = Math.max(...prices)
+    priceRangeMax.value = Math.ceil(max / 100) * 100 || 1000
+    maxPrice.value = priceRangeMax.value
+  }
+}
+
+// 图片懒加载
+const setupLazyLoading = () => {
+  const images = document.querySelectorAll('.lazy-img')
+  const imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const img = entry.target
+        const src = img.getAttribute('data-src')
+        if (src) {
+          img.src = src
+          img.classList.add('loaded')
+          imageObserver.unobserve(img)
+        }
+      }
+    })
+  })
+
+  images.forEach((img) => imageObserver.observe(img))
+}
+
 onMounted(async () => {
   console.log('=== Shop页面挂载 ===')
-  console.log('初始 productStore.products:', productStore.products)
-  console.log('初始 productStore.productList:', productStore.productList)
 
   try {
     await productStore.fetchProducts()
     console.log('=== 数据加载完成 ===')
-    console.log('productStore.products:', productStore.products)
-    console.log('productStore.products 类型:', typeof productStore.products)
-    console.log('是否为数组:', Array.isArray(productStore.products))
-    console.log('productStore.productList:', productStore.productList)
     console.log('商品数量:', productStore.productList?.length || 0)
+
+    // 计算价格范围
+    calculatePriceRange()
+
+    // 如果有分类数据，也加载分类
+    if (productStore.categories.length === 0) {
+      await productStore.fetchCategories()
+    }
+
+    // 设置图片懒加载
+    setTimeout(() => {
+      setupLazyLoading()
+    }, 100)
   } catch (error) {
     console.error('加载商品数据失败:', error)
   }
 })
+
+// 监听商品列表变化，重新设置懒加载
+watch(
+  () => sortedProducts.value.length,
+  () => {
+    setTimeout(() => {
+      setupLazyLoading()
+    }, 100)
+  },
+)
 </script>
 
 <style scoped>
@@ -310,9 +432,65 @@ h1 {
   cursor: pointer;
 }
 
-.filter-group input[type='range'] {
+.filter-group .no-data {
+  color: #999;
+  font-size: 14px;
+  padding: 10px 0;
+}
+
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.price-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.price-input:focus {
+  outline: none;
+  border-color: #618961;
+}
+
+.price-range span {
+  color: #999;
+}
+
+.price-slider {
   width: 100%;
   cursor: pointer;
+  margin: 10px 0;
+}
+
+.price-label {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.reset-btn {
+  width: 100%;
+  padding: 10px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.reset-btn:hover {
+  background: #618961;
+  color: white;
+  border-color: #618961;
 }
 
 .products-area {
@@ -375,33 +553,88 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .product-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-image img.loaded {
+  opacity: 1;
+}
+
+.image-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  z-index: 0;
+}
+
+.product-image img.loaded ~ .image-loading {
+  display: none;
 }
 
 .placeholder {
   font-size: 48px;
+  z-index: 1;
 }
 
 .product-info {
   padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .product-info h3 {
-  margin: 0 0 8px 0;
+  margin: 0;
   font-size: 16px;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.product-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
 }
 
 .price {
   color: #2d5a27;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  margin: 8px 0;
+  margin: 0;
+}
+
+.unit {
+  color: #999;
+  font-size: 14px;
+  margin: 0;
+}
+
+.description {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .add-to-cart-btn {
@@ -413,11 +646,17 @@ h1 {
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .add-to-cart-btn:hover {
   background: #2d5a27;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(97, 137, 97, 0.3);
 }
 
 /* 加载状态 */
