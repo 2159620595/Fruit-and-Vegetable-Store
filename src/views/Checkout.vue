@@ -14,7 +14,9 @@
           <a href="#" class="nav-link">联系我们</a>
         </nav>
         <div class="header-actions">
-          <button class="cart-btn" @click="router.push('/cart')">Cart (3)</button>
+          <button class="cart-btn" @click="router.push('/cart')">
+            购物车 ({{ cartStore.cartCount }})
+          </button>
           <div class="profile-pic" @click="router.push('/profile')">
             <img
               src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNEMUQ1REIiLz4KPHBhdGggZD0iTTE2IDE2QzE4LjIwOTEgMTYgMjAgMTQuMjA5MSAyMCAxMkMyMCA5Ljc5MDg2IDE4LjIwOTEgOCAxNiA4QzEzLjc5MDkgOCAxMiA5Ljc5MDg2IDEyIDEyQzEyIDE0LjIwOTEgMTMuNzkwOSAxNiAxNiAxNloiIGZpbGw9IiM2NjY2NjYiLz4KPHBhdGggZD0iTTE2IDI0QzE5LjMxMzcgMjQgMjIgMjEuMzEzNyAyMiAxOEgyMkMyMiAxNi44OTU0IDIxLjEwNDYgMTYgMjAgMTZIMTJDMTAuODk1NCAxNiAxMCAxNi44OTU0IDEwIDE4SDhDOCAyMS4zMTM3IDEwLjY4NjMgMjQgMTYgMjRaIiBmaWxsPSIjNjY2NjY2Ii8+Cjwvc3ZnPgo="
@@ -27,50 +29,44 @@
 
     <!-- Breadcrumbs -->
     <div class="breadcrumbs">
-      <a href="#" class="breadcrumb-link">购物车</a>
+      <a href="#" class="breadcrumb-link" @click.prevent="router.push('/cart')">购物车</a>
       <span class="breadcrumb-separator">/</span>
       <span class="breadcrumb-current">结账</span>
     </div>
 
+    <!-- 空购物车提示 -->
+    <div v-if="cartStore.selectedItems.length === 0" class="empty-cart-message">
+      <div class="empty-icon">🛒</div>
+      <h2>没有要结账的商品</h2>
+      <p>请先在购物车中选择要购买的商品</p>
+      <button class="back-to-cart-btn" @click="router.push('/cart')">返回购物车</button>
+    </div>
+
     <!-- Main Content -->
-    <div class="main-content">
+    <div v-else class="main-content">
       <!-- Left Section - Checkout Form -->
       <div class="checkout-form-section">
         <h1 class="checkout-title">结账</h1>
 
         <!-- Shipping Address -->
-        <div class="form-section">
-          <h2 class="section-title">送货地址</h2>
-          <div class="form-row">
-            <input type="text" placeholder="Full Name" class="form-input full-width" />
-          </div>
-          <div class="form-row">
-            <input type="text" placeholder="Address" class="form-input full-width" />
-          </div>
-          <div class="form-row">
-            <input type="text" placeholder="City" class="form-input full-width" />
-          </div>
-          <div class="form-row">
-            <input type="text" placeholder="State" class="form-input half-width" />
-            <input type="text" placeholder="Zip Code" class="form-input half-width" />
-          </div>
-        </div>
+        <AddressSelector v-model="selectedAddressId" @change="onAddressChange" />
+        <div v-if="errors.address" class="error-message">{{ errors.address }}</div>
 
         <!-- Delivery Method -->
         <div class="form-section">
           <h2 class="section-title">配送时效</h2>
           <div class="radio-group">
-            <label class="radio-option selected">
-              <input type="radio" name="delivery" value="standard" checked />
+            <label class="radio-option" :class="{ selected: deliveryMethod === 'standard' }">
+              <input v-model="deliveryMethod" type="radio" name="delivery" value="standard" />
               <div class="radio-content">
-                <div class="radio-title">标准配送</div>
+                <div class="radio-title">标准配送 - ¥5.00</div>
                 <div class="radio-description">3-5个工作日内送达</div>
               </div>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="delivery" value="express" />
+            <label class="radio-option" :class="{ selected: deliveryMethod === 'express' }">
+              <input v-model="deliveryMethod" type="radio" name="delivery" value="express" />
               <div class="radio-content">
-                <div class="radio-title">特快配送</div>
+                <div class="radio-title">特快配送 - ¥10.00</div>
                 <div class="radio-description">1-2 个工作日内送达</div>
               </div>
             </label>
@@ -81,32 +77,65 @@
         <div class="form-section">
           <h2 class="section-title">付款方式</h2>
           <div class="radio-group">
-            <label class="radio-option selected">
-              <input type="radio" name="payment" value="credit" checked />
+            <label class="radio-option" :class="{ selected: paymentMethod === 'credit-card' }">
+              <input v-model="paymentMethod" type="radio" name="payment" value="credit-card" />
               <div class="radio-content">
-                <div class="radio-title">信用卡</div>
+                <div class="radio-title">💳 信用卡/借记卡</div>
               </div>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="payment" value="paypal" />
+            <label class="radio-option" :class="{ selected: paymentMethod === 'wechat' }">
+              <input v-model="paymentMethod" type="radio" name="payment" value="wechat" />
               <div class="radio-content">
-                <div class="radio-title">PayPal</div>
+                <div class="radio-title">💚 微信支付</div>
+              </div>
+            </label>
+            <label class="radio-option" :class="{ selected: paymentMethod === 'alipay' }">
+              <input v-model="paymentMethod" type="radio" name="payment" value="alipay" />
+              <div class="radio-content">
+                <div class="radio-title">💙 支付宝</div>
               </div>
             </label>
           </div>
-          <div class="payment-fields">
+
+          <!-- Credit Card Fields -->
+          <div v-if="paymentMethod === 'credit-card'" class="payment-fields">
             <div class="form-row">
-              <input type="text" placeholder="Card Number" class="form-input full-width" />
+              <input
+                v-model="cardInfo.number"
+                type="text"
+                placeholder="卡号"
+                class="form-input full-width"
+                :class="{ error: errors.cardNumber }"
+                maxlength="19"
+              />
             </div>
+            <div v-if="errors.cardNumber" class="error-message">{{ errors.cardNumber }}</div>
+
             <div class="form-row">
-              <input type="text" placeholder="Expiration Date" class="form-input half-width" />
-              <input type="text" placeholder="CVV" class="form-input half-width" />
+              <input
+                v-model="cardInfo.expiry"
+                type="text"
+                placeholder="有效期 (MM/YY)"
+                class="form-input half-width"
+                :class="{ error: errors.expiry }"
+                maxlength="5"
+              />
+              <input
+                v-model="cardInfo.cvv"
+                type="text"
+                placeholder="CVV"
+                class="form-input half-width"
+                :class="{ error: errors.cvv }"
+                maxlength="4"
+              />
             </div>
           </div>
         </div>
 
         <!-- Submit Button -->
-        <button class="submit-btn" @click="router.push('/orders/1')">提交订单</button>
+        <button class="submit-btn" @click="submitOrder" :disabled="submitting">
+          {{ submitting ? '提交中...' : '提交订单' }}
+        </button>
       </div>
 
       <!-- Right Section - Order Summary -->
@@ -115,55 +144,50 @@
 
         <!-- Product Items -->
         <div class="product-items">
-          <div class="product-item">
+          <div v-for="item in cartStore.selectedItems" :key="item.id" class="product-item">
             <div class="product-image">
-              <div class="image-placeholder apple">🍎</div>
+              <img
+                v-if="item.image_url || item.image"
+                :src="item.image_url || item.image"
+                :alt="item.name"
+              />
+              <div v-else class="image-placeholder">🍎</div>
             </div>
             <div class="product-info">
-              <div class="product-quantity">2 个 苹果</div>
-              <div class="product-name">有机苹果</div>
+              <div class="product-name">{{ item.name }}</div>
+              <div class="product-quantity">{{ item.quantity }} × ¥{{ item.price.toFixed(2) }}</div>
             </div>
-          </div>
-
-          <div class="product-item">
-            <div class="product-image">
-              <div class="image-placeholder banana">🍌</div>
-            </div>
-            <div class="product-info">
-              <div class="product-quantity">3 个 香蕉</div>
-              <div class="product-name">有机香蕉</div>
-            </div>
-          </div>
-
-          <div class="product-item">
-            <div class="product-image">
-              <div class="image-placeholder carrot">🥕</div>
-            </div>
-            <div class="product-info">
-              <div class="product-quantity">1 根胡萝卜</div>
-              <div class="product-name">有机胡萝卜</div>
-            </div>
+            <div class="product-price">¥{{ (item.price * item.quantity).toFixed(2) }}</div>
           </div>
         </div>
 
         <!-- Cost Breakdown -->
         <div class="cost-breakdown">
           <div class="cost-row">
-            <span class="cost-label">小计</span>
-            <span class="cost-value">$25.00</span>
+            <span class="cost-label">小计 ({{ cartStore.selectedCount }} 件商品)</span>
+            <span class="cost-value">¥{{ cartStore.selectedTotal.toFixed(2) }}</span>
           </div>
           <div class="cost-row">
             <span class="cost-label">运费</span>
-            <span class="cost-value">$5.00</span>
+            <span class="cost-value">
+              {{ shippingCost === 0 ? '免费' : `¥${shippingCost.toFixed(2)}` }}
+            </span>
           </div>
-          <div class="cost-row">
+          <div v-if="discount > 0" class="cost-row">
             <span class="cost-label">优惠</span>
-            <span class="cost-value discount">-$2.50</span>
+            <span class="cost-value discount">-¥{{ discount.toFixed(2) }}</span>
           </div>
           <div class="cost-row total">
             <span class="cost-label">总计</span>
-            <span class="cost-value">$27.50</span>
+            <span class="cost-value">¥{{ totalAmount.toFixed(2) }}</span>
           </div>
+        </div>
+
+        <!-- Order Tips -->
+        <div class="order-tips">
+          <p class="tip-item">✓ 所有商品均为新鲜配送</p>
+          <p class="tip-item">✓ 支持7天无理由退货</p>
+          <p class="tip-item">✓ 满¥50免运费</p>
         </div>
       </div>
     </div>
@@ -171,28 +195,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cartStore'
 import { useOrderStore } from '../stores/orderStore'
 import { useUserStore } from '../stores/userStore'
+import { useAddressStore } from '../stores/addressStore'
+import AddressSelector from '../components/AddressSelector.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const orderStore = useOrderStore()
 const userStore = useUserStore()
-console.log(userStore)
+const addressStore = useAddressStore()
 
-const shippingInfo = ref({
-  name: '',
-  address: '',
-  city: '',
-  state: '',
-  zipCode: '',
-})
+// 选中的地址ID
+const selectedAddressId = ref(null)
+
+// 选中的地址对象
+const selectedAddress = ref(null)
 
 const deliveryMethod = ref('standard')
-const paymentMethod = ref('credit-card')
+const paymentMethod = ref('wechat')
 
 const cardInfo = ref({
   number: '',
@@ -200,64 +224,151 @@ const cardInfo = ref({
   cvv: '',
 })
 
-const discount = ref(2.5)
-
-const shippingCost = computed(() => {
-  return deliveryMethod.value === 'express' ? 5.0 : 0.0
+// 验证错误
+const errors = ref({
+  address: '',
+  cardNumber: '',
+  expiry: '',
+  cvv: '',
 })
 
+// 提交状态
+const submitting = ref(false)
+
+// 优惠金额（可以后续从优惠券系统获取）
+const discount = ref(0)
+
+// 运费计算
+const shippingCost = computed(() => {
+  // 满50免运费
+  if (cartStore.selectedTotal >= 50) {
+    return 0
+  }
+  return deliveryMethod.value === 'express' ? 10.0 : 5.0
+})
+
+// 总金额计算
 const totalAmount = computed(() => {
-  // 使用已选中商品的总价
   return cartStore.selectedTotal + shippingCost.value - discount.value
 })
 
+// 页面加载时检查购物车
+onMounted(() => {
+  if (cartStore.selectedItems.length === 0) {
+    console.warn('没有选中的商品')
+  }
+})
+
+// 地址选择变化
+const onAddressChange = (address) => {
+  selectedAddress.value = address
+  // 清空地址错误
+  errors.value.address = ''
+}
+
+// 表单验证
+const validateForm = () => {
+  // 清空之前的错误
+  Object.keys(errors.value).forEach((key) => {
+    errors.value[key] = ''
+  })
+
+  let isValid = true
+
+  // 验证地址
+  if (!selectedAddress.value) {
+    errors.value.address = '请选择收货地址'
+    isValid = false
+  }
+
+  // 如果选择信用卡支付，验证卡信息
+  if (paymentMethod.value === 'credit-card') {
+    if (!cardInfo.value.number.trim()) {
+      errors.value.cardNumber = '请输入卡号'
+      isValid = false
+    } else if (cardInfo.value.number.replace(/\s/g, '').length < 13) {
+      errors.value.cardNumber = '卡号长度不正确'
+      isValid = false
+    }
+
+    const expiryRegex = /^\d{2}\/\d{2}$/
+    if (!cardInfo.value.expiry.trim()) {
+      errors.value.expiry = '请输入有效期'
+      isValid = false
+    } else if (!expiryRegex.test(cardInfo.value.expiry)) {
+      errors.value.expiry = '格式应为 MM/YY'
+      isValid = false
+    }
+
+    if (!cardInfo.value.cvv.trim()) {
+      errors.value.cvv = '请输入CVV'
+      isValid = false
+    } else if (cardInfo.value.cvv.length < 3) {
+      errors.value.cvv = 'CVV应为3-4位数字'
+      isValid = false
+    }
+  }
+
+  return isValid
+}
+
+// 提交订单
 const submitOrder = async () => {
   // 检查是否有选中的商品
   if (cartStore.selectedItems.length === 0) {
-    alert('请先选择要结账的商品')
+    alert('没有选中的商品，请返回购物车选择商品')
     router.push('/cart')
     return
   }
 
-  if (!shippingInfo.value.name || !shippingInfo.value.address) {
-    alert('Please fill in all shipping information')
+  // 验证表单
+  if (!validateForm()) {
+    alert('请完善表单信息')
     return
   }
 
-  if (paymentMethod.value === 'credit-card' && !cardInfo.value.number) {
-    alert('Please enter your card details')
-    return
-  }
+  submitting.value = true
 
   try {
-    // 只提交已选中的商品
+    // 构建订单数据
     const orderData = {
       items: cartStore.selectedItems.map((item) => ({
-        productId: item.id,
-        name: item.name,
-        price: item.price,
+        productId: item.product_id || item.id,
         quantity: item.quantity,
-        image: item.image,
       })),
-      shippingAddress: shippingInfo.value,
+      shippingAddress: {
+        name: selectedAddress.value.recipient_name,
+        phone: selectedAddress.value.phone,
+        region: selectedAddress.value.region || '',
+        address: selectedAddress.value.detailed_address,
+      },
       deliveryMethod: deliveryMethod.value,
       paymentMethod: paymentMethod.value,
-      subtotal: cartStore.selectedTotal,
-      shipping: shippingCost.value,
-      discount: discount.value,
-      total: totalAmount.value,
+      remark: '',
     }
 
-    const order = await orderStore.createOrder(orderData)
+    console.log('提交订单数据:', orderData)
 
-    // 只清除已选中的商品
+    // 创建订单
+    const result = await orderStore.createOrder(orderData)
+
+    // 只清除已购买的商品（已选中的商品）
     await cartStore.removeSelectedItems()
 
-    alert('Order placed successfully!')
-    router.push(`/orders/${order._id}`)
+    alert('订单提交成功！')
+
+    // 跳转到订单详情页
+    if (result && result.order_id) {
+      router.push(`/orders/${result.order_id}`)
+    } else {
+      // 如果没有返回订单ID，跳转到个人中心
+      router.push('/profile')
+    }
   } catch (error) {
-    alert('Failed to place order. Please try again.')
-    console.error(error)
+    console.error('订单提交失败:', error)
+    alert('订单提交失败，请重试：' + (error.message || '未知错误'))
+  } finally {
+    submitting.value = false
   }
 }
 </script>
@@ -380,6 +491,48 @@ const submitOrder = async () => {
   font-size: 14px;
 }
 
+/* 空购物车提示 */
+.empty-cart-message {
+  text-align: center;
+  padding: 80px 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+}
+
+.empty-cart-message h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 12px;
+}
+
+.empty-cart-message p {
+  font-size: 16px;
+  color: #666666;
+  margin-bottom: 32px;
+}
+
+.back-to-cart-btn {
+  padding: 12px 32px;
+  background-color: #2d5a27;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.back-to-cart-btn:hover {
+  background-color: #1e3d1a;
+}
+
 /* Main Content */
 .main-content {
   max-width: 1200px;
@@ -431,6 +584,19 @@ const submitOrder = async () => {
 .form-input:focus {
   outline: none;
   border-color: #2d5a27;
+}
+
+.form-input.error {
+  border-color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: -12px;
+  margin-bottom: 12px;
+  padding-left: 4px;
 }
 
 .full-width {
@@ -506,12 +672,20 @@ const submitOrder = async () => {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   margin-top: 16px;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   background-color: #1e3d1a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(45, 90, 39, 0.2);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #999999;
 }
 
 /* Right Section - Order Summary */
@@ -549,14 +723,21 @@ const submitOrder = async () => {
 }
 
 .product-image {
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #fff8e1;
+  background-color: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .image-placeholder {
@@ -565,18 +746,29 @@ const submitOrder = async () => {
 
 .product-info {
   flex: 1;
-}
-
-.product-quantity {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333333;
-  margin-bottom: 4px;
+  min-width: 0;
 }
 
 .product-name {
   font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-quantity {
+  font-size: 13px;
   color: #666666;
+}
+
+.product-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d5a27;
+  flex-shrink: 0;
 }
 
 /* Cost Breakdown */
@@ -624,6 +816,26 @@ const submitOrder = async () => {
 
 .cost-value.discount {
   color: #dc3545;
+}
+
+/* Order Tips */
+.order-tips {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.tip-item {
+  font-size: 13px;
+  color: #666666;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tip-item:last-child {
+  margin-bottom: 0;
 }
 
 /* Responsive Design */

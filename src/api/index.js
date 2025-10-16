@@ -26,3 +26,6 @@ export * from './cart'
 
 // 导出订单相关 API
 export * from './order'
+
+// 导出地址相关 API
+export * from './address'
