@@ -806,7 +806,7 @@ const addToCart = () => {
   showToastNotification(`已添加 ${quantity.value} 件商品到购物车`, 'success')
 }
 
-const buyNow = () => {
+const buyNow = async () => {
   if (!canAddToCart.value) {
     showToastNotification('该商品暂时无法购买', 'error')
     return
@@ -818,8 +818,23 @@ const buyNow = () => {
     return
   }
 
-  cartStore.addToCart(product.value, quantity.value)
-  router.push('/cart')
+  // 添加到购物车并选中该商品
+  await cartStore.addToCart(product.value, quantity.value)
+
+  // 取消其他商品的选中状态，只保留刚添加的商品
+  const addedItem = cartStore.items.find((item) => item.product_id === product.value.id)
+  if (addedItem) {
+    // 取消所有商品选中
+    cartStore.items.forEach((item) => {
+      item.selected = false
+    })
+    // 只选中当前商品
+    addedItem.selected = true
+    cartStore.saveLocalCart()
+  }
+
+  // 直接跳转到结账页面
+  router.push('/checkout')
 }
 
 // Favorite toggle

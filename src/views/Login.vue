@@ -31,11 +31,6 @@
 
             <!-- 注册表单 -->
             <div v-if="activeTab === 'signup'" class="form-content">
-              <!-- 错误提示 -->
-              <div v-if="signupError" class="error-message">
-                {{ signupError }}
-              </div>
-
               <!-- 用户名 -->
               <div class="form-group">
                 <label class="form-label">
@@ -130,11 +125,6 @@
 
             <!-- 登录表单 -->
             <div v-if="activeTab === 'login'" class="form-content">
-              <!-- 错误提示 -->
-              <div v-if="loginError" class="error-message">
-                {{ loginError }}
-              </div>
-
               <!-- 用户名 -->
               <div class="form-group">
                 <label class="form-label">
@@ -228,12 +218,12 @@ const validateLogin = () => {
   loginError.value = ''
 
   if (!loginForm.value.username.trim()) {
-    loginError.value = '请输入用户名'
+    ElMessage.warning('请输入用户名')
     return false
   }
 
   if (!loginForm.value.password) {
-    loginError.value = '请输入密码'
+    ElMessage.warning('请输入密码')
     return false
   }
 
@@ -245,47 +235,47 @@ const validateSignup = () => {
   signupError.value = ''
 
   if (!signupForm.value.username.trim()) {
-    signupError.value = '请输入用户名'
+    ElMessage.warning('请输入用户名')
     return false
   }
 
   if (signupForm.value.username.length < 4) {
-    signupError.value = '用户名至少4个字符'
+    ElMessage.warning('用户名至少4个字符')
     return false
   }
 
   if (!signupForm.value.password) {
-    signupError.value = '请输入密码'
+    ElMessage.warning('请输入密码')
     return false
   }
 
   if (signupForm.value.password.length < 6) {
-    signupError.value = '密码至少6个字符'
+    ElMessage.warning('密码至少6个字符')
     return false
   }
 
   if (!signupForm.value.confirm_password) {
-    signupError.value = '请确认密码'
+    ElMessage.warning('请确认密码')
     return false
   }
 
   if (signupForm.value.password !== signupForm.value.confirm_password) {
-    signupError.value = '两次输入的密码不一致'
+    ElMessage.warning('两次输入的密码不一致')
     return false
   }
 
   if (!signupForm.value.phone.trim()) {
-    signupError.value = '请输入手机号'
+    ElMessage.warning('请输入手机号')
     return false
   }
 
   if (!/^1[3-9]\d{9}$/.test(signupForm.value.phone)) {
-    signupError.value = '请输入有效的手机号'
+    ElMessage.warning('请输入有效的11位手机号')
     return false
   }
 
   if (!signupForm.value.verification_code.trim()) {
-    signupError.value = '请输入验证码'
+    ElMessage.warning('请输入验证码')
     return false
   }
 
@@ -304,16 +294,35 @@ const handleSignup = async () => {
   console.log('✅ 表单验证通过，准备提交')
   signupError.value = ''
 
+  // 显示加载提示
+  const loading = ElMessage({
+    message: '正在注册，请稍候...',
+    type: 'info',
+    duration: 0,
+    icon: 'Loading',
+  })
+
   try {
     await userStore.register(signupForm.value)
     console.log('✅ 注册成功')
 
+    loading.close()
+
     // 显示成功消息
-    ElMessage.success('注册成功！请登录')
+    ElMessage({
+      message: '🎉 注册成功！欢迎加入',
+      type: 'success',
+      duration: 3000,
+      showClose: true,
+    })
 
     // 切换到登录并填充用户名
     loginForm.value.username = signupForm.value.username
-    activeTab.value = 'login'
+
+    // 延迟切换标签，让用户看到成功提示
+    setTimeout(() => {
+      activeTab.value = 'login'
+    }, 500)
 
     // 清空注册表单
     signupForm.value = {
@@ -324,20 +333,50 @@ const handleSignup = async () => {
       verification_code: '',
     }
   } catch (error) {
+    loading.close()
     console.error('❌ 注册失败:', error)
-    signupError.value = error.message || userStore.error || '注册失败，请稍后重试'
+    const errorMsg = error.message || userStore.error || '注册失败，请稍后重试'
+    signupError.value = errorMsg
+
+    ElMessage({
+      message: errorMsg,
+      type: 'error',
+      duration: 4000,
+      showClose: true,
+      dangerouslyUseHTMLString: false,
+    })
   }
 }
 
 // 处理登录
 const handleLogin = async () => {
-  if (!validateLogin()) return
+  if (!validateLogin()) {
+    return
+  }
 
   loginError.value = ''
+
+  // 显示加载提示
+  const loading = ElMessage({
+    message: '正在登录，请稍候...',
+    type: 'info',
+    duration: 0,
+    icon: 'Loading',
+  })
 
   try {
     await userStore.login(loginForm.value)
     console.log('✅ 登录成功')
+
+    loading.close()
+
+    // 显示欢迎消息
+    ElMessage({
+      message: `👋 欢迎回来，${loginForm.value.username}！`,
+      type: 'success',
+      duration: 2500,
+      showClose: true,
+    })
 
     // 获取重定向地址（从query参数）
     const redirect = route.query.redirect || '/'
@@ -347,11 +386,20 @@ const handleLogin = async () => {
     // 跳转到目标页面或首页
     setTimeout(() => {
       router.push(redirect)
-    }, 500)
+    }, 800)
   } catch (error) {
+    loading.close()
     console.error('❌ 登录失败:', error)
-    loginError.value =
+    const errorMsg =
       userStore.error || error.response?.data?.message || '登录失败，请检查用户名和密码'
+    loginError.value = errorMsg
+
+    ElMessage({
+      message: errorMsg,
+      type: 'error',
+      duration: 4000,
+      showClose: true,
+    })
   }
 }
 </script>
