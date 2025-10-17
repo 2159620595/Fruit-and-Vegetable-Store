@@ -131,6 +131,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAddressStore } from '@/stores/addressStore'
 import RegionSelector from './RegionSelector.vue'
 
@@ -221,7 +222,13 @@ const editAddress = (address) => {
 
 // 删除地址
 const deleteAddress = async (id) => {
-  if (!confirm('确定要删除该地址吗？')) {
+  try {
+    await ElMessageBox.confirm('确定要删除该地址吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+  } catch {
     return
   }
 
@@ -237,7 +244,7 @@ const deleteAddress = async (id) => {
       }
     }
   } catch (error) {
-    alert('删除地址失败：' + error.message)
+    ElMessage.error('删除地址失败：' + error.message)
   }
 }
 
@@ -300,8 +307,9 @@ const submitAddress = async () => {
     }
 
     closeAddressForm()
+    ElMessage.success('保存地址成功')
   } catch (error) {
-    alert('保存地址失败：' + error.message)
+    ElMessage.error('保存地址失败：' + error.message)
   } finally {
     submitting.value = false
   }

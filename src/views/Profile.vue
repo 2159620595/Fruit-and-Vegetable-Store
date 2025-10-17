@@ -64,6 +64,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '../stores/userStore'
 import { useOrderStore } from '../stores/orderStore'
 import ProductCard from '../components/ProductCard.vue'
@@ -94,19 +95,27 @@ const filteredOrders = computed(() => {
   return orders.value.filter(order => order.status === orderFilter.value)
 })
 
-const handleLogout = () => {
-  if (confirm('Are you sure you want to logout?')) {
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
     userStore.logout()
+    ElMessage.success('已退出登录')
     router.push('/login')
+  } catch {
+    // 用户取消
   }
 }
 
 const updateProfile = async () => {
   try {
     await userStore.updateProfile(profileData.value)
-    alert('Profile updated successfully!')
+    ElMessage.success('个人信息更新成功！')
   } catch (error) {
-    alert('Failed to update profile',error)
+    ElMessage.error('个人信息更新失败：' + error)
   }
 }
 

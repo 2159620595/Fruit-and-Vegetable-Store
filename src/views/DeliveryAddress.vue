@@ -1,6 +1,5 @@
 <template>
   <div class="delivery-address-page">
- 
     <!-- Main Content -->
     <div class="main-content">
       <!-- Page Title -->
@@ -18,9 +17,7 @@
                 <button class="edit-btn">✏️</button>
               </div>
               <div class="address-type">Home</div>
-              <div class="address-details">
-                123 Oak Street, Apt 4B, Anytown, CA 91234
-              </div>
+              <div class="address-details">123 Oak Street, Apt 4B, Anytown, CA 91234</div>
             </div>
           </div>
 
@@ -31,9 +28,7 @@
                 <button class="edit-btn">✏️</button>
               </div>
               <div class="address-type">Work</div>
-              <div class="address-details">
-                456 Maple Avenue, Unit 2A, Anytown, CA 91234
-              </div>
+              <div class="address-details">456 Maple Avenue, Unit 2A, Anytown, CA 91234</div>
             </div>
           </div>
         </div>
@@ -97,9 +92,9 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '../stores/userStore'
 import axios from 'axios'
 
@@ -114,7 +109,7 @@ const addresses = ref([
     city: 'Anytown',
     state: 'CA',
     zipCode: '91234',
-    isDefault: true
+    isDefault: true,
   },
   {
     id: 2,
@@ -125,8 +120,8 @@ const addresses = ref([
     city: 'Anytown',
     state: 'CA',
     zipCode: '91234',
-    isDefault: false
-  }
+    isDefault: false,
+  },
 ])
 
 const showAddForm = ref(false)
@@ -142,10 +137,10 @@ const editingAddress = ref(null)
 //   isDefault: false
 // })
 const newAddress = ref({
-        recipientName: "",
-        phoneNumber: "",
-        region: "",
-        detailedAddress: "",
+  recipientName: '',
+  phoneNumber: '',
+  region: '',
+  detailedAddress: '',
 })
 const editAddress = (address) => {
   editingAddress.value = address
@@ -153,17 +148,25 @@ const editAddress = (address) => {
   showAddForm.value = true
 }
 
-const deleteAddress = (id) => {
-  if (confirm('Are you sure you want to delete this address?')) {
-    addresses.value = addresses.value.filter(a => a.id !== id)
+const deleteAddress = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这个地址吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    addresses.value = addresses.value.filter((a) => a.id !== id)
+    ElMessage.success('地址删除成功')
     // Call API to delete address
+  } catch {
+    // 用户取消
   }
 }
 
 const setDefault = (id) => {
-  addresses.value = addresses.value.map(a => ({
+  addresses.value = addresses.value.map((a) => ({
     ...a,
-    isDefault: a.id === id
+    isDefault: a.id === id,
   }))
   // Call API to update default address
 }
@@ -172,28 +175,26 @@ const saveAddress = async () => {
   try {
     if (editingAddress.value) {
       // Update existing address
-      const index = addresses.value.findIndex(a => a.id === editingAddress.value.id)
+      const index = addresses.value.findIndex((a) => a.id === editingAddress.value.id)
       addresses.value[index] = { ...formData.value }
     } else {
       // Add new address
       const newAddress = {
         ...formData.value,
-        id: Date.now()
+        id: Date.now(),
       }
       addresses.value.push(newAddress)
-      
+
       // Call API
-      await axios.post(
-        'http://localhost:3000/api/users/addresses',
-        newAddress,
-        { headers: { Authorization: `Bearer ${userStore.token}` } }
-      )
+      await axios.post('http://localhost:3000/api/users/addresses', newAddress, {
+        headers: { Authorization: `Bearer ${userStore.token}` },
+      })
     }
-    
+
     cancelForm()
-    alert('Address saved successfully!')
+    ElMessage.success('地址保存成功！')
   } catch (error) {
-    alert('Failed to save address: ' + error)
+    ElMessage.error('保存地址失败：' + error)
   }
 }
 
@@ -208,7 +209,7 @@ const cancelForm = () => {
     city: '',
     state: '',
     zipCode: '',
-    isDefault: false
+    isDefault: false,
   }
 }
 
@@ -221,7 +222,7 @@ onMounted(() => {
 .delivery-address-page {
   min-height: 100vh;
   background-color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Header Styles */

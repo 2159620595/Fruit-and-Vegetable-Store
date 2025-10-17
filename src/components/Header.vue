@@ -204,6 +204,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
 
 const router = useRouter()
@@ -309,12 +310,19 @@ const goToOrders = () => {
 }
 
 // 处理登出
-const handleLogout = () => {
-  if (confirm('确定要退出登录吗？')) {
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
     userStore.logout()
     showUserMenu.value = false
-    alert('已退出登录')
+    ElMessage.success('已退出登录')
     router.push('/')
+  } catch {
+    // 用户取消
   }
 }
 

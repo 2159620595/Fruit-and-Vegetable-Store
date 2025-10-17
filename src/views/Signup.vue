@@ -165,6 +165,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const activeTab = ref('signup')
 
@@ -184,43 +185,43 @@ const loginForm = ref({
 const handleSignup = () => {
   // 验证表单
   if (!signupForm.value.username) {
-    alert('请输入用户名')
+    ElMessage.warning('请输入用户名')
     return
   }
   if (!signupForm.value.password) {
-    alert('请输入密码')
+    ElMessage.warning('请输入密码')
     return
   }
   if (signupForm.value.password !== signupForm.value.confirmPassword) {
-    alert('两次密码输入不一致')
+    ElMessage.warning('两次密码输入不一致')
     return
   }
   if (!signupForm.value.phone) {
-    alert('请输入手机号')
+    ElMessage.warning('请输入手机号')
     return
   }
   if (!signupForm.value.verificationCode) {
-    alert('请输入验证码')
+    ElMessage.warning('请输入验证码')
     return
   }
   
   console.log('注册信息：', signupForm.value)
-  alert('注册成功！')
+  ElMessage.success('注册成功！')
 }
 
 const handleLogin = () => {
   // 验证表单
   if (!loginForm.value.username) {
-    alert('请输入用户名')
+    ElMessage.warning('请输入用户名')
     return
   }
   if (!loginForm.value.password) {
-    alert('请输入密码')
+    ElMessage.warning('请输入密码')
     return
   }
   
   console.log('登录信息：', loginForm.value)
-  alert('登录成功！')
+  ElMessage.success('登录成功！')
 }
 </script>
 

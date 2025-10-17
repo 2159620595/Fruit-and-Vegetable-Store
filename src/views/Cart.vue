@@ -149,6 +149,7 @@
 <script setup>
 import router from '@/router'
 import { computed, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCartStore } from '@/stores/cartStore'
 import Back from '../components/Back.vue'
 
@@ -187,12 +188,12 @@ const continueShopping = () => {
 // 结账
 const checkout = () => {
   if (cartStore.items.length === 0) {
-    alert('购物车为空，请先添加商品')
+    ElMessage.warning('购物车为空，请先添加商品')
     return
   }
 
   if (!cartStore.hasSelected) {
-    alert('请先选择要结账的商品')
+    ElMessage.warning('请先选择要结账的商品')
     return
   }
 
@@ -202,8 +203,16 @@ const checkout = () => {
 
 // 删除单个商品
 const removeItem = async (id) => {
-  if (confirm('确定要删除这个商品吗？')) {
+  try {
+    await ElMessageBox.confirm('确定要删除这个商品吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
     await cartStore.removeFromCart(id)
+    ElMessage.success('删除成功')
+  } catch {
+    // 用户取消
   }
 }
 
@@ -227,20 +236,36 @@ const toggleAllSelected = async () => {
 // 批量删除选中商品
 const handleBatchDelete = async () => {
   if (!cartStore.hasSelected) {
-    alert('请先选择要删除的商品')
+    ElMessage.warning('请先选择要删除的商品')
     return
   }
 
   const selectedCount = cartStore.selectedCount
-  if (confirm(`确定要删除选中的 ${selectedCount} 件商品吗？`)) {
+  try {
+    await ElMessageBox.confirm(`确定要删除选中的 ${selectedCount} 件商品吗？`, '批量删除', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
     await cartStore.removeSelectedItems()
+    ElMessage.success('删除成功')
+  } catch {
+    // 用户取消
   }
 }
 
 // 清空购物车
 const handleClearCart = async () => {
-  if (confirm('确定要清空购物车吗？此操作不可恢复！')) {
+  try {
+    await ElMessageBox.confirm('确定要清空购物车吗？此操作不可恢复！', '清空购物车', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'error',
+    })
     await cartStore.clearCart()
+    ElMessage.success('购物车已清空')
+  } catch {
+    // 用户取消
   }
 }
 

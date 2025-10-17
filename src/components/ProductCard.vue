@@ -2,32 +2,30 @@
 <template>
   <div class="product-card">
     <div class="product-image" @click="goToProduct">
-      <img :src="product.image" :alt="product.name">
+      <img :src="product.image" :alt="product.name" />
       <button class="favorite-btn" @click.stop="toggleFavorite">
         {{ isFavorite ? '❤️' : '🤍' }}
       </button>
     </div>
-    
+
     <div class="product-info">
       <h3 @click="goToProduct">{{ product.name }}</h3>
       <p class="product-unit">{{ product.unit }}</p>
-      
+
       <div class="product-rating" v-if="product.rating">
         <span class="stars">⭐ {{ product.rating }}</span>
         <span class="reviews">({{ product.reviews }} reviews)</span>
       </div>
-      
+
       <div class="product-price">
         <span class="current-price">${{ product.price.toFixed(2) }}</span>
         <span class="original-price" v-if="product.originalPrice">
           ${{ product.originalPrice.toFixed(2) }}
         </span>
       </div>
-      
+
       <div class="product-actions">
-        <button class="add-to-cart" @click="addToCart">
-          Add to Cart
-        </button>
+        <button class="add-to-cart" @click="addToCart">Add to Cart</button>
       </div>
     </div>
   </div>
@@ -36,13 +34,14 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { useCartStore } from '../stores/cartStore'
 
 const props = defineProps({
   product: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const router = useRouter()
@@ -55,7 +54,7 @@ const goToProduct = () => {
 
 const addToCart = () => {
   cartStore.addToCart(props.product)
-  alert('Product added to cart!')
+  ElMessage.success('已添加到购物车')
 }
 
 const toggleFavorite = () => {

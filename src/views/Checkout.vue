@@ -197,6 +197,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { useCartStore } from '../stores/cartStore'
 import { useOrderStore } from '../stores/orderStore'
 import { useUserStore } from '../stores/userStore'
@@ -316,14 +317,14 @@ const validateForm = () => {
 const submitOrder = async () => {
   // 检查是否有选中的商品
   if (cartStore.selectedItems.length === 0) {
-    alert('没有选中的商品，请返回购物车选择商品')
+    ElMessage.warning('没有选中的商品，请返回购物车选择商品')
     router.push('/cart')
     return
   }
 
   // 验证表单
   if (!validateForm()) {
-    alert('请完善表单信息')
+    ElMessage.error('请完善表单信息')
     return
   }
 
@@ -355,7 +356,7 @@ const submitOrder = async () => {
     // 只清除已购买的商品（已选中的商品）
     await cartStore.removeSelectedItems()
 
-    alert('订单提交成功！')
+    ElMessage.success('订单提交成功！')
 
     // 跳转到订单详情页
     if (result && result.order_id) {
@@ -366,7 +367,7 @@ const submitOrder = async () => {
     }
   } catch (error) {
     console.error('订单提交失败:', error)
-    alert('订单提交失败，请重试：' + (error.message || '未知错误'))
+    ElMessage.error('订单提交失败，请重试：' + (error.message || '未知错误'))
   } finally {
     submitting.value = false
   }

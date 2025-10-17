@@ -193,6 +193,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
 
 const router = useRouter()
@@ -308,7 +309,7 @@ const handleSignup = async () => {
     console.log('✅ 注册成功')
 
     // 显示成功消息
-    alert('注册成功！请登录')
+    ElMessage.success('注册成功！请登录')
 
     // 切换到登录并填充用户名
     loginForm.value.username = signupForm.value.username
