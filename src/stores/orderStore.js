@@ -34,7 +34,7 @@ export const useOrderStore = defineStore('order', {
     // 获取待发货订单
     processingOrders: (state) => state.orders.filter((order) => order.status === 'processing'),
 
-    // 获取待收货订单
+    // 获取已发货订单
     shippedOrders: (state) =>
       state.orders.filter((order) => ['shipped', 'in_transit'].includes(order.status)),
 

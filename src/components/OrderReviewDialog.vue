@@ -143,7 +143,7 @@ const getStatusText = (status) => {
   const statusMap = {
     pending: '待支付',
     processing: '待发货',
-    shipped: '待收货',
+    shipped: '已发货',
     in_transit: '运输中',
     delivered: '已完成',
     cancelled: '已取消',

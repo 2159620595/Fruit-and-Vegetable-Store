@@ -5,7 +5,7 @@
 
     <!-- Main Content -->
     <div class="main-content">
-<back></back>
+      <back></back>
 
       <!-- User Profile Section -->
       <div class="user-profile-section">
@@ -33,7 +33,7 @@
           </button>
           <button class="tab-btn" @click="setActiveTab('toReceive')">
             <span class="tab-icon">📦</span>
-            <span class="tab-text">待收货</span>
+            <span class="tab-text">已发货</span>
           </button>
           <button class="tab-btn" @click="setActiveTab('toReview')">
             <span class="tab-icon">⭐</span>
@@ -60,7 +60,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -69,7 +68,6 @@ import { useUserStore } from '../stores/userStore'
 import { useOrderStore } from '../stores/orderStore'
 import ProductCard from '../components/ProductCard.vue'
 import Back from '../components/Back.vue'
-
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -83,7 +81,7 @@ const favorites = ref([])
 const profileData = ref({
   username: '',
   email: '',
-  phone: ''
+  phone: '',
 })
 
 const memberYear = computed(() => {
@@ -92,7 +90,7 @@ const memberYear = computed(() => {
 
 const filteredOrders = computed(() => {
   if (orderFilter.value === 'all') return orders.value
-  return orders.value.filter(order => order.status === orderFilter.value)
+  return orders.value.filter((order) => order.status === orderFilter.value)
 })
 
 const handleLogout = async () => {
@@ -126,7 +124,7 @@ onMounted(async () => {
       profileData.value = { ...userStore.user }
     }
   } catch (error) {
-    console.error('Failed to load profile data',error)
+    console.error('Failed to load profile data', error)
   }
 })
 </script>
@@ -134,7 +132,7 @@ onMounted(async () => {
 .profile-page {
   min-height: 100vh;
   background-color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Header Styles */
@@ -250,9 +248,9 @@ onMounted(async () => {
 
 .user-avatar {
   width: 50px;
-  height:80px;
+  height: 80px;
   border-radius: 50%;
-  margin: 0 auto ;
+  margin: 0 auto;
   overflow: hidden;
   background-color: #f5f5f5;
   display: flex;
@@ -293,7 +291,7 @@ onMounted(async () => {
 
 .order-tabs {
   display: flex;
- 
+
   gap: 0;
   border-bottom: 1px solid #e5e5e5;
 }
@@ -313,7 +311,6 @@ onMounted(async () => {
   min-width: 120px;
 }
 
-
 .tab-btn.active {
   color: #000000;
 }
@@ -323,7 +320,7 @@ onMounted(async () => {
 }
 
 .tab-btn.active::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -1px;
   left: 0;

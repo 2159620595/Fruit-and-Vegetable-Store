@@ -54,10 +54,10 @@
               </span>
             </template>
           </el-tab-pane>
-          <el-tab-pane label="待收货" name="shipped">
+          <el-tab-pane label="已发货" name="shipped">
             <template #label>
               <span class="tab-label">
-                待收货
+                已发货
                 <el-badge
                   v-if="orderCounts.to_receive > 0"
                   :value="orderCounts.to_receive"
@@ -261,7 +261,7 @@
               </el-button>
             </template>
 
-            <!-- 待收货状态 -->
+            <!-- 已发货状态 -->
             <template v-if="order.status === 'shipped'">
               <el-button
                 type="success"
@@ -395,7 +395,7 @@ const getStatusText = (status) => {
   const statusMap = {
     pending: '待支付',
     processing: '待发货',
-    shipped: '待收货',
+    shipped: '已发货',
     in_transit: '运输中',
     delivered: '已完成',
     cancelled: '已取消',
@@ -572,7 +572,7 @@ const getEmptyDescription = () => {
     all: '暂无订单，快去选购商品吧',
     pending: '暂无待支付订单',
     processing: '暂无待发货订单',
-    shipped: '暂无待收货订单',
+    shipped: '暂无已发货订单',
     in_transit: '暂无运输中订单',
     delivered: '暂无已完成订单',
     cancelled: '暂无已取消订单',
