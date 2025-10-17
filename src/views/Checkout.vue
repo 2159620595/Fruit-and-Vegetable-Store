@@ -155,9 +155,11 @@
             </div>
             <div class="product-info">
               <div class="product-name">{{ item.name }}</div>
-              <div class="product-quantity">{{ item.quantity }} × ¥{{ item.price.toFixed(2) }}</div>
+              <div class="product-quantity">
+                {{ item.quantity }} × ¥{{ formatPrice(item.price) }}
+              </div>
             </div>
-            <div class="product-price">¥{{ (item.price * item.quantity).toFixed(2) }}</div>
+            <div class="product-price">¥{{ formatPrice(item.price * item.quantity) }}</div>
           </div>
         </div>
 
@@ -353,24 +355,53 @@ const submitOrder = async () => {
     // 创建订单
     const result = await orderStore.createOrder(orderData)
 
+    // 模拟支付处理（实际项目中这里应该调用真实的支付接口）
+    ElMessage.info('正在处理支付...')
+
+    // 模拟支付成功，更新订单状态
+    const orderId = result.order_id || result.id
+    if (result && orderId) {
+      console.log('订单创建成功，订单ID:', orderId)
+
+      // 这里应该调用支付接口，支付成功后更新订单状态
+      // 暂时模拟支付成功
+      setTimeout(async () => {
+        try {
+          console.log('开始模拟支付处理，订单ID:', orderId)
+
+          // 模拟支付成功，更新订单状态为待发货
+          await orderStore.updateOrderStatus(orderId, 'processing')
+
+          ElMessage.success('支付成功！订单已确认')
+
+          // 跳转到订单详情页
+          router.push(`/orders/${orderId}`)
+        } catch (error) {
+          console.error('支付处理失败:', error)
+          ElMessage.error('支付处理失败，请重试')
+        }
+      }, 2000) // 模拟2秒支付处理时间
+    } else {
+      console.error('订单创建失败或没有返回订单ID:', result)
+      ElMessage.error('订单创建失败，请重试')
+    }
+
     // 只清除已购买的商品（已选中的商品）
     await cartStore.removeSelectedItems()
 
-    ElMessage.success('订单提交成功！')
-
-    // 跳转到订单详情页
-    if (result && result.order_id) {
-      router.push(`/orders/${result.order_id}`)
-    } else {
-      // 如果没有返回订单ID，跳转到个人中心
-      router.push('/profile')
-    }
+    ElMessage.success('订单提交成功！正在处理支付...')
   } catch (error) {
     console.error('订单提交失败:', error)
     ElMessage.error('订单提交失败，请重试：' + (error.message || '未知错误'))
   } finally {
     submitting.value = false
   }
+}
+
+// 格式化价格函数
+const formatPrice = (price) => {
+  const numPrice = typeof price === 'number' ? price : parseFloat(price) || 0
+  return numPrice.toFixed(2)
 }
 </script>
 

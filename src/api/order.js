@@ -38,3 +38,28 @@ export const deleteOrder = (id) => {
 export const getOrderStatusCount = () => {
   return request.get('/orders/count')
 }
+
+// 更新订单状态
+export const updateOrderStatus = (id, status) => {
+  return request.put(`/orders/${id}/status`, { status })
+}
+
+// 支付订单
+export const payOrder = (id, paymentMethod) => {
+  return request.post(`/orders/${id}/pay`, { payment_method: paymentMethod })
+}
+
+// 评价订单
+export const reviewOrder = (id, data) => {
+  return request.post(`/orders/${id}/review`, data)
+}
+
+// 再次购买
+export const buyAgain = (id) => {
+  return request.post(`/orders/${id}/buy-again`)
+}
+
+// 立即购买
+export const buyNow = (data) => {
+  return request.post('/buy-now', data)
+}

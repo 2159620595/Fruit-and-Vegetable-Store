@@ -7,6 +7,10 @@ import {
   cancelOrder as cancelOrderAPI,
   confirmOrder as confirmOrderAPI,
   deleteOrder as deleteOrderAPI,
+  updateOrderStatus as updateOrderStatusAPI,
+  payOrder as payOrderAPI,
+  reviewOrder as reviewOrderAPI,
+  buyAgain as buyAgainAPI,
 } from '@/api/order'
 
 export const useOrderStore = defineStore('order', {
@@ -228,6 +232,152 @@ export const useOrderStore = defineStore('order', {
       } catch (error) {
         console.error('❌ 删除订单失败:', error)
         this.error = error.message || '删除订单失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * 更新订单状态
+     * @param {Number} id - 订单ID
+     * @param {String} status - 新状态
+     */
+    async updateOrderStatus(id, status) {
+      this.loading = true
+      this.error = null
+
+      try {
+        console.log('🔄 开始更新订单状态:', { id, status })
+        console.log(
+          '当前订单列表:',
+          this.orders.map((o) => ({ id: o.id, status: o.status })),
+        )
+
+        // 调用后端API更新订单状态
+        console.log('📡 调用后端API更新订单状态...')
+        await updateOrderStatusAPI(id, status)
+        console.log('✅ 后端API调用成功')
+
+        // 更新本地状态
+        const order = this.orders.find((o) => o.id == id) // 使用 == 进行类型转换比较
+        if (order) {
+          console.log('找到订单，更新本地状态:', { 原状态: order.status, 新状态: status })
+          order.status = status
+          // 同时更新 updated_at 时间
+          order.updated_at = new Date().toISOString()
+        } else {
+          console.warn('未找到订单，ID:', id)
+          // 如果订单列表中找不到，可能是新创建的订单，先刷新列表
+          console.log('刷新订单列表以获取最新数据...')
+          await this.fetchOrders()
+
+          // 再次尝试更新
+          const updatedOrder = this.orders.find((o) => o.id == id)
+          if (updatedOrder) {
+            console.log('刷新后找到订单，更新本地状态:', {
+              原状态: updatedOrder.status,
+              新状态: status,
+            })
+            updatedOrder.status = status
+            updatedOrder.updated_at = new Date().toISOString()
+          } else {
+            console.error('刷新后仍未找到订单，ID:', id)
+          }
+        }
+
+        if (this.currentOrder && this.currentOrder.order.id == id) {
+          console.log('更新当前订单状态')
+          this.currentOrder.order.status = status
+        }
+
+        console.log('✅ 订单状态更新成功:', { id, status })
+        console.log(
+          '更新后的订单列表:',
+          this.orders.map((o) => ({ id: o.id, status: o.status })),
+        )
+
+        return true
+      } catch (error) {
+        console.error('❌ 更新订单状态失败:', error)
+        this.error = error.message || '更新订单状态失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * 支付订单
+     * @param {Number} orderId - 订单ID
+     * @param {String} paymentMethod - 支付方式
+     */
+    async payOrder(orderId, paymentMethod) {
+      try {
+        this.loading = true
+        console.log('💳 开始支付订单:', { orderId, paymentMethod })
+
+        const response = await payOrderAPI(orderId, paymentMethod)
+        console.log('✅ 支付成功:', response.data)
+
+        // 更新本地订单状态
+        const order = this.orders.find((o) => o.id == orderId)
+        if (order) {
+          order.status = 'processing'
+          order.payment_method = paymentMethod
+        }
+
+        return response.data
+      } catch (error) {
+        console.error('❌ 支付失败:', error)
+        this.error = error.message || '支付失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * 评价订单
+     * @param {Number} orderId - 订单ID
+     * @param {Object} reviewData - 评价数据
+     * @param {Number} reviewData.rating - 评分（1-5）
+     * @param {String} reviewData.comment - 评价内容
+     */
+    async reviewOrder(orderId, reviewData) {
+      try {
+        this.loading = true
+        console.log('⭐ 开始评价订单:', { orderId, reviewData })
+
+        const response = await reviewOrderAPI(orderId, reviewData)
+        console.log('✅ 评价成功:', response.data)
+
+        return response.data
+      } catch (error) {
+        console.error('❌ 评价失败:', error)
+        this.error = error.message || '评价失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * 再次购买
+     * @param {Number} orderId - 订单ID
+     */
+    async buyAgain(orderId) {
+      try {
+        this.loading = true
+        console.log('🛒 开始再次购买:', orderId)
+
+        const response = await buyAgainAPI(orderId)
+        console.log('✅ 再次购买成功:', response.data)
+
+        return response.data
+      } catch (error) {
+        console.error('❌ 再次购买失败:', error)
+        this.error = error.message || '再次购买失败'
         throw error
       } finally {
         this.loading = false

@@ -7,6 +7,7 @@ import Shop from '@/views/Shop.vue'
 import ProductDetail from '@/views/ProductDetail.vue'
 import Cart from '@/views/Cart.vue'
 import Checkout from '@/views/Checkout.vue'
+import OrderList from '@/views/OrderList.vue'
 import OrderDetail from '@/views/OrderDetail.vue'
 import Profile from '@/views/Profile.vue'
 import DeliveryAddress from '@/views/DeliveryAddress.vue'
@@ -66,6 +67,17 @@ const router = createRouter({
       },
     },
 
+    // 我的订单列表（需要登录）
+    {
+      path: '/orders',
+      name: 'Orders',
+      component: OrderList,
+      meta: {
+        requiresAuth: true,
+        title: '我的订单 - 果蔬商城',
+      },
+    },
+
     // 订单详情（需要登录）
     {
       path: '/orders/:id',
@@ -74,17 +86,6 @@ const router = createRouter({
       meta: {
         requiresAuth: true,
         title: '订单详情 - 果蔬商城',
-      },
-    },
-
-    // 我的订单列表（需要登录）
-    {
-      path: '/orders',
-      name: 'Orders',
-      component: OrderDetail,
-      meta: {
-        requiresAuth: true,
-        title: '我的订单 - 果蔬商城',
       },
     },
 
