@@ -93,37 +93,6 @@
             </button>
           </div>
 
-          <!-- 分类筛选 -->
-          <div class="filter-group">
-            <h3>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                viewBox="0 0 256 256"
-              >
-                <path
-                  d="M224,177.32V78.68a16,16,0,0,0-8.32-14L144,29.12V16a8,8,0,0,0-16,0V29.12L56.32,64.68a16,16,0,0,0-8.32,14v98.64a16,16,0,0,0,8.32,14L128,226.88l71.68-35.56A16,16,0,0,0,224,177.32Z"
-                ></path>
-              </svg>
-              分类
-            </h3>
-            <div v-if="productStore.categories.length > 0" class="category-list">
-              <label
-                v-for="cat in productStore.categories"
-                :key="cat"
-                class="category-item"
-                :class="{ active: selectedCategories.includes(cat) }"
-              >
-                <input type="checkbox" :value="cat" v-model="selectedCategories" />
-                <span class="category-name">{{ cat }}</span>
-                <span class="category-count">({{ getCategoryCount(cat) }})</span>
-              </label>
-            </div>
-            <p v-else class="no-data">暂无分类</p>
-          </div>
-
           <!-- 价格区间 -->
           <div class="filter-group">
             <h3>
@@ -140,53 +109,158 @@
               </svg>
               价格区间
             </h3>
-            <div class="price-inputs">
-              <div class="price-input-wrapper">
-                <span class="currency">¥</span>
+            <!-- 价格滑块 -->
+            <div class="price-slider-container">
+              <div class="slider-wrapper">
                 <input
-                  type="number"
-                  v-model.number="minPrice"
-                  placeholder="最低价"
+                  ref="priceSlider"
+                  type="range"
                   min="0"
-                  :max="maxPrice"
-                  class="price-input"
-                />
-              </div>
-              <span class="price-separator">-</span>
-              <div class="price-input-wrapper">
-                <span class="currency">¥</span>
-                <input
-                  type="number"
+                  :max="priceRangeMax"
                   v-model.number="maxPrice"
-                  placeholder="最高价"
-                  :min="minPrice"
-                  class="price-input"
+                  class="price-slider"
                 />
+                <div class="slider-track">
+                  <div
+                    class="slider-fill"
+                    :style="{ width: (maxPrice / priceRangeMax) * 100 + '%' }"
+                  ></div>
+                </div>
+              </div>
+              <div class="price-display">
+                <span class="price-label">最高价格: ¥{{ maxPrice }}</span>
               </div>
             </div>
 
-            <!-- 双滑块价格区间 -->
-            <div class="dual-slider">
-              <input
-                type="range"
-                min="0"
-                :max="priceRangeMax"
-                v-model.number="minPrice"
-                class="price-slider slider-min"
-              />
-              <input
-                type="range"
-                min="0"
-                :max="priceRangeMax"
-                v-model.number="maxPrice"
-                class="price-slider slider-max"
-              />
+            <!-- 预设价格区间 -->
+            <div class="price-presets">
+              <h4>快速选择</h4>
+              <div class="preset-buttons">
+                <button
+                  v-for="preset in pricePresets"
+                  :key="preset.label"
+                  class="preset-btn"
+                  :class="{ active: isPricePresetActive(preset) }"
+                  @click="applyPricePreset(preset)"
+                >
+                  {{ preset.label }}
+                </button>
+              </div>
             </div>
+          </div>
 
-            <div class="price-display">
-              <span class="price-tag">¥{{ minPrice }}</span>
-              <span class="price-range-line"></span>
-              <span class="price-tag">¥{{ maxPrice }}</span>
+          <!-- 评分筛选 -->
+          <div class="filter-group">
+            <h3>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M239.2,97.4A16,16,0,0,0,224.6,86.6l-59.4-4.84-22.55-55.43a15.95,15.95,0,0,0-29.3,0L90.8,81.76,31.4,86.6a16,16,0,0,0-9.1,28.06l45.4,39.74-13,56.66a16,16,0,0,0,24.2,17.3l51.1-31,51.1,31a16,16,0,0,0,24.2-17.3l-13-56.66,45.4-39.74A16,16,0,0,0,239.2,97.4Z"
+                ></path>
+              </svg>
+              评分
+            </h3>
+            <div class="rating-options">
+              <label
+                v-for="rating in ratingOptions"
+                :key="rating.value"
+                class="rating-item"
+                :class="{ active: selectedRating === rating.value }"
+              >
+                <input
+                  type="radio"
+                  :value="rating.value"
+                  v-model="selectedRating"
+                  class="rating-input"
+                />
+                <div class="rating-stars">
+                  <span
+                    v-for="star in 5"
+                    :key="star"
+                    class="star"
+                    :class="{ filled: star <= rating.value }"
+                  >
+                    ★
+                  </span>
+                </div>
+                <span class="rating-text">{{ rating.text }}</span>
+                <span class="rating-count">({{ getRatingCount(rating.value) }})</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 库存状态 -->
+          <div class="filter-group">
+            <h3>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M208,80H176V56a24,24,0,0,0-24-24H104A24,24,0,0,0,80,56V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8V80H96ZM208,208H48V96H208V208Z"
+                ></path>
+              </svg>
+              库存状态
+            </h3>
+            <div class="stock-options">
+              <label class="stock-item" :class="{ active: stockFilter === 'all' }">
+                <input type="radio" value="all" v-model="stockFilter" class="stock-input" />
+                <span>全部商品</span>
+                <span class="stock-count">({{ productStore.productList.length }})</span>
+              </label>
+              <label class="stock-item" :class="{ active: stockFilter === 'in-stock' }">
+                <input type="radio" value="in-stock" v-model="stockFilter" class="stock-input" />
+                <span>有库存</span>
+                <span class="stock-count">({{ getInStockCount() }})</span>
+              </label>
+              <label class="stock-item" :class="{ active: stockFilter === 'low-stock' }">
+                <input type="radio" value="low-stock" v-model="stockFilter" class="stock-input" />
+                <span>库存紧张</span>
+                <span class="stock-count">({{ getLowStockCount() }})</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 品牌筛选 -->
+          <div class="filter-group" v-if="brands.length > 0">
+            <h3>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M224,48H32A16,16,0,0,0,16,64V192a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48ZM32,64H224V80H32ZM32,192V96H224v96Z"
+                ></path>
+              </svg>
+              品牌
+            </h3>
+            <div class="brand-list">
+              <label
+                v-for="brand in brands"
+                :key="brand"
+                class="brand-item"
+                :class="{ active: selectedBrands.includes(brand) }"
+              >
+                <input
+                  type="checkbox"
+                  :value="brand"
+                  v-model="selectedBrands"
+                  class="brand-checkbox"
+                />
+                <span class="brand-name">{{ brand }}</span>
+                <span class="brand-count">({{ getBrandCount(brand) }})</span>
+              </label>
             </div>
           </div>
 
@@ -213,12 +287,60 @@
         <div class="products-area">
           <div class="products-header">
             <p>找到 {{ filteredProducts.length }} 个商品</p>
-            <select v-model="sortBy">
-              <option value="name">名称</option>
-              <option value="price-low">价格: 从低到高</option>
-              <option value="price-high">价格: 从高到低</option>
-              <option value="rating">评分</option>
-            </select>
+            <div class="sort-controls">
+              <select v-model="sortBy" class="sort-select">
+                <option value="name">按名称排序</option>
+                <option value="price-low">价格: 从低到高</option>
+                <option value="price-high">价格: 从高到低</option>
+                <option value="rating-high">评分: 从高到低</option>
+                <option value="rating-low">评分: 从低到高</option>
+                <option value="newest">最新上架</option>
+                <option value="popular">最受欢迎</option>
+              </select>
+
+              <!-- 排序方向指示器 -->
+              <div class="sort-indicator">
+                <svg
+                  v-if="
+                    sortBy.includes('price') ||
+                    sortBy.includes('rating') ||
+                    sortBy === 'newest' ||
+                    sortBy === 'popular'
+                  "
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 256 256"
+                  :class="{
+                    'sort-desc':
+                      sortBy.includes('high') || sortBy === 'newest' || sortBy === 'popular',
+                    'sort-asc': sortBy.includes('low'),
+                  }"
+                >
+                  <!-- 价格图标 -->
+                  <path
+                    v-if="sortBy.includes('price')"
+                    d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm40-68a28,28,0,0,1-28,28h-4v8a8,8,0,0,1-16,0v-8H104a8,8,0,0,1,0-16h36a12,12,0,0,0,0-24H116a28,28,0,0,1,0-56h4V72a8,8,0,0,1,16,0v8h16a8,8,0,0,1,0,16H116a12,12,0,0,0,0,24h24A28,28,0,0,1,168,148Z"
+                  ></path>
+                  <!-- 评分图标 -->
+                  <path
+                    v-else-if="sortBy.includes('rating')"
+                    d="M239.2,97.4A16,16,0,0,0,224.6,86.6l-59.4-4.84-22.55-55.43a15.95,15.95,0,0,0-29.3,0L90.8,81.76,31.4,86.6a16,16,0,0,0-9.1,28.06l45.4,39.74-13,56.66a16,16,0,0,0,24.2,17.3l51.1-31,51.1,31a16,16,0,0,0,24.2-17.3l-13-56.66,45.4-39.74A16,16,0,0,0,239.2,97.4Z"
+                  ></path>
+                  <!-- 最新上架图标 -->
+                  <path
+                    v-else-if="sortBy === 'newest'"
+                    d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm40-88a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,128Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,160Z"
+                  ></path>
+                  <!-- 最受欢迎图标 -->
+                  <path
+                    v-else-if="sortBy === 'popular'"
+                    d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm40-88a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,128Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,160Z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
           </div>
 
           <!-- 加载状态 -->
@@ -402,7 +524,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProductStore } from '../stores/productStore'
 import { useCartStore } from '../stores/cartStore'
@@ -415,12 +537,37 @@ const productStore = useProductStore()
 const cartStore = useCartStore()
 
 // 筛选状态
-const selectedCategories = ref([])
 const minPrice = ref(0)
 const maxPrice = ref(1000)
 const priceRangeMax = ref(1000)
 const sortBy = ref('name')
 const searchKeyword = ref('')
+
+// 新增筛选状态
+const selectedRating = ref(0) // 0表示不筛选评分
+const stockFilter = ref('all') // 'all', 'in-stock', 'low-stock'
+const selectedBrands = ref([])
+
+// 滑块引用
+const priceSlider = ref(null)
+
+// 价格预设选项
+const pricePresets = [
+  { label: '¥0-50', min: 0, max: 50 },
+  { label: '¥50-100', min: 0, max: 100 },
+  { label: '¥100-200', min: 0, max: 200 },
+  { label: '¥200-500', min: 0, max: 500 },
+  { label: '¥500以上', min: 0, max: 2000 },
+]
+
+// 评分选项
+const ratingOptions = [
+  { value: 0, text: '全部评分' },
+  { value: 4, text: '4星及以上' },
+  { value: 3, text: '3星及以上' },
+  { value: 2, text: '2星及以上' },
+  { value: 1, text: '1星及以上' },
+]
 
 // 视图模式
 const viewMode = ref('grid') // 'grid' 或 'list'
@@ -447,13 +594,25 @@ const categories = computed(() => {
   return Array.from(cats)
 })
 
+// 从商品数据中提取品牌
+const brands = computed(() => {
+  const brandSet = new Set()
+  productStore.productList.forEach((p) => {
+    if (p.brand) {
+      brandSet.add(p.brand)
+    }
+  })
+  return Array.from(brandSet)
+})
+
 // 判断是否有活跃的筛选条件
 const hasActiveFilters = computed(() => {
   return (
     searchKeyword.value ||
-    selectedCategories.value.length > 0 ||
-    minPrice.value > 0 ||
-    maxPrice.value < priceRangeMax.value
+    maxPrice.value < priceRangeMax.value ||
+    selectedRating.value > 0 ||
+    stockFilter.value !== 'all' ||
+    selectedBrands.value.length > 0
   )
 })
 
@@ -472,12 +631,10 @@ watch(
   (newFilter) => {
     if (newFilter === 'new') {
       // 新到商品筛选 - 可以根据创建时间或特殊标记筛选
-      selectedCategories.value = []
       searchKeyword.value = ''
       // 这里可以添加新商品的筛选逻辑
     } else if (newFilter === 'sale') {
       // 促销活动筛选 - 可以根据折扣或促销标记筛选
-      selectedCategories.value = []
       searchKeyword.value = ''
       // 这里可以添加促销商品的筛选逻辑
     }
@@ -522,25 +679,54 @@ const filteredProducts = computed(() => {
 
     // 搜索过滤
     if (searchKeyword.value) {
-      const keyword = searchKeyword.value.toLowerCase()
-      products = products.filter(
-        (p) =>
-          (p.name && p.name.toLowerCase().includes(keyword)) ||
-          (p.description && p.description.toLowerCase().includes(keyword)) ||
-          (p.category && p.category.toLowerCase().includes(keyword)),
-      )
-    }
-
-    // 分类过滤
-    if (selectedCategories.value.length > 0) {
-      products = products.filter((p) => p.category && selectedCategories.value.includes(p.category))
+      const keyword = searchKeyword.value.toLowerCase().trim()
+      if (keyword) {
+        products = products.filter(
+          (p) =>
+            (p.name && p.name.toLowerCase().includes(keyword)) ||
+            (p.description && p.description.toLowerCase().includes(keyword)) ||
+            (p.category && p.category.toLowerCase().includes(keyword)),
+        )
+      }
     }
 
     // 价格过滤
     products = products.filter((p) => {
-      const price = typeof p.price === 'number' ? p.price : 0
-      return price >= minPrice.value && price <= maxPrice.value
+      // 将字符串价格转换为数字进行比较
+      const price =
+        parseFloat(p.price) ||
+        parseFloat(p.current_price) ||
+        parseFloat(p.unit_price) ||
+        parseFloat(p.sale_price) ||
+        0
+      return price >= 0 && price <= maxPrice.value
     })
+
+    // 评分过滤
+    if (selectedRating.value > 0) {
+      products = products.filter((p) => {
+        const rating = parseFloat(p.rating) || 0
+        return rating >= selectedRating.value
+      })
+    }
+
+    // 库存状态过滤
+    if (stockFilter.value !== 'all') {
+      products = products.filter((p) => {
+        const stock = typeof p.stock === 'number' ? p.stock : 0
+        if (stockFilter.value === 'in-stock') {
+          return stock > 0
+        } else if (stockFilter.value === 'low-stock') {
+          return stock > 0 && stock <= 10 // 假设库存紧张为10件以下
+        }
+        return true
+      })
+    }
+
+    // 品牌过滤
+    if (selectedBrands.value.length > 0) {
+      products = products.filter((p) => p.brand && selectedBrands.value.includes(p.brand))
+    }
 
     return products
   } catch (error) {
@@ -552,49 +738,264 @@ const filteredProducts = computed(() => {
 const sortedProducts = computed(() => {
   const products = [...filteredProducts.value]
 
-  switch (sortBy.value) {
-    case 'price-low':
-      return products.sort((a, b) => {
-        const priceA = typeof a.price === 'number' ? a.price : 0
-        const priceB = typeof b.price === 'number' ? b.price : 0
-        return priceA - priceB
-      })
-    case 'price-high':
-      return products.sort((a, b) => {
-        const priceA = typeof a.price === 'number' ? a.price : 0
-        const priceB = typeof b.price === 'number' ? b.price : 0
-        return priceB - priceA
-      })
-    case 'rating':
-      return products.sort((a, b) => {
-        const ratingA = typeof a.rating === 'number' ? a.rating : 0
-        const ratingB = typeof b.rating === 'number' ? b.rating : 0
-        return ratingB - ratingA
-      })
-    default:
-      return products.sort((a, b) => {
-        const nameA = a.name || ''
-        const nameB = b.name || ''
-        return nameA.localeCompare(nameB)
-      })
+  // 如果没有商品，直接返回空数组
+  if (products.length === 0) {
+    return products
+  }
+
+  try {
+    console.log('当前排序方式:', sortBy.value)
+    console.log('排序前商品数量:', products.length)
+    console.log('第一个商品的数据结构:', products[0])
+    console.log('第一个商品的所有字段:', Object.keys(products[0]))
+    console.log('第一个商品的时间相关字段:', {
+      created_at: products[0].created_at,
+      updated_at: products[0].updated_at,
+      is_new: products[0].is_new,
+    })
+    console.log('第一个商品的受欢迎度相关字段:', {
+      sales_count: products[0].sales_count,
+      review_count: products[0].review_count,
+      is_favorite: products[0].is_favorite,
+      is_discount: products[0].is_discount,
+      discount_rate: products[0].discount_rate,
+    })
+
+    let sortedResult
+    switch (sortBy.value) {
+      case 'price-low':
+        sortedResult = products.sort((a, b) => {
+          // 将字符串价格转换为数字进行比较
+          const priceA =
+            parseFloat(a.price) ||
+            parseFloat(a.current_price) ||
+            parseFloat(a.unit_price) ||
+            parseFloat(a.sale_price) ||
+            0
+          const priceB =
+            parseFloat(b.price) ||
+            parseFloat(b.current_price) ||
+            parseFloat(b.unit_price) ||
+            parseFloat(b.sale_price) ||
+            0
+          console.log(`比较: ${a.name} (${priceA}) vs ${b.name} (${priceB})`)
+          return priceA - priceB
+        })
+        console.log('价格从低到高排序完成')
+        break
+      case 'price-high':
+        sortedResult = products.sort((a, b) => {
+          // 将字符串价格转换为数字进行比较
+          const priceA =
+            parseFloat(a.price) ||
+            parseFloat(a.current_price) ||
+            parseFloat(a.unit_price) ||
+            parseFloat(a.sale_price) ||
+            0
+          const priceB =
+            parseFloat(b.price) ||
+            parseFloat(b.current_price) ||
+            parseFloat(b.unit_price) ||
+            parseFloat(b.sale_price) ||
+            0
+          console.log(`比较: ${a.name} (${priceA}) vs ${b.name} (${priceB})`)
+          return priceB - priceA
+        })
+        console.log('价格从高到低排序完成')
+        break
+      case 'rating-high':
+        sortedResult = products.sort((a, b) => {
+          const ratingA = parseFloat(a.rating) || 0
+          const ratingB = parseFloat(b.rating) || 0
+          console.log(`比较: ${a.name} (${ratingA}) vs ${b.name} (${ratingB})`)
+          return ratingB - ratingA
+        })
+        console.log('评分从高到低排序完成')
+        break
+      case 'rating-low':
+        sortedResult = products.sort((a, b) => {
+          const ratingA = parseFloat(a.rating) || 0
+          const ratingB = parseFloat(b.rating) || 0
+          console.log(`比较: ${a.name} (${ratingA}) vs ${b.name} (${ratingB})`)
+          return ratingA - ratingB
+        })
+        console.log('评分从低到高排序完成')
+        break
+      case 'newest':
+        sortedResult = products.sort((a, b) => {
+          // 优先使用 is_new 字段，然后使用 created_at，最后使用 ID
+          if (a.is_new !== b.is_new) {
+            return b.is_new - a.is_new // is_new 为 true 的排在前面
+          }
+
+          // 如果有创建时间，按时间排序
+          if (a.created_at && b.created_at) {
+            const timeA = new Date(a.created_at).getTime()
+            const timeB = new Date(b.created_at).getTime()
+            console.log(`比较时间: ${a.name} (${a.created_at}) vs ${b.name} (${b.created_at})`)
+            return timeB - timeA // 新的在前
+          }
+
+          // 最后按 ID 排序（假设 ID 越大越新）
+          const idA = parseInt(a.id) || 0
+          const idB = parseInt(b.id) || 0
+          console.log(`比较ID: ${a.name} (${idA}) vs ${b.name} (${idB})`)
+          return idB - idA
+        })
+        console.log('最新上架排序完成')
+        break
+      case 'popular':
+        sortedResult = products.sort((a, b) => {
+          // 综合多个受欢迎度指标进行排序
+          const getPopularityScore = (product) => {
+            let score = 0
+
+            // 销量权重最高
+            const salesCount = parseInt(product.sales_count) || 0
+            score += salesCount * 10
+
+            // 评价数量权重中等
+            const reviewCount = parseInt(product.review_count) || 0
+            score += reviewCount * 5
+
+            // 评分权重中等
+            const rating = parseFloat(product.rating) || 0
+            score += rating * 3
+
+            // 收藏状态加分
+            if (product.is_favorite) {
+              score += 50
+            }
+
+            // 折扣商品可能更受欢迎
+            if (product.is_discount) {
+              score += 20
+            }
+
+            return score
+          }
+
+          const scoreA = getPopularityScore(a)
+          const scoreB = getPopularityScore(b)
+
+          console.log(`受欢迎度比较: ${a.name} (${scoreA}) vs ${b.name} (${scoreB})`)
+          console.log(
+            `  ${a.name}: 销量${a.sales_count}, 评价${a.review_count}, 评分${a.rating}, 收藏${a.is_favorite}`,
+          )
+          console.log(
+            `  ${b.name}: 销量${b.sales_count}, 评价${b.review_count}, 评分${b.rating}, 收藏${b.is_favorite}`,
+          )
+
+          return scoreB - scoreA // 分数高的在前
+        })
+        console.log('最受欢迎排序完成')
+        break
+      default:
+        sortedResult = products.sort((a, b) => {
+          const nameA = a.name || ''
+          const nameB = b.name || ''
+          return nameA.localeCompare(nameB)
+        })
+        console.log('按名称排序完成')
+        break
+    }
+
+    console.log(
+      '排序后前3个商品:',
+      sortedResult.slice(0, 3).map((p) => ({ name: p.name, price: p.price, rating: p.rating })),
+    )
+    return sortedResult
+  } catch (error) {
+    console.error('排序商品时出错:', error)
+    return products
   }
 })
 
 // 分页商品
 const paginatedProducts = computed(() => {
+  const products = sortedProducts.value
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
-  return sortedProducts.value.slice(start, end)
+
+  // 确保分页参数有效
+  if (start < 0 || start >= products.length) {
+    return []
+  }
+
+  return products.slice(start, end)
 })
 
 // 总页数
 const totalPages = computed(() => {
-  return Math.ceil(sortedProducts.value.length / itemsPerPage.value)
+  const total = sortedProducts.value.length
+  return Math.max(1, Math.ceil(total / itemsPerPage.value))
 })
 
-// 获取每个分类的商品数量
-const getCategoryCount = (category) => {
-  return productStore.productList.filter((p) => p.category === category).length
+// 获取每个评分的商品数量
+const getRatingCount = (rating) => {
+  if (!productStore.productList) return 0
+  if (rating === 0) return productStore.productList.length
+  return productStore.productList.filter((p) => {
+    const productRating = parseFloat(p.rating) || 0
+    return productRating >= rating
+  }).length
+}
+
+// 获取有库存的商品数量
+const getInStockCount = () => {
+  if (!productStore.productList) return 0
+  return productStore.productList.filter((p) => {
+    const stock = typeof p.stock === 'number' ? p.stock : 0
+    return stock > 0
+  }).length
+}
+
+// 获取库存紧张的商品数量
+const getLowStockCount = () => {
+  if (!productStore.productList) return 0
+  return productStore.productList.filter((p) => {
+    const stock = typeof p.stock === 'number' ? p.stock : 0
+    return stock > 0 && stock <= 10
+  }).length
+}
+
+// 获取每个品牌的商品数量
+const getBrandCount = (brand) => {
+  if (!brand || !productStore.productList) return 0
+  return productStore.productList.filter((p) => p.brand === brand).length
+}
+
+// 价格预设相关方法
+const isPricePresetActive = (preset) => {
+  if (!preset) return false
+  return preset.min === 0 && preset.max === maxPrice.value
+}
+
+const applyPricePreset = (preset) => {
+  if (!preset) return
+
+  console.log('应用价格预设:', preset)
+  let newValue = preset.max
+
+  // 如果预设值超过当前价格范围，扩展价格范围
+  if (newValue > priceRangeMax.value) {
+    priceRangeMax.value = newValue
+    console.log('扩展价格范围到:', priceRangeMax.value)
+  }
+
+  console.log('新价格值:', newValue, '当前最大价格范围:', priceRangeMax.value)
+
+  maxPrice.value = newValue
+
+  // 使用 ref 直接操作滑块
+  nextTick(() => {
+    if (priceSlider.value) {
+      priceSlider.value.value = newValue
+      console.log('滑块值已设置为:', priceSlider.value.value)
+    } else {
+      console.log('滑块元素未找到')
+    }
+  })
 }
 
 const goToProduct = (id) => {
@@ -632,19 +1033,35 @@ const clearSearch = () => {
 
 // 重置筛选
 const resetFilters = () => {
-  selectedCategories.value = []
-  minPrice.value = 0
   maxPrice.value = priceRangeMax.value
   searchKeyword.value = ''
+  selectedRating.value = 0
+  stockFilter.value = 'all'
+  selectedBrands.value = []
   currentPage.value = 1
   router.push({ path: '/shop' })
 }
 
 // 计算价格范围
 const calculatePriceRange = () => {
-  if (productStore.productList.length > 0) {
+  if (!productStore.productList || productStore.productList.length === 0) {
+    priceRangeMax.value = 1000
+    maxPrice.value = 1000
+    return
+  }
+
+  try {
     const prices = productStore.productList
-      .map((p) => (typeof p.price === 'number' ? p.price : 0))
+      .map((p) => {
+        // 将字符串价格转换为数字
+        return (
+          parseFloat(p.price) ||
+          parseFloat(p.current_price) ||
+          parseFloat(p.unit_price) ||
+          parseFloat(p.sale_price) ||
+          0
+        )
+      })
       .filter((price) => price > 0)
 
     if (prices.length > 0) {
@@ -655,6 +1072,10 @@ const calculatePriceRange = () => {
       priceRangeMax.value = 1000
       maxPrice.value = 1000
     }
+  } catch (error) {
+    console.error('计算价格范围时出错:', error)
+    priceRangeMax.value = 1000
+    maxPrice.value = 1000
   }
 }
 
@@ -690,7 +1111,7 @@ onMounted(async () => {
     calculatePriceRange()
 
     // 从商品数据中提取分类
-    if (productStore.categories.length === 0) {
+    if (!productStore.categories || productStore.categories.length === 0) {
       productStore.fetchCategories()
     }
 
@@ -714,7 +1135,7 @@ watch(
 )
 
 // 监听筛选条件变化，重置分页
-watch([selectedCategories, minPrice, maxPrice, sortBy, searchKeyword], () => {
+watch([maxPrice, sortBy, searchKeyword, selectedRating, stockFilter, selectedBrands], () => {
   currentPage.value = 1
 })
 </script>
@@ -1641,89 +2062,437 @@ h1 {
   }
 }
 
+/* 评分筛选样式 */
+.rating-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rating-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.rating-item:hover {
+  background-color: #f5f5f5;
+}
+
+.rating-item.active {
+  background-color: #e8f5e8;
+  border: 1px solid #4a6b4a;
+}
+
+.rating-input {
+  margin: 0;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  color: #ddd;
+  font-size: 14px;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.rating-text {
+  font-size: 14px;
+  color: #333;
+}
+
+.rating-count {
+  font-size: 12px;
+  color: #999;
+  margin-left: auto;
+}
+
+/* 库存状态筛选样式 */
+.stock-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stock-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.stock-item:hover {
+  background-color: #f5f5f5;
+}
+
+.stock-item.active {
+  background-color: #e8f5e8;
+  border: 1px solid #4a6b4a;
+}
+
+.stock-input {
+  margin: 0;
+}
+
+.stock-count {
+  font-size: 12px;
+  color: #999;
+  margin-left: auto;
+}
+
+/* 品牌筛选样式 */
+.brand-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brand-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.brand-item:hover {
+  background-color: #f5f5f5;
+}
+
+.brand-item.active {
+  background-color: #e8f5e8;
+  border: 1px solid #4a6b4a;
+}
+
+.brand-checkbox {
+  margin: 0;
+}
+
+.brand-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.brand-count {
+  font-size: 12px;
+  color: #999;
+  margin-left: auto;
+}
+
+/* 价格预设样式 */
+.price-presets {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.price-presets h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preset-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  border-color: #4a6b4a;
+  color: #4a6b4a;
+}
+
+.preset-btn.active {
+  background: #4a6b4a;
+  border-color: #4a6b4a;
+  color: white;
+}
+
+/* 分类搜索样式 */
+.category-search {
+  margin-bottom: 12px;
+}
+
+.category-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.category-search-input:focus {
+  border-color: #4a6b4a;
+}
+
+/* 分类排序样式 */
+.category-sort {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sort-btn {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-btn:hover {
+  border-color: #4a6b4a;
+  color: #4a6b4a;
+}
+
+.sort-btn.active {
+  background: #4a6b4a;
+  border-color: #4a6b4a;
+  color: white;
+}
+
+/* 分类列表样式 */
+.category-items {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.category-item:hover {
+  background-color: #f5f5f5;
+}
+
+.category-item.active {
+  background-color: #e8f5e8;
+  border: 1px solid #4a6b4a;
+}
+
+.category-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.category-count {
+  font-size: 12px;
+  color: #999;
+  margin-left: auto;
+}
+
+/* 分类操作按钮样式 */
+.category-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover:not(:disabled) {
+  border-color: #4a6b4a;
+  color: #4a6b4a;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 排序控制样式 */
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sort-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-width: 160px;
+}
+
+.sort-select:focus {
+  border-color: #4a6b4a;
+}
+
+.sort-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.sort-indicator svg {
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.sort-indicator .sort-asc {
+  transform: rotate(180deg);
+  color: #4a6b4a;
+}
+
+.sort-indicator .sort-desc {
+  color: #4a6b4a;
+}
+
 /* 搜索信息图标 */
 .search-info svg {
   color: #618961;
   flex-shrink: 0;
 }
 
-/* 价格输入框组 */
-.price-inputs {
+/* 价格滑块容器 */
+.price-slider-container {
+  margin: 20px 0;
+}
+
+.slider-wrapper {
+  position: relative;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 15px;
-  position: relative;
-  z-index: 10;
 }
 
-.price-input-wrapper {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 0 10px;
-  transition: all 0.2s;
-  z-index: 10;
-  min-width: 0;
-  height: 42px;
-}
-
-.price-input-wrapper:focus-within {
-  background: white;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  z-index: 20;
-}
-
-.currency {
-  color: #999;
-  font-size: 13px;
-  font-weight: 500;
-  pointer-events: none;
-  flex-shrink: 0;
-  margin-right: 4px;
-}
-
-.price-input {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  padding: 8px 6px;
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  outline: none;
+.price-slider {
+  position: absolute;
   width: 100%;
-  min-width: 0;
-  color: #333;
-  font-weight: 500;
-}
-
-.price-input::placeholder {
-  color: #ccc;
-  font-size: 13px;
-  font-weight: 400;
-}
-
-/* 移除数字输入框的上下箭头 */
-.price-input::-webkit-outer-spin-button,
-.price-input::-webkit-inner-spin-button {
+  height: 6px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  z-index: 2;
   -webkit-appearance: none;
-  margin: 0;
+  appearance: none;
 }
 
-.price-input[type='number'] {
-  -moz-appearance: textfield;
+.price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+  transition: all 0.2s ease;
 }
 
-.price-separator {
-  color: #999;
-  font-weight: bold;
-  z-index: 10;
+.price-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.price-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+  transition: all 0.2s ease;
+}
+
+.price-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.slider-track {
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.slider-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.price-display {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.price-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  background: #f8f9fa;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+  border: 1px solid #e0e0e0;
 }
 
 /* 双滑块 */

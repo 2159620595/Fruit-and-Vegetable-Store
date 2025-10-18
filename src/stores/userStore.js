@@ -1,6 +1,6 @@
 // src/stores/userStore.js
 import { defineStore } from 'pinia'
-import { userLoginService, userRegisterService } from '@/api/user.js'
+import { userLoginService, userRegisterService, getUserProfileService } from '@/api/user.js'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -126,23 +126,29 @@ export const useUserStore = defineStore('user', {
 
       this.loading = true
       try {
-        // 这里需要一个获取用户信息的API
-        // 暂时使用localStorage中的信息
         console.log('📤 获取用户信息')
 
-        // 如果有用户信息API，可以这样调用：
-        // const response = await request.get('/user/profile')
-        // this.user = response.data.data
+        // 调用用户信息API
+        const response = await getUserProfileService()
+        console.log('✅ 用户信息API响应:', response.data)
 
-        // Pinia持久化插件会自动恢复状态
-        this.initFromStorage()
-
-        console.log('✅ 用户信息已加载:', this.user)
+        if (response.data?.code === 200 && response.data?.data?.user) {
+          // 更新用户信息
+          this.user = response.data.data.user
+          console.log('✅ 用户信息已更新:', this.user)
+        } else {
+          console.warn('⚠️ 用户信息API响应格式异常')
+          // 如果API失败，使用localStorage中的信息
+          this.initFromStorage()
+        }
       } catch (error) {
         console.error('❌ 获取用户信息失败:', error)
         // 如果token无效，清除登录状态
         if (error.response?.status === 401) {
           this.logout()
+        } else {
+          // 如果API失败，使用localStorage中的信息
+          this.initFromStorage()
         }
       } finally {
         this.loading = false

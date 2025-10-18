@@ -151,7 +151,13 @@
             <div v-if="userStore.isLoggedIn" class="user-info-section">
               <div class="user-greeting">
                 <span class="greeting-text">你好，</span>
-                <span class="username">{{ userStore.user?.username || '用户' }}</span>
+                <span class="username">{{
+                  userStore.user?.username || userStore.user?.name || '用户'
+                }}</span>
+                <!-- 调试信息 -->
+                <small v-if="userStore.user" style="display: block; color: #999; font-size: 10px">
+                  调试: {{ JSON.stringify(userStore.user) }}
+                </small>
               </div>
               <div class="user-menu-items">
                 <a href="#" @click.prevent="goToProfile" class="user-menu-item">
@@ -211,7 +217,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
@@ -235,6 +241,22 @@ const showSuggestions = ref(false)
 
 // 用户菜单状态
 const showUserMenu = ref(false)
+
+// 获取用户信息
+const fetchUserInfo = async () => {
+  if (userStore.isLoggedIn && userStore.token) {
+    try {
+      await userStore.fetchProfile()
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+    }
+  }
+}
+
+// 组件挂载时获取用户信息
+onMounted(() => {
+  fetchUserInfo()
+})
 
 // 返回上一页
 const goBack = () => {

@@ -16,10 +16,32 @@ export default defineConfig([
     languageOptions: {
       globals: {
         ...globals.browser,
-        rules: {
-          'vue/multi-word-component-names': 'off',
-        },
+        ...globals.node,
       },
+    },
+    rules: {
+      // Vue 相关规则
+      'vue/multi-word-component-names': 'off',
+      'vue/no-unused-vars': 'error',
+      'vue/no-multiple-template-root': 'off',
+      'vue/html-self-closing': 'off',
+
+      // JavaScript 相关规则
+      'no-console': 'warn',
+      'no-debugger': 'error',
+      'no-unused-vars': 'warn',
+      'prefer-const': 'error',
+      'no-var': 'error',
+      eqeqeq: 'error',
+      curly: 'error',
+
+      // 代码风格
+      indent: ['error', 2],
+      quotes: ['error', 'single'],
+      semi: ['error', 'never'],
+      'comma-dangle': ['error', 'es5'],
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'never'],
     },
   },
 

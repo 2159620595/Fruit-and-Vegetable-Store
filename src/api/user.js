@@ -13,3 +13,6 @@ export const userRegisterService = ({
 // 登录请求
 export const userLoginService = ({ username, password }) =>
   request.post('/auth/login', { username, password })
+
+// 获取用户信息
+export const getUserProfileService = () => request.get('/user/profile')
