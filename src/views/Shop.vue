@@ -1,14 +1,9 @@
 <!-- src/views/Shop.vue -->
 <template>
   <div class="shop">
-    <Header></Header>
     <div class="container">
       <!-- 面包屑导航 -->
-      <nav class="breadcrumb">
-        <router-link to="/">首页</router-link>
-        <span class="separator">/</span>
-        <span class="current">商品列表</span>
-      </nav>
+      <Breadcrumb current-page="商品列表" />
 
       <!-- 页面标题和视图切换 -->
       <div class="page-header">
@@ -412,6 +407,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useProductStore } from '../stores/productStore'
 import { useCartStore } from '../stores/cartStore'
 import Header from '../components/Header.vue'
+import Breadcrumb from '../components/Breadcrumb.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -470,6 +466,25 @@ watch(
   { immediate: true },
 )
 
+// 监听filter查询参数
+watch(
+  () => route.query.filter,
+  (newFilter) => {
+    if (newFilter === 'new') {
+      // 新到商品筛选 - 可以根据创建时间或特殊标记筛选
+      selectedCategories.value = []
+      searchKeyword.value = ''
+      // 这里可以添加新商品的筛选逻辑
+    } else if (newFilter === 'sale') {
+      // 促销活动筛选 - 可以根据折扣或促销标记筛选
+      selectedCategories.value = []
+      searchKeyword.value = ''
+      // 这里可以添加促销商品的筛选逻辑
+    }
+  },
+  { immediate: true },
+)
+
 const filteredProducts = computed(() => {
   // 使用 getter 确保总是获取数组
   let products = productStore.productList || []
@@ -481,6 +496,30 @@ const filteredProducts = computed(() => {
   }
 
   try {
+    // Filter查询参数筛选
+    if (route.query.filter === 'new') {
+      // 新到商品筛选 - 可以根据创建时间筛选最近7天的商品
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      products = products.filter((p) => {
+        if (p.created_at) {
+          return new Date(p.created_at) > sevenDaysAgo
+        }
+        // 如果没有创建时间字段，可以根据商品ID或其他逻辑判断
+        return p.id > 0 // 简单示例：假设ID越大越新
+      })
+    } else if (route.query.filter === 'sale') {
+      // 促销活动筛选 - 可以根据折扣价格筛选
+      products = products.filter((p) => {
+        // 假设有原价和现价字段，或者有折扣字段
+        if (p.original_price && p.price) {
+          return p.original_price > p.price
+        }
+        // 如果没有折扣字段，可以根据价格范围筛选
+        return p.price < 50 // 简单示例：价格低于50的商品
+      })
+    }
+
     // 搜索过滤
     if (searchKeyword.value) {
       const keyword = searchKeyword.value.toLowerCase()

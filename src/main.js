@@ -2,6 +2,7 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia } from 'pinia'
+import { createPersistedState } from 'pinia-plugin-persistedstate'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
@@ -62,6 +63,8 @@ import router from './router'
 // })
 
 const pinia = createPinia()
+pinia.use(createPersistedState())
+
 const app = createApp(App)
 
 app.use(router)

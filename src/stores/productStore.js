@@ -10,6 +10,11 @@ export const useProductStore = defineStore('product', {
     error: null,
   }),
 
+  persist: {
+    key: 'product',
+    storage: localStorage,
+  },
+
   getters: {
     // 确保总是返回数组
     productList: (state) => {

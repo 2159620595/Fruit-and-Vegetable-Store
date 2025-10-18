@@ -15,10 +15,15 @@ import { useUserStore } from './userStore'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
-    items: JSON.parse(localStorage.getItem('cart')) || [],
+    items: [],
     loading: false,
     error: null,
   }),
+
+  persist: {
+    key: 'cart',
+    storage: localStorage,
+  },
 
   getters: {
     // 购物车商品总数量
@@ -60,9 +65,13 @@ export const useCartStore = defineStore('cart', {
     async fetchCartList() {
       const userStore = useUserStore()
 
-      // 如果用户未登录，从 localStorage 加载
+      console.log('🛒 fetchCartList 开始')
+      console.log('用户token:', userStore.token)
+      console.log('当前items:', this.items)
+
+      // 如果用户未登录，直接返回（Pinia持久化插件会自动加载数据）
       if (!userStore.token) {
-        this.loadLocalCart()
+        console.log('用户未登录，使用本地数据')
         return
       }
 
@@ -71,10 +80,22 @@ export const useCartStore = defineStore('cart', {
 
       try {
         const response = await getCartList()
+        console.log('🛒 API响应原始数据:', response)
+        console.log('🛒 response.data:', response.data)
+
         const cartData = response.data.data || response.data
+        console.log('🛒 cartData:', cartData)
 
         // 后端返回格式：{ items: [...], subtotal, shipping, total }
         const items = cartData.items || []
+        console.log('🛒 items from API:', items)
+
+        // 如果后端返回空数据，但localStorage有数据，保留localStorage数据
+        if (items.length === 0 && this.items.length > 0) {
+          console.log('🛒 后端返回空数据，但localStorage有数据，保留localStorage数据')
+          // 不更新this.items，保持localStorage中的数据
+          return
+        }
 
         // 确保每个商品都有 selected 属性，并映射字段
         this.items = items.map((item) => ({
@@ -90,12 +111,13 @@ export const useCartStore = defineStore('cart', {
           selected: item.selected !== undefined ? item.selected : false,
         }))
 
-        this.saveLocalCart()
+        console.log('🛒 处理后的items:', this.items)
+
+        // Pinia持久化插件会自动保存
       } catch (error) {
         console.error('获取购物车失败:', error)
         this.error = error.message || '获取购物车失败'
-        // 如果请求失败，使用本地缓存
-        this.loadLocalCart()
+        // 如果请求失败，保持本地数据（Pinia持久化插件会自动处理）
       } finally {
         this.loading = false
       }
@@ -125,7 +147,7 @@ export const useCartStore = defineStore('cart', {
         })
       }
 
-      this.saveLocalCart()
+      // Pinia持久化插件会自动保存
 
       // 如果用户已登录，同步到后端
       if (userStore.token) {
@@ -155,7 +177,7 @@ export const useCartStore = defineStore('cart', {
       if (item) {
         const validQuantity = Math.max(1, Math.min(item.stock || 999, quantity))
         item.quantity = validQuantity
-        this.saveLocalCart()
+        // Pinia持久化插件会自动保存
 
         // 同步到后端
         if (userStore.token) {
@@ -179,7 +201,7 @@ export const useCartStore = defineStore('cart', {
 
       // 本地删除
       this.items = this.items.filter((item) => item.id !== cartItemId)
-      this.saveLocalCart()
+      // Pinia持久化插件会自动保存
 
       // 同步到后端
       if (userStore.token) {
@@ -198,9 +220,21 @@ export const useCartStore = defineStore('cart', {
     async batchRemove(productIds) {
       const userStore = useUserStore()
 
-      // 本地删除
-      this.items = this.items.filter((item) => !productIds.includes(item.id))
-      this.saveLocalCart()
+      console.log('🛒 batchRemove 开始:', {
+        productIds,
+        currentItems: this.items.map((item) => ({ id: item.id, product_id: item.product_id })),
+      })
+
+      // 本地删除 - 使用id或product_id进行匹配
+      this.items = this.items.filter(
+        (item) => !productIds.includes(item.id) && !productIds.includes(item.product_id),
+      )
+
+      console.log('🛒 batchRemove 删除后:', {
+        remainingItems: this.items.map((item) => ({ id: item.id, product_id: item.product_id })),
+      })
+
+      // Pinia持久化插件会自动保存
 
       // 同步到后端
       if (userStore.token) {
@@ -217,7 +251,12 @@ export const useCartStore = defineStore('cart', {
      * 删除已选中的商品
      */
     async removeSelectedItems() {
-      const selectedIds = this.selectedItems.map((item) => item.id)
+      console.log('🛒 removeSelectedItems 开始')
+      console.log('🛒 selectedItems:', this.selectedItems)
+
+      const selectedIds = this.selectedItems.map((item) => item.id || item.product_id)
+      console.log('🛒 selectedIds:', selectedIds)
+
       if (selectedIds.length > 0) {
         await this.batchRemove(selectedIds)
       }
@@ -231,7 +270,7 @@ export const useCartStore = defineStore('cart', {
 
       // 本地清空
       this.items = []
-      this.saveLocalCart()
+      // Pinia持久化插件会自动保存
 
       // 同步到后端
       if (userStore.token) {
@@ -251,7 +290,7 @@ export const useCartStore = defineStore('cart', {
       const item = this.items.find((item) => item.id === productId)
       if (item) {
         item.selected = !item.selected
-        this.saveLocalCart()
+        // Pinia持久化插件会自动保存
 
         // 同步到后端
         const userStore = useUserStore()
@@ -276,7 +315,7 @@ export const useCartStore = defineStore('cart', {
       this.items.forEach((item) => {
         item.selected = newSelectedState
       })
-      this.saveLocalCart()
+      // Pinia持久化插件会自动保存
 
       // 同步到后端
       const userStore = useUserStore()
@@ -307,31 +346,6 @@ export const useCartStore = defineStore('cart', {
       } catch (error) {
         console.error('获取购物车数量失败:', error)
         return this.cartCount
-      }
-    },
-
-    /**
-     * 保存购物车到本地存储
-     */
-    saveLocalCart() {
-      localStorage.setItem('cart', JSON.stringify(this.items))
-    },
-
-    /**
-     * 从本地存储加载购物车
-     */
-    loadLocalCart() {
-      try {
-        const localCart = localStorage.getItem('cart')
-        if (localCart) {
-          this.items = JSON.parse(localCart).map((item) => ({
-            ...item,
-            selected: item.selected !== undefined ? item.selected : false,
-          }))
-        }
-      } catch (error) {
-        console.error('加载本地购物车失败:', error)
-        this.items = []
       }
     },
 

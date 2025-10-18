@@ -14,6 +14,11 @@ export const useAddressStore = defineStore('address', {
     error: null,
   }),
 
+  persist: {
+    key: 'address',
+    storage: localStorage,
+  },
+
   getters: {
     // 获取默认地址
     defaultAddress: (state) => state.addresses.find((addr) => addr.is_default),

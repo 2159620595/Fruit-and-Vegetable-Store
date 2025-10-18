@@ -3,25 +3,37 @@
   <header class="site-header">
     <div class="header-content">
       <div class="logo">
-        <span class="leaf-icon">🌱</span>
+        <span class="leaf-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="currentColor"
+            viewBox="0 0 256 256"
+          >
+            <path
+              d="M173.79,51.48a221.25,221.25,0,0,0-41.67-34.34,8,8,0,0,0-8.24,0A221.25,221.25,0,0,0,82.21,51.48C54.59,80.48,40,112.47,40,144a88,88,0,0,0,176,0C216,112.47,201.41,80.48,173.79,51.48ZM96,184c0-27.67,22.53-47.28,32-54.3,9.48,7,32,26.63,32,54.3a32,32,0,0,1-64,0Z"
+            ></path>
+          </svg>
+        </span>
         <span class="brand-name">果蔬商城</span>
       </div>
       <div class="right">
-        <nav class="nav-links">
+        <nav class="nav-links" v-if="isHomePage">
           <a href="#" class="nav-link" @click="router.push('/')">首页</a>
-          <a href="#" class="nav-link">所有产品</a>
-          <a href="#" class="nav-link">新到商品</a>
-          <a href="#" class="nav-link">促销活动</a>
-          <a href="#" class="nav-link">联系我们</a>
+          <a href="#" class="nav-link" @click="router.push('/shop')">所有产品</a>
+          <a href="#" class="nav-link" @click="router.push('/shop?filter=new')">新到商品</a>
+          <a href="#" class="nav-link" @click="router.push('/shop?filter=sale')">促销活动</a>
+          <a href="#" class="nav-link" @click="scrollToContact">联系我们</a>
         </nav>
         <div class="header-actions">
           <div class="search-container">
             <div class="search-bar">
-              <span class="search-icon">
+              <span class="search-icon" @click="handleSearch">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="20px"
-                  height="20px"
+                  width="16"
+                  height="16"
                   fill="currentColor"
                   viewBox="0 0 256 256"
                 >
@@ -44,18 +56,18 @@
             </div>
 
             <!-- 搜索建议下拉框 -->
-            <div
-              v-if="showSuggestions && (searchHistory.length > 0 || searchKeyword)"
-              class="search-suggestions"
-            >
+            <div v-if="showSuggestions" class="search-suggestions">
               <!-- 搜索历史 -->
-              <div v-if="searchHistory.length > 0 && !searchKeyword" class="suggestion-section">
+              <div
+                v-if="searchStore.searchHistory.length > 0 && !searchKeyword"
+                class="suggestion-section"
+              >
                 <div class="suggestion-header">
                   <span>搜索历史</span>
                   <button @click="clearHistory" class="clear-history-btn">清空</button>
                 </div>
                 <div
-                  v-for="(item, index) in searchHistory"
+                  v-for="(item, index) in searchStore.searchHistory"
                   :key="index"
                   class="suggestion-item"
                   @mousedown="selectSuggestion(item)"
@@ -81,7 +93,7 @@
                   <span>热门搜索</span>
                 </div>
                 <div
-                  v-for="(item, index) in hotSearches"
+                  v-for="(item, index) in searchStore.hotSearches"
                   :key="index"
                   class="suggestion-item hot"
                   @mousedown="selectSuggestion(item)"
@@ -106,8 +118,8 @@
           <button class="icon-btn" @click="router.push('/cart')">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="20px"
-              height="20px"
+              width="18"
+              height="18"
               fill="currentColor"
               viewBox="0 0 256 256"
             >
@@ -120,17 +132,14 @@
           <div class="user-menu-container">
             <button class="icon-btn user-btn" @click="toggleUserMenu">
               <svg
-                t="1760099249589"
-                class="icon"
-                viewBox="0 0 1024 1024"
-                version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
-                p-id="4707"
+                width="20"
+                height="20"
+                fill="currentColor"
+                viewBox="0 0 256 256"
               >
                 <path
-                  d="M512 170.666667a341.333333 341.333333 0 1 1 0 682.666666 341.333333 341.333333 0 0 1 0-682.666666z m42.666667 362.666666h-85.333334a128 128 0 0 0-128 128h341.333334l-0.213334-7.509333A128 128 0 0 0 554.666667 533.333333z m-42.666667-213.333333a85.333333 85.333333 0 1 0 0 170.666667 85.333333 85.333333 0 0 0 0-170.666667z"
-                  fill="#444444"
-                  p-id="4708"
+                  d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"
                 ></path>
               </svg>
               <span v-if="userStore.isLoggedIn" class="user-badge"></span>
@@ -202,34 +211,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
+import { useSearchStore } from '@/stores/searchStore'
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
+const searchStore = useSearchStore()
+
+// 判断是否为首页
+const isHomePage = computed(() => {
+  return route.path === '/'
+})
 
 // 搜索相关状态
 const searchKeyword = ref('')
 const showSuggestions = ref(false)
-const searchHistory = ref([])
-const hotSearches = ref(['苹果', '香蕉', '西红柿', '黄瓜', '橙汁', '有机蔬菜'])
 
 // 用户菜单状态
 const showUserMenu = ref(false)
-
-// 从localStorage加载搜索历史
-onMounted(() => {
-  const saved = localStorage.getItem('searchHistory')
-  if (saved) {
-    try {
-      searchHistory.value = JSON.parse(saved)
-    } catch (e) {
-      searchHistory.value = []
-    }
-  }
-})
 
 // 执行搜索
 const handleSearch = () => {
@@ -237,7 +240,7 @@ const handleSearch = () => {
   if (!keyword) return
 
   // 保存到搜索历史
-  addToHistory(keyword)
+  searchStore.addToHistory(keyword)
 
   // 跳转到商品列表页面并传递搜索关键词
   router.push({
@@ -247,18 +250,6 @@ const handleSearch = () => {
 
   // 关闭建议框
   showSuggestions.value = false
-}
-
-// 添加到搜索历史
-const addToHistory = (keyword) => {
-  // 移除重复项
-  const filtered = searchHistory.value.filter((item) => item !== keyword)
-  // 添加到开头
-  filtered.unshift(keyword)
-  // 只保留最近10条
-  searchHistory.value = filtered.slice(0, 10)
-  // 保存到localStorage
-  localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value))
 }
 
 // 选择搜索建议
@@ -274,8 +265,7 @@ const clearSearch = () => {
 
 // 清空搜索历史
 const clearHistory = () => {
-  searchHistory.value = []
-  localStorage.removeItem('searchHistory')
+  searchStore.clearHistory()
 }
 
 // 处理失去焦点
@@ -309,6 +299,32 @@ const goToOrders = () => {
   router.push('/orders')
 }
 
+// 滚动到联系我们部分
+const scrollToContact = () => {
+  // 如果当前在首页，滚动到联系我们部分
+  if (route.path === '/') {
+    const contactSection = document.getElementById('contact-section')
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      // 如果没有找到联系我们部分，滚动到页面底部
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+    }
+  } else {
+    // 如果不在首页，跳转到首页并滚动到联系我们部分
+    router.push('/').then(() => {
+      setTimeout(() => {
+        const contactSection = document.getElementById('contact-section')
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: 'smooth' })
+        } else {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+        }
+      }, 100)
+    })
+  }
+}
+
 // 处理登出
 const handleLogout = async () => {
   try {
@@ -317,7 +333,7 @@ const handleLogout = async () => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    userStore.logout()
+    await userStore.logout()
     showUserMenu.value = false
     ElMessage.success('已退出登录')
     router.push('/')
@@ -337,9 +353,11 @@ onMounted(() => {
   background-color: #ffffff;
   border-bottom: 1px solid #e5e5e5;
   align-items: center;
+  height: 78px;
 }
 
 .header-content {
+  height: 78px;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
   padding-left: 2.5rem;
@@ -420,6 +438,14 @@ onMounted(() => {
   color: #618961;
   display: flex;
   align-items: center;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.search-icon:hover {
+  background-color: rgba(97, 137, 97, 0.1);
 }
 
 .clear-btn {

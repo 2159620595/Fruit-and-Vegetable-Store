@@ -10,7 +10,6 @@ import Checkout from '@/views/Checkout.vue'
 import OrderList from '@/views/OrderList.vue'
 import OrderDetail from '@/views/OrderDetail.vue'
 import Profile from '@/views/Profile.vue'
-import DeliveryAddress from '@/views/DeliveryAddress.vue'
 import Login from '@/views/Login.vue'
 
 const router = createRouter({
@@ -97,17 +96,6 @@ const router = createRouter({
       meta: {
         requiresAuth: true,
         title: '个人中心 - 果蔬商城',
-      },
-    },
-
-    // 收货地址管理（需要登录）
-    {
-      path: '/addresses',
-      name: 'DeliveryAddress',
-      component: DeliveryAddress,
-      meta: {
-        requiresAuth: true,
-        title: '收货地址 - 果蔬商城',
       },
     },
 

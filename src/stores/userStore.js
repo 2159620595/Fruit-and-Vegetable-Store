@@ -5,11 +5,16 @@ import { userLoginService, userRegisterService } from '@/api/user.js'
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: null,
-    token: localStorage.getItem('token') || null,
-    isAuthenticated: !!localStorage.getItem('token'),
+    token: null,
+    isAuthenticated: false,
     loading: false,
     error: null,
   }),
+
+  persist: {
+    key: 'user',
+    storage: localStorage,
+  },
 
   getters: {
     // 获取用户信息
@@ -62,11 +67,7 @@ export const useUserStore = defineStore('user', {
         this.user = user
         this.isAuthenticated = true
 
-        // 持久化存储
-        localStorage.setItem('token', token)
-        if (user) {
-          localStorage.setItem('userInfo', JSON.stringify(user))
-        }
+        // Pinia持久化插件会自动保存
 
         console.log('✅ 登录状态已保存')
 
@@ -110,23 +111,10 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    // 从localStorage恢复用户状态
+    // 从持久化存储恢复用户状态（Pinia会自动处理）
     initFromStorage() {
-      const token = localStorage.getItem('token')
-      const userInfo = localStorage.getItem('userInfo')
-
-      if (token) {
-        this.token = token
-        this.isAuthenticated = true
-
-        if (userInfo) {
-          try {
-            this.user = JSON.parse(userInfo)
-          } catch (e) {
-            console.error('解析用户信息失败:', e)
-          }
-        }
-      }
+      // Pinia持久化插件会自动恢复状态
+      console.log('✅ 用户状态已从持久化存储恢复')
     },
 
     // 从服务器获取用户信息
@@ -146,7 +134,7 @@ export const useUserStore = defineStore('user', {
         // const response = await request.get('/user/profile')
         // this.user = response.data.data
 
-        // 暂时从localStorage恢复
+        // Pinia持久化插件会自动恢复状态
         this.initFromStorage()
 
         console.log('✅ 用户信息已加载:', this.user)
@@ -162,15 +150,55 @@ export const useUserStore = defineStore('user', {
     },
 
     // 登出
-    logout() {
+    async logout() {
+      console.log('🚪 开始退出登录，清除所有用户相关数据...')
+
+      // 清除用户数据
       this.user = null
       this.token = null
       this.isAuthenticated = false
       this.error = null
 
-      // 清除本地存储
-      localStorage.removeItem('token')
-      localStorage.removeItem('userInfo')
+      // 清除其他 store 的数据
+      try {
+        // 清除购物车数据
+        const { useCartStore } = await import('./cartStore')
+        const cartStore = useCartStore()
+        cartStore.items = []
+        console.log('✅ 购物车数据已清除')
+
+        // 清除订单数据
+        const { useOrderStore } = await import('./orderStore')
+        const orderStore = useOrderStore()
+        orderStore.orders = []
+        orderStore.currentOrder = null
+        orderStore.orderCounts = {
+          to_pay: 0,
+          to_ship: 0,
+          to_receive: 0,
+          to_review: 0,
+        }
+        console.log('✅ 订单数据已清除')
+
+        // 清除地址数据
+        const { useAddressStore } = await import('./addressStore')
+        const addressStore = useAddressStore()
+        addressStore.addresses = []
+        console.log('✅ 地址数据已清除')
+
+        // 清除物流数据
+        const { useLogisticsStore } = await import('./logisticsStore')
+        const logisticsStore = useLogisticsStore()
+        logisticsStore.clearLogisticsData()
+        console.log('✅ 物流数据已清除')
+
+        console.log('✅ 所有用户相关数据已清除完成')
+      } catch (error) {
+        console.error('❌ 清除数据时出错:', error)
+        // 即使清除其他数据失败，也要确保用户数据被清除
+      }
+
+      // Pinia持久化插件会自动清除
     },
 
     // 清除错误

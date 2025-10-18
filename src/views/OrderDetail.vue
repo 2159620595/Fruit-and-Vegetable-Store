@@ -1,16 +1,7 @@
 <template>
   <div class="order-detail-page">
-    <!-- Header -->
-    <Header />
-
     <!-- Breadcrumbs -->
-    <div class="breadcrumbs">
-      <a href="#" class="breadcrumb-link" @click.prevent="router.push('/')">首页</a>
-      <span class="breadcrumb-separator">/</span>
-      <a href="#" class="breadcrumb-link" @click.prevent="router.push('/orders')">订单</a>
-      <span class="breadcrumb-separator">/</span>
-      <span class="breadcrumb-current">订单详情</span>
-    </div>
+    <Breadcrumb current-page="订单详情" />
 
     <!-- Loading State -->
     <div v-if="loading" class="loading-container">
@@ -65,7 +56,7 @@
             评价订单
           </button>
           <button
-            v-if="['processing', 'shipped', 'in_transit'].includes(order.status)"
+            v-if="['processing', 'shipped', 'in_transit', 'delivered'].includes(order.status)"
             class="btn btn-outline"
             @click="handleTrackOrder"
           >
@@ -223,6 +214,24 @@
         </div>
       </div>
 
+      <!-- Logistics Information -->
+      <div
+        v-if="['shipped', 'in_transit', 'delivered'].includes(order.status)"
+        class="logistics-info"
+      >
+        <h2 class="section-title">物流信息</h2>
+        <LogisticsTracker
+          :order-id="order.id"
+          :tracking-number="order.tracking_number"
+          :carrier="order.carrier"
+          :order-status="order.status"
+          :auto-refresh="true"
+          :refresh-interval="30000"
+          @update="handleLogisticsUpdate"
+          @error="handleLogisticsError"
+        />
+      </div>
+
       <!-- Payment Information -->
       <div class="payment-info">
         <h2 class="section-title">支付信息</h2>
@@ -252,7 +261,7 @@
           评价订单
         </button>
         <button
-          v-if="['processing', 'shipped', 'in_transit'].includes(order.status)"
+          v-if="['processing', 'shipped', 'in_transit', 'delivered'].includes(order.status)"
           class="btn btn-outline"
           @click="handleTrackOrder"
         >
@@ -288,17 +297,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useOrderStore } from '@/stores/orderStore'
 import { useUserStore } from '@/stores/userStore'
+import { useLogisticsStore } from '@/stores/logisticsStore'
 import Header from '@/components/Header.vue'
+import LogisticsTracker from '@/components/LogisticsTracker.vue'
+import LogisticsDialog from '@/components/LogisticsDialog.vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()
 const router = useRouter()
 const orderStore = useOrderStore()
 const userStore = useUserStore()
+const logisticsStore = useLogisticsStore()
 
 // State
 const order = ref(null)
@@ -781,102 +795,44 @@ const handleReview = () => {
   })
 }
 
-const handleTrackOrder = () => {
-  const logisticsInfo = {
-    trackingNumber: order.value.tracking_number || `SF${Date.now()}`,
-    carrier: order.value.carrier || '顺丰速运',
-    estimatedDelivery: '2024-01-17 18:00',
-    progress: [
-      {
-        status: '已发货',
-        time: '2024-01-15 10:00',
-        description: '您的订单已从北京分拣中心发出',
-        completed: true,
-        icon: '🚚',
+const handleTrackOrder = async () => {
+  try {
+    // 获取物流信息
+    const trackingNumber = order.value.tracking_number || `SF${Date.now()}`
+    const carrier = order.value.carrier || '顺丰速运'
+
+    // 使用物流store获取数据
+    await logisticsStore.fetchLogisticsInfo(trackingNumber, carrier, order.value.id, true)
+
+    // 显示物流跟踪对话框
+    ElMessageBox({
+      title: '物流跟踪',
+      message: h(LogisticsDialog, {
+        orderId: order.value.id,
+        trackingNumber: trackingNumber,
+        carrier: carrier,
+        orderStatus: order.value.status,
+        autoRefresh: true,
+        refreshInterval: 30000,
+        onUpdate: (data) => {
+          console.log('物流信息更新:', data)
+        },
+        onError: (error) => {
+          console.error('物流信息错误:', error)
+        },
+      }),
+      customClass: 'logistics-dialog',
+      showCancelButton: false,
+      confirmButtonText: '关闭',
+      customStyle: {
+        width: '800px',
+        borderRadius: '12px',
       },
-      {
-        status: '运输中',
-        time: '2024-01-16 14:00',
-        description: '正在运输途中，预计明天到达',
-        completed: true,
-        icon: '🚛',
-      },
-      {
-        status: '到达分拣中心',
-        time: '2024-01-17 08:00',
-        description: '已到达上海分拣中心，准备派送',
-        completed: true,
-        icon: '🏢',
-      },
-      {
-        status: '派送中',
-        time: '2024-01-17 15:00',
-        description: '快递员正在派送中',
-        completed: false,
-        icon: '🏍️',
-        current: true,
-      },
-      {
-        status: '已送达',
-        time: '2024-01-17 18:00',
-        description: '包裹已签收，感谢您的耐心等待',
-        completed: false,
-        icon: '✅',
-      },
-    ],
+    })
+  } catch (error) {
+    console.error('获取物流信息失败:', error)
+    ElMessage.error('获取物流信息失败，请重试')
   }
-
-  const logisticsHTML = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 500px;">
-      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center;">
-        <div style="font-size: 24px; font-weight: bold; margin-bottom: 8px;">📦 物流跟踪</div>
-        <div style="font-size: 14px; opacity: 0.9;">快递单号：${logisticsInfo.trackingNumber}</div>
-        <div style="font-size: 14px; opacity: 0.9;">承运商：${logisticsInfo.carrier}</div>
-        <div style="font-size: 14px; opacity: 0.9;">预计送达：${logisticsInfo.estimatedDelivery}</div>
-      </div>
-      
-      <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 12px 12px;">
-        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #007bff;">
-          <div style="font-weight: bold; color: #007bff; margin-bottom: 5px;">当前状态</div>
-          <div style="color: #666; font-size: 14px;">快递员正在派送中</div>
-        </div>
-        
-        <div style="position: relative; padding-left: 30px;">
-          ${logisticsInfo.progress
-            .map(
-              (item, index) => `
-            <div style="position: relative; margin-bottom: 20px;">
-              <div style="position: absolute; left: -25px; top: 0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; ${item.completed ? 'background: #28a745; color: white;' : item.current ? 'background: #007bff; color: white;' : 'background: #e9ecef; color: #6c757d;'}">
-                ${item.completed ? '✓' : item.icon}
-              </div>
-              <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${item.current ? 'border-left: 4px solid #007bff;' : ''}">
-                <div style="font-weight: bold; color: #333; margin-bottom: 4px;">${item.status}</div>
-                <div style="color: #666; font-size: 13px; margin-bottom: 4px;">${item.time}</div>
-                <div style="color: #888; font-size: 12px;">${item.description}</div>
-              </div>
-              ${index < logisticsInfo.progress.length - 1 ? '<div style="position: absolute; left: -15px; top: 20px; width: 2px; height: 20px; background: #e9ecef;"></div>' : ''}
-            </div>
-          `,
-            )
-            .join('')}
-        </div>
-        
-        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 12px; border-radius: 6px; margin-top: 15px;">
-          <div style="font-size: 13px; color: #856404;">
-            💡 温馨提示：如有疑问请联系客服 400-123-4567
-          </div>
-        </div>
-      </div>
-    </div>
-  `
-
-  ElMessageBox.alert(logisticsHTML, '物流跟踪', {
-    dangerouslyUseHTMLString: true,
-    customStyle: {
-      width: '600px',
-      borderRadius: '12px',
-    },
-  })
 }
 
 const handleBuyAgain = async () => {
@@ -909,6 +865,17 @@ const handleCancelOrder = async () => {
       ElMessage.error('取消订单失败，请重试')
     }
   }
+}
+
+// 物流更新事件处理
+const handleLogisticsUpdate = (data) => {
+  console.log('物流信息更新:', data)
+  // 可以在这里更新订单状态或显示通知
+}
+
+const handleLogisticsError = (error) => {
+  console.error('物流信息错误:', error)
+  ElMessage.error('获取物流信息失败')
 }
 
 // Load order detail
@@ -1754,6 +1721,14 @@ onMounted(() => {
   font-size: 14px;
   color: #1a1a1a;
   flex: 1;
+}
+
+/* Logistics Info */
+.logistics-info {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* Payment Info */

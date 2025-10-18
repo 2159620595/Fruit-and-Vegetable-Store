@@ -64,8 +64,9 @@ instance.interceptors.response.use(
         console.error('❌ 无权限访问:', message)
         // 清除token并跳转登录页
         const userStore = useUserStore()
-        userStore.logout()
-        router.push('/login')
+        userStore.logout().then(() => {
+          router.push('/login')
+        })
         break
       case 404:
         console.error('❌ 资源不存在:', message)
@@ -96,8 +97,9 @@ instance.interceptors.response.use(
           // HTTP 401 - 未授权，清除token并跳转到登录页
           console.warn('⚠️ HTTP 401: 未授权，请重新登录')
           const userStore = useUserStore()
-          userStore.logout()
-          router.push('/login')
+          userStore.logout().then(() => {
+            router.push('/login')
+          })
           break
         case 403:
           console.warn('⚠️ HTTP 403: 无权限访问')

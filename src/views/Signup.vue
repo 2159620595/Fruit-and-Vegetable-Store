@@ -12,16 +12,16 @@
             <!-- 标签切换 -->
             <div class="tabs">
               <div class="tab-bar">
-                <a 
-                  href="#" 
-                  :class="['tab-item', { active: activeTab === 'signup' }]" 
+                <a
+                  href="#"
+                  :class="['tab-item', { active: activeTab === 'signup' }]"
                   @click.prevent="activeTab = 'signup'"
                 >
                   <p>注册</p>
                 </a>
-                <a 
-                  href="#" 
-                  :class="['tab-item', { active: activeTab === 'login' }]" 
+                <a
+                  href="#"
+                  :class="['tab-item', { active: activeTab === 'login' }]"
                   @click.prevent="activeTab = 'login'"
                 >
                   <p>登录</p>
@@ -174,12 +174,12 @@ const signupForm = ref({
   password: '',
   confirmPassword: '',
   phone: '',
-  verificationCode: ''
+  verificationCode: '',
 })
 
 const loginForm = ref({
   username: '',
-  password: ''
+  password: '',
 })
 
 const handleSignup = () => {
@@ -204,7 +204,7 @@ const handleSignup = () => {
     ElMessage.warning('请输入验证码')
     return
   }
-  
+
   console.log('注册信息：', signupForm.value)
   ElMessage.success('注册成功！')
 }
@@ -219,7 +219,7 @@ const handleLogin = () => {
     ElMessage.warning('请输入密码')
     return
   }
-  
+
   console.log('登录信息：', loginForm.value)
   ElMessage.success('登录成功！')
 }
@@ -238,7 +238,7 @@ const handleLogin = () => {
 }
 
 .root {
-  font-family: Epilogue, "Noto Sans", sans-serif;
+  font-family: Epilogue, 'Noto Sans', sans-serif;
   position: relative;
   display: flex;
   justify-content: center;
@@ -251,6 +251,9 @@ const handleLogin = () => {
 }
 
 .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
   display: flex;
   height: 100%;
   flex-grow: 1;

@@ -1,9 +1,8 @@
 <template>
   <div class="order-list-page">
-    <Header />
-
     <div class="container">
-      <Back />
+      <!-- 面包屑导航 -->
+      <Breadcrumb current-page="我的订单" />
 
       <div class="page-header">
         <h1 class="page-title">我的订单</h1>
@@ -19,7 +18,7 @@
 
       <!-- 订单状态筛选标签 -->
       <div class="order-tabs">
-        <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+        <el-tabs v-model="activeTab" @tab-change="handleTabChange" :before-leave="beforeTabLeave">
           <el-tab-pane label="全部订单" name="all">
             <template #label>
               <span class="tab-label">
@@ -110,13 +109,13 @@
       </div>
 
       <!-- 加载状态 -->
-      <div v-if="loading" class="loading-container">
+      <div v-if="initialLoading" class="loading-container">
         <el-skeleton :rows="3" animated />
       </div>
 
       <!-- 空状态 -->
       <el-empty
-        v-else-if="!loading && orders.length === 0"
+        v-if="!initialLoading && filteredOrders.length === 0"
         :description="getEmptyDescription()"
         :image-size="120"
       >
@@ -132,188 +131,209 @@
       </el-empty>
 
       <!-- 订单列表 -->
-      <div v-else class="order-list">
-        <div v-for="order in orders" :key="order.id" class="order-card">
-          <!-- 订单头部 -->
-          <div class="order-header">
-            <div class="order-info">
-              <span class="order-number">订单号: {{ order.order_number }}</span>
-              <span class="order-date">{{ formatDate(order.created_at) }}</span>
+      <div
+        v-if="!initialLoading && filteredOrders.length > 0"
+        class="order-list"
+        :key="forceUpdateKey"
+      >
+        <transition-group name="order-list" tag="div" :key="activeTab">
+          <div v-for="order in filteredOrders" :key="order.id" class="order-card">
+            <!-- 订单头部 -->
+            <div class="order-header">
+              <div class="order-info">
+                <span class="order-number">订单号: {{ order.order_number }}</span>
+                <span class="order-date">{{ formatDate(order.created_at) }}</span>
+              </div>
+              <el-tag :type="getStatusType(order.status)" effect="light" size="large">
+                {{ getStatusText(order.status) }}
+              </el-tag>
             </div>
-            <el-tag :type="getStatusType(order.status)" effect="light" size="large">
-              {{ getStatusText(order.status) }}
-            </el-tag>
-          </div>
 
-          <!-- 订单商品列表 -->
-          <div class="order-items" @click="goToOrderDetail(order.id)">
-            <div class="order-products">
-              <!-- 商品图片展示 -->
-              <div class="order-product-images" v-if="getOrderItems(order).length > 0">
-                <div class="product-images-container">
-                  <div
-                    v-for="(item, index) in getOrderItems(order).slice(0, 4)"
-                    :key="item.id || index"
-                    class="product-image-item"
-                  >
-                    <img
-                      v-if="item.product_image"
-                      :src="item.product_image"
-                      :alt="item.product_name || '商品图片'"
-                      class="product-image"
-                      @error="handleImageError"
-                    />
-                    <div v-else class="product-image-placeholder">🍎</div>
-                  </div>
-                  <!-- 显示更多商品数量 -->
-                  <div v-if="getOrderItems(order).length > 4" class="product-image-more">
-                    <span class="more-count">+{{ getOrderItems(order).length - 4 }}</span>
-                  </div>
-                </div>
-                <div class="product-names" v-if="getOrderItems(order).length > 0">
-                  <span class="product-names-text">
-                    {{
-                      getOrderItems(order)
-                        .slice(0, 2)
-                        .map((item) => item.product_name)
-                        .join('、')
-                    }}
-                    <span v-if="getOrderItems(order).length > 2"
-                      >等{{ getOrderItems(order).length }}件商品</span
+            <!-- 订单商品列表 -->
+            <div class="order-items" @click="goToOrderDetail(order.id)">
+              <div class="order-products">
+                <!-- 商品图片展示 -->
+                <div class="order-product-images" v-if="getOrderItems(order).length > 0">
+                  <div class="product-images-container">
+                    <div
+                      v-for="(item, index) in getOrderItems(order).slice(0, 4)"
+                      :key="item.id || index"
+                      class="product-image-item"
                     >
-                  </span>
+                      <img
+                        v-if="item.product_image"
+                        :src="item.product_image"
+                        :alt="item.product_name || '商品图片'"
+                        class="product-image"
+                        @error="handleImageError"
+                      />
+                      <div v-else class="product-image-placeholder">🍎</div>
+                    </div>
+                    <!-- 显示更多商品数量 -->
+                    <div v-if="getOrderItems(order).length > 4" class="product-image-more">
+                      <span class="more-count">+{{ getOrderItems(order).length - 4 }}</span>
+                    </div>
+                  </div>
+                  <div class="product-names" v-if="getOrderItems(order).length > 0">
+                    <span class="product-names-text">
+                      {{
+                        getOrderItems(order)
+                          .slice(0, 2)
+                          .map((item) => item.product_name)
+                          .join('、')
+                      }}
+                      <span v-if="getOrderItems(order).length > 2"
+                        >等{{ getOrderItems(order).length }}件商品</span
+                      >
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 订单摘要信息 -->
+                <div class="order-summary">
+                  <div class="summary-item">
+                    <span class="label">配送方式:</span>
+                    <span class="value">{{ getDeliveryMethodText(order.delivery_method) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">支付方式:</span>
+                    <span class="value">{{ getPaymentMethodText(order.payment_method) }}</span>
+                  </div>
+                  <div class="summary-item" v-if="order.remark">
+                    <span class="label">备注:</span>
+                    <span class="value remark-text">{{ order.remark }}</span>
+                  </div>
                 </div>
               </div>
-
-              <!-- 订单摘要信息 -->
-              <div class="order-summary">
-                <div class="summary-item">
-                  <span class="label">配送方式:</span>
-                  <span class="value">{{ getDeliveryMethodText(order.delivery_method) }}</span>
-                </div>
-                <div class="summary-item">
-                  <span class="label">支付方式:</span>
-                  <span class="value">{{ getPaymentMethodText(order.payment_method) }}</span>
-                </div>
-                <div class="summary-item" v-if="order.remark">
-                  <span class="label">备注:</span>
-                  <span class="value remark-text">{{ order.remark }}</span>
+              <div class="order-total">
+                <div class="total-label">订单总额</div>
+                <div class="total-amount">¥{{ formatPrice(order.total_amount) }}</div>
+                <div class="shipping-fee" v-if="order.shipping_fee">
+                  (含运费 ¥{{ formatPrice(order.shipping_fee) }})
                 </div>
               </div>
             </div>
-            <div class="order-total">
-              <div class="total-label">订单总额</div>
-              <div class="total-amount">¥{{ formatPrice(order.total_amount) }}</div>
-              <div class="shipping-fee" v-if="order.shipping_fee">
-                (含运费 ¥{{ formatPrice(order.shipping_fee) }})
-              </div>
+
+            <!-- 订单操作按钮 -->
+            <div class="order-actions">
+              <el-button size="small" @click.stop="goToOrderDetail(order.id)"> 查看详情 </el-button>
+
+              <!-- 待支付状态 -->
+              <template v-if="order.status === 'pending'">
+                <el-button
+                  type="primary"
+                  size="small"
+                  :loading="actionLoading"
+                  @click.stop="handlePayOrder(order.id, $event)"
+                >
+                  立即支付
+                </el-button>
+                <el-button
+                  type="danger"
+                  size="small"
+                  :loading="actionLoading"
+                  @click.stop="handleCancelOrder(order.id, $event)"
+                >
+                  取消订单
+                </el-button>
+              </template>
+
+              <!-- 待发货状态 -->
+              <template v-if="order.status === 'processing'">
+                <el-button
+                  type="success"
+                  size="small"
+                  @click.stop="startAutoStatusFlow(order.id)"
+                  :disabled="autoStatusTimers.has(order.id)"
+                >
+                  {{ autoStatusTimers.has(order.id) ? '流转中...' : '启动自动流转' }}
+                </el-button>
+                <el-button
+                  type="info"
+                  size="small"
+                  @click.stop="handleContactSeller(order.id, $event)"
+                >
+                  联系商家
+                </el-button>
+                <el-button
+                  type="danger"
+                  size="small"
+                  :loading="actionLoading"
+                  @click.stop="handleCancelOrder(order.id, $event)"
+                >
+                  取消订单
+                </el-button>
+              </template>
+
+              <!-- 已发货状态 -->
+              <template v-if="order.status === 'shipped'">
+                <el-button
+                  type="success"
+                  size="small"
+                  :loading="actionLoading"
+                  @click.stop="handleConfirmOrder(order.id, $event)"
+                >
+                  确认收货
+                </el-button>
+                <el-button
+                  type="info"
+                  size="small"
+                  @click.stop="handleTrackOrder(order.id, $event)"
+                >
+                  查看物流
+                </el-button>
+              </template>
+
+              <!-- 运输中状态 -->
+              <template v-if="order.status === 'in_transit'">
+                <el-button
+                  type="success"
+                  size="small"
+                  :loading="actionLoading"
+                  @click.stop="handleConfirmOrder(order.id, $event)"
+                >
+                  确认收货
+                </el-button>
+                <el-button
+                  type="info"
+                  size="small"
+                  @click.stop="handleTrackOrder(order.id, $event)"
+                >
+                  查看物流
+                </el-button>
+              </template>
+
+              <!-- 已完成状态 -->
+              <template v-if="order.status === 'delivered'">
+                <el-button type="primary" size="small" @click.stop="handleReview(order.id, $event)">
+                  评价
+                </el-button>
+                <el-button
+                  type="info"
+                  size="small"
+                  @click.stop="handleTrackOrder(order.id, $event)"
+                >
+                  查看物流
+                </el-button>
+                <el-button type="info" size="small" @click.stop="handleBuyAgain(order.id, $event)">
+                  再次购买
+                </el-button>
+              </template>
+
+              <!-- 已取消状态 -->
+              <template v-if="order.status === 'cancelled'">
+                <el-button
+                  type="info"
+                  size="small"
+                  :loading="actionLoading"
+                  @click.stop="handleDeleteOrder(order.id, $event)"
+                >
+                  删除订单
+                </el-button>
+              </template>
             </div>
           </div>
-
-          <!-- 订单操作按钮 -->
-          <div class="order-actions">
-            <el-button size="small" @click.stop="goToOrderDetail(order.id)"> 查看详情 </el-button>
-
-            <!-- 待支付状态 -->
-            <template v-if="order.status === 'pending'">
-              <el-button
-                type="primary"
-                size="small"
-                :loading="actionLoading"
-                @click.stop="handlePayOrder(order.id, $event)"
-              >
-                立即支付
-              </el-button>
-              <el-button
-                type="danger"
-                size="small"
-                :loading="actionLoading"
-                @click.stop="handleCancelOrder(order.id, $event)"
-              >
-                取消订单
-              </el-button>
-            </template>
-
-            <!-- 待发货状态 -->
-            <template v-if="order.status === 'processing'">
-              <el-button
-                type="success"
-                size="small"
-                @click.stop="startAutoStatusFlow(order.id)"
-                :disabled="autoStatusTimers.has(order.id)"
-              >
-                {{ autoStatusTimers.has(order.id) ? '流转中...' : '启动自动流转' }}
-              </el-button>
-              <el-button
-                type="info"
-                size="small"
-                @click.stop="handleContactSeller(order.id, $event)"
-              >
-                联系商家
-              </el-button>
-              <el-button
-                type="danger"
-                size="small"
-                :loading="actionLoading"
-                @click.stop="handleCancelOrder(order.id, $event)"
-              >
-                取消订单
-              </el-button>
-            </template>
-
-            <!-- 已发货状态 -->
-            <template v-if="order.status === 'shipped'">
-              <el-button
-                type="success"
-                size="small"
-                :loading="actionLoading"
-                @click.stop="handleConfirmOrder(order.id, $event)"
-              >
-                确认收货
-              </el-button>
-              <el-button type="info" size="small" @click.stop="handleTrackOrder(order.id, $event)">
-                查看物流
-              </el-button>
-            </template>
-
-            <!-- 运输中状态 -->
-            <template v-if="order.status === 'in_transit'">
-              <el-button
-                type="success"
-                size="small"
-                :loading="actionLoading"
-                @click.stop="handleConfirmOrder(order.id, $event)"
-              >
-                确认收货
-              </el-button>
-              <el-button type="info" size="small" @click.stop="handleTrackOrder(order.id, $event)">
-                查看物流
-              </el-button>
-            </template>
-
-            <!-- 已完成状态 -->
-            <template v-if="order.status === 'delivered'">
-              <el-button type="primary" size="small" @click.stop="handleReview(order.id, $event)">
-                评价
-              </el-button>
-              <el-button type="info" size="small" @click.stop="handleBuyAgain(order.id, $event)">
-                再次购买
-              </el-button>
-            </template>
-
-            <!-- 已取消状态 -->
-            <template v-if="order.status === 'cancelled'">
-              <el-button
-                type="info"
-                size="small"
-                :loading="actionLoading"
-                @click.stop="handleDeleteOrder(order.id, $event)"
-              >
-                删除订单
-              </el-button>
-            </template>
-          </div>
-        </div>
+        </transition-group>
       </div>
 
       <!-- 分页 -->
@@ -321,7 +341,7 @@
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50]"
+          :page-sizes="[10, 20, 50, 100]"
           :total="totalCount"
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
@@ -342,23 +362,27 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useOrderStore } from '@/stores/orderStore'
+import { useLogisticsStore } from '@/stores/logisticsStore'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
-import Back from '@/components/Back.vue'
 import OrderReviewDialog from '@/components/OrderReviewDialog.vue'
+import LogisticsDialog from '@/components/LogisticsDialog.vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
+import { h } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
 const orderStore = useOrderStore()
+const logisticsStore = useLogisticsStore()
 
 // 状态
 const activeTab = ref('all')
 const currentPage = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(20)
 const totalCount = ref(0)
 const actionLoading = ref(false) // 操作加载状态
 const initialLoading = ref(true) // 首次加载状态
@@ -374,17 +398,27 @@ const statusFlow = ['processing', 'in_transit', 'shipped', 'delivered'] // 状�
 // 计算属性
 const loading = computed(() => orderStore.loading)
 const orders = computed(() => orderStore.orders)
+
+// 基于实际订单数据计算各状态的数量
 const orderCounts = computed(() => {
-  const counts = orderStore.orderCounts
-  // 确保返回数字类型，处理后端可能返回字符串的情况
-  return {
-    to_pay: parseInt(counts.to_pay) || 0,
-    to_ship: parseInt(counts.to_ship) || 0,
-    to_receive: parseInt(counts.to_receive) || 0,
-    in_transit: parseInt(counts.in_transit) || 0,
-    to_review: parseInt(counts.to_review) || 0,
-    cancelled: parseInt(counts.cancelled) || 0,
+  const allOrders = orders.value || []
+
+  console.log('🔄 计算orderCounts:', {
+    totalOrders: allOrders.length,
+    orders: allOrders.map((o) => ({ id: o.id, status: o.status })),
+  })
+
+  const counts = {
+    to_pay: allOrders.filter((order) => order.status === 'pending').length,
+    to_ship: allOrders.filter((order) => order.status === 'processing').length,
+    to_receive: allOrders.filter((order) => order.status === 'shipped').length,
+    in_transit: allOrders.filter((order) => order.status === 'in_transit').length,
+    to_review: allOrders.filter((order) => order.status === 'delivered').length,
+    cancelled: allOrders.filter((order) => order.status === 'cancelled').length,
   }
+
+  console.log('📊 计算出的counts:', counts)
+  return counts
 })
 
 // 是否有操作正在进行
@@ -435,6 +469,25 @@ const getPaymentMethodText = (method) => {
   return methodMap[method] || method
 }
 
+// 计算属性 - 前端过滤订单
+const filteredOrders = computed(() => {
+  let filtered = orders.value
+
+  // 如果当前标签不是'all'，进行前端过滤
+  if (activeTab.value !== 'all') {
+    filtered = orders.value.filter((order) => order.status === activeTab.value)
+  }
+
+  return filtered
+})
+
+// 强制更新key
+const forceUpdateKey = ref(0)
+
+// 强制重新渲染
+const forceUpdate = () => {
+  forceUpdateKey.value++
+}
 // 格式化价格
 const formatPrice = (price) => {
   const numPrice = typeof price === 'number' ? price : parseFloat(price) || 0
@@ -453,6 +506,61 @@ const formatDate = (date) => {
   })
 }
 
+// 加载所有订单（不进行状态筛选）
+const loadAllOrders = async (showLoading = false) => {
+  try {
+    const params = {
+      page: currentPage.value,
+      page_size: pageSize.value,
+      // 不传status参数，加载所有订单
+    }
+
+    if (showLoading) {
+      loading.value = true
+    }
+
+    console.log('📋 loadAllOrders开始:', {
+      params,
+      currentPage: currentPage.value,
+      pageSize: pageSize.value,
+    })
+
+    const result = await orderStore.fetchOrders(params)
+
+    console.log('📋 loadAllOrders完成:', {
+      params,
+      resultOrders: result.orders?.length || 0,
+      storeOrders: orderStore.orders?.length || 0,
+      computedOrders: orders.value?.length || 0,
+      resultTotal: result.total,
+      resultCounts: result.counts,
+    })
+
+    // 强制触发响应式更新
+    await nextTick()
+
+    // 后端返回格式: { orders: [...], counts: {...}, total: xxx }
+    if (result.total !== undefined) {
+      totalCount.value = result.total
+    } else {
+      totalCount.value = orders.value.length
+    }
+
+    // 检查并启动待发货订单的自动流转
+    checkAndStartAutoFlow()
+
+    // 强制更新页面
+    forceUpdate()
+
+    console.log('🔄 加载所有订单完成')
+  } catch (error) {
+    console.error('❌ 加载所有订单失败:', error)
+    ElMessage.error('加载订单失败')
+  } finally {
+    loading.value = false
+  }
+}
+
 // 加载订单列表
 const loadOrders = async (showLoading = true) => {
   try {
@@ -463,12 +571,35 @@ const loadOrders = async (showLoading = true) => {
 
     // 根据选项卡筛选状态（注意：'all' 不传 status 参数）
     if (activeTab.value !== 'all') {
-      params.status = activeTab.value
+      // 将标签名称映射到API状态名称
+      const statusMapping = {
+        pending: 'pending',
+        processing: 'processing',
+        shipped: 'shipped',
+        in_transit: 'in_transit',
+        delivered: 'delivered',
+        cancelled: 'cancelled',
+      }
+      params.status = statusMapping[activeTab.value] || activeTab.value
     }
 
-    console.log('🔍 开始加载订单列表:', params)
+    if (showLoading) {
+      loading.value = true
+    }
 
     const result = await orderStore.fetchOrders(params)
+
+    // 更新订单数据 - 通过store更新，而不是直接赋值computed
+    // orders.value = result.orders || [] // 错误：不能直接赋值computed属性
+
+    console.log('📋 loadOrders完成:', {
+      resultOrders: result.orders?.length || 0,
+      storeOrders: orderStore.orders?.length || 0,
+      computedOrders: orders.value?.length || 0,
+    })
+
+    // 强制触发响应式更新
+    await nextTick()
 
     // 后端返回格式: { orders: [...], counts: {...}, total: xxx }
     // 或者可能没有 total 字段，需要计算
@@ -479,22 +610,11 @@ const loadOrders = async (showLoading = true) => {
       totalCount.value = orders.value.length
     }
 
-    console.log('✅ 订单列表加载成功:', {
-      total: totalCount.value,
-      current: orders.value.length,
-      page: currentPage.value,
-      status: activeTab.value,
-      counts: orderCounts.value,
-    })
-
-    // 调试：打印第一个订单的数据结构
-    if (orders.value.length > 0) {
-      console.log('🔍 第一个订单数据结构:', orders.value[0])
-      console.log('🔍 订单items字段:', orders.value[0].items)
-    }
-
     // 检查并启动待发货订单的自动流转
     checkAndStartAutoFlow()
+
+    // 强制更新页面
+    forceUpdate()
 
     // 如果是静默刷新，不显示提示
     if (!showLoading) {
@@ -523,22 +643,53 @@ const loadOrders = async (showLoading = true) => {
     }
   } finally {
     initialLoading.value = false
+    loading.value = false
   }
 }
 
 // 刷新订单列表
 const refreshOrders = async () => {
   ElMessage.info('正在刷新...')
-  await loadOrders(false)
+  await loadAllOrders()
   ElMessage.success('刷新成功')
+}
+
+// 标签切换前的处理
+const beforeTabLeave = (activeName, oldActiveName) => {
+  // 如果正在加载，阻止切换
+  if (loading.value) {
+    return false
+  }
+  return true
+}
+
+// 防抖函数
+const debounce = (func, delay) => {
+  let timeoutId
+  return (...args) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func.apply(null, args), delay)
+  }
 }
 
 // 切换标签
 const handleTabChange = (tabName) => {
   console.log('切换到标签:', tabName)
+
+  // 防止重复切换
+  if (tabName === activeTab.value) return
+
+  // 重置分页
   currentPage.value = 1
-  loadOrders()
+
+  // 使用防抖加载数据
+  debouncedLoadOrders()
 }
+
+// 防抖的加载函数
+const debouncedLoadOrders = debounce(() => {
+  loadOrders()
+}, 50) // 减少延迟时间
 
 // 分页变化
 const handlePageChange = (page) => {
@@ -616,8 +767,8 @@ const handleCancelOrder = async (orderId, event) => {
     loading.close()
     ElMessage.success('订单已取消')
 
-    // 刷新列表
-    await loadOrders(false)
+    // 刷新列表 - 加载所有订单
+    await loadAllOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
       console.error('❌ 取消订单失败:', error)
@@ -668,8 +819,8 @@ const handleConfirmOrder = async (orderId, event) => {
       showClose: true,
     })
 
-    // 刷新列表
-    await loadOrders(false)
+    // 刷新列表 - 加载所有订单
+    await loadAllOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
       console.error('❌ 确认收货失败:', error)
@@ -716,8 +867,8 @@ const handleDeleteOrder = async (orderId, event) => {
     loading.close()
     ElMessage.success('订单已删除')
 
-    // 刷新列表
-    await loadOrders(false)
+    // 刷新列表 - 加载所有订单
+    await loadAllOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
       console.error('❌ 删除订单失败:', error)
@@ -785,8 +936,8 @@ const handleReviewSubmit = async (reviewData) => {
     reviewDialogVisible.value = false
     currentReviewOrder.value = null
 
-    // 刷新列表
-    await loadOrders(false)
+    // 刷新列表 - 加载所有订单
+    await loadAllOrders()
   } catch (error) {
     console.error('❌ 评价失败:', error)
     const errorMsg = error.response?.data?.message || error.message || '评价失败'
@@ -811,186 +962,42 @@ const handleTrackOrder = async (orderId, event) => {
       return
     }
 
-    // 模拟物流信息
-    const logisticsInfo = {
-      orderNumber: order.order_number,
-      status: order.status,
-      trackingNumber: `SF${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-      carrier: '顺丰速运',
-      carrierLogo:
-        'https://img.alicdn.com/imgextra/i1/O1CN01KqBq1W1Mph8L4dQjO_!!6000000001497-2-tps-200-200.png',
-      estimatedDelivery: '2024-01-17 18:00',
-      progress: [
-        {
-          time: '2024-01-15 09:30:00',
-          status: '已发货',
-          location: '北京分拣中心',
-          description: '您的订单已从北京分拣中心发出',
-          completed: true,
-          icon: '🚚',
-        },
-        {
-          time: '2024-01-15 14:20:00',
-          status: '运输中',
-          location: '北京-上海',
-          description: '正在运输途中，预计明天到达',
-          completed: true,
-          icon: '🚛',
-        },
-        {
-          time: '2024-01-16 08:15:00',
-          status: '到达目的地',
-          location: '上海分拣中心',
-          description: '已到达上海分拣中心，准备派送',
-          completed: true,
-          icon: '🏢',
-        },
-        {
-          time: '2024-01-16 10:30:00',
-          status: '派送中',
-          location: '上海市浦东新区',
-          description: '快递员正在派送，请注意查收',
-          completed: false,
-          icon: '🏍️',
-          current: true,
-        },
-        {
-          time: '',
-          status: '已签收',
-          location: '上海市浦东新区',
-          description: '包裹已签收，感谢您的耐心等待',
-          completed: false,
-          icon: '✅',
-        },
-      ],
-    }
+    // 获取物流信息
+    const trackingNumber = order.tracking_number || `SF${Date.now()}`
+    const carrier = order.carrier || '顺丰速运'
 
-    // 显示物流信息对话框
-    await ElMessageBox.alert(
-      `
-        <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-          <!-- 头部信息 -->
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; margin: -20px -20px 20px -20px;">
-            <div style="display: flex; align-items: center; margin-bottom: 12px;">
-              <img src="${logisticsInfo.carrierLogo}" style="width: 32px; height: 32px; border-radius: 6px; margin-right: 12px;" />
-              <div>
-                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">${logisticsInfo.carrier}</h3>
-                <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">快递单号：${logisticsInfo.trackingNumber}</p>
-              </div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <div style="font-size: 14px; opacity: 0.9;">订单号</div>
-                <div style="font-size: 16px; font-weight: 600;">${logisticsInfo.orderNumber}</div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 14px; opacity: 0.9;">预计送达</div>
-                <div style="font-size: 16px; font-weight: 600;">${logisticsInfo.estimatedDelivery}</div>
-              </div>
-            </div>
-          </div>
+    // 使用物流store获取数据
+    await logisticsStore.fetchLogisticsInfo(trackingNumber, carrier, order.id, true)
 
-          <!-- 当前状态 -->
-          <div style="background: #f8f9ff; border: 1px solid #e1e5ff; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center;">
-              <div style="width: 40px; height: 40px; background: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                <span style="color: white; font-size: 18px;">${getStatusIcon(order.status)}</span>
-              </div>
-              <div>
-                <div style="font-size: 16px; font-weight: 600; color: #1f2937;">当前状态：${getStatusText(order.status)}</div>
-                <div style="font-size: 13px; color: #6b7280; margin-top: 2px;">${getStatusDescription(order.status)}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 物流轨迹 -->
-          <div style="margin-bottom: 16px;">
-            <h4 style="margin: 0 0 16px 0; color: #374151; font-size: 16px; font-weight: 600; display: flex; align-items: center;">
-              <span style="margin-right: 8px;">📦</span>
-              物流轨迹
-            </h4>
-            <div style="position: relative;">
-              ${logisticsInfo.progress
-                .map(
-                  (item, index) => `
-                <div style="display: flex; margin-bottom: 20px; position: relative;">
-                  <!-- 时间线 -->
-                  <div style="display: flex; flex-direction: column; align-items: center; margin-right: 16px; min-width: 60px;">
-                    <div style="width: 12px; height: 12px; border-radius: 50%; background: ${item.completed ? '#10b981' : item.current ? '#4f46e5' : '#d1d5db'}; border: 3px solid white; box-shadow: 0 0 0 2px ${item.completed ? '#10b981' : item.current ? '#4f46e5' : '#d1d5db'}; z-index: 2;"></div>
-                    ${index < logisticsInfo.progress.length - 1 ? `<div style="width: 2px; height: 40px; background: ${item.completed ? '#10b981' : '#e5e7eb'}; margin-top: 8px;"></div>` : ''}
-                  </div>
-                  
-                  <!-- 内容 -->
-                  <div style="flex: 1; padding: 12px; background: ${item.current ? '#f0f9ff' : item.completed ? '#f0fdf4' : '#f9fafb'}; border-radius: 8px; border: 1px solid ${item.current ? '#bae6fd' : item.completed ? '#bbf7d0' : '#e5e7eb'};">
-                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                      <span style="font-size: 20px; margin-right: 8px;">${item.icon}</span>
-                      <span style="font-weight: 600; color: ${item.current ? '#1e40af' : item.completed ? '#166534' : '#374151'}; font-size: 14px;">${item.status}</span>
-                      ${item.current ? '<span style="background: #4f46e5; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px;">进行中</span>' : ''}
-                    </div>
-                    <div style="font-size: 13px; color: #6b7280; margin-bottom: 4px;">${item.description}</div>
-                    <div style="font-size: 12px; color: #9ca3af;">${item.location}</div>
-                    ${item.time ? `<div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">${item.time}</div>` : ''}
-                  </div>
-                </div>
-              `,
-                )
-                .join('')}
-            </div>
-          </div>
-
-          <!-- 底部提示 -->
-          <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-top: 16px;">
-            <div style="display: flex; align-items: center;">
-              <span style="font-size: 16px; margin-right: 8px;">💡</span>
-              <div style="font-size: 13px; color: #92400e;">
-                <strong>温馨提示：</strong>如遇配送问题，请及时联系客服或快递员
-              </div>
-            </div>
-          </div>
-        </div>
-      `,
-      '物流查询',
-      {
-        confirmButtonText: '知道了',
-        dangerouslyUseHTMLString: true,
-        customStyle: {
-          width: '600px',
-          borderRadius: '12px',
+    // 显示物流跟踪对话框
+    ElMessageBox({
+      title: '物流跟踪',
+      message: h(LogisticsDialog, {
+        orderId: order.id,
+        trackingNumber: trackingNumber,
+        carrier: carrier,
+        orderStatus: order.status,
+        autoRefresh: true,
+        refreshInterval: 30000,
+        onUpdate: (data) => {
+          console.log('物流信息更新:', data)
         },
+        onError: (error) => {
+          console.error('物流信息错误:', error)
+        },
+      }),
+      customClass: 'logistics-dialog',
+      showCancelButton: false,
+      confirmButtonText: '关闭',
+      customStyle: {
+        width: '800px',
+        borderRadius: '12px',
       },
-    )
+    })
   } catch (error) {
-    if (error !== 'cancel' && error !== 'close') {
-      console.error('❌ 查看物流失败:', error)
-      ElMessage.error('查看物流信息失败')
-    }
+    console.error('❌ 查看物流失败:', error)
+    ElMessage.error('查看物流信息失败')
   }
-}
-
-// 获取状态图标
-const getStatusIcon = (status) => {
-  const iconMap = {
-    pending: '⏳',
-    processing: '📦',
-    shipped: '🚚',
-    in_transit: '🚛',
-    delivered: '✅',
-    cancelled: '❌',
-  }
-  return iconMap[status] || '📦'
-}
-
-// 获取状态描述
-const getStatusDescription = (status) => {
-  const descriptionMap = {
-    pending: '订单已创建，等待支付',
-    processing: '订单已支付，商家正在备货',
-    shipped: '商品已发货，正在运输途中',
-    in_transit: '商品正在运输途中，即将到达',
-    delivered: '订单已完成，感谢您的购买',
-    cancelled: '订单已取消',
-  }
-  return descriptionMap[status] || '订单状态更新中'
 }
 
 // 再次购买
@@ -1095,8 +1102,8 @@ const handlePayOrder = async (orderId, event) => {
       showClose: true,
     })
 
-    // 刷新列表
-    await loadOrders(false)
+    // 刷新列表 - 加载所有订单而不是只加载当前标签的订单
+    await loadAllOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
       console.error('❌ 支付失败:', error)
@@ -1305,6 +1312,44 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 订单列表过渡动画 - 优化版本 */
+.order-list-enter-active,
+.order-list-leave-active {
+  transition: all 0.15s ease;
+}
+
+.order-list-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.order-list-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.order-list-move {
+  transition: transform 0.15s ease;
+}
+
+/* 加载覆盖层 */
+.loading-overlay {
+  position: relative;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.loading-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1;
+}
+
 .order-list-page {
   min-height: 100vh;
   background-color: #f5f5f5;
@@ -1347,7 +1392,41 @@ onUnmounted(() => {
 }
 
 .tab-badge {
-  margin-left: 4px;
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tab-badge :deep(.el-badge__content) {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+/* 不同状态的徽章颜色 */
+.el-tabs__item:nth-child(2) .tab-badge :deep(.el-badge__content) {
+  background: linear-gradient(135deg, #ff9500, #ffb84d); /* 待支付 - 橙色 */
+}
+
+.el-tabs__item:nth-child(3) .tab-badge :deep(.el-badge__content) {
+  background: linear-gradient(135deg, #007aff, #4da6ff); /* 待发货 - 蓝色 */
+}
+
+.el-tabs__item:nth-child(4) .tab-badge :deep(.el-badge__content) {
+  background: linear-gradient(135deg, #34c759, #5dd679); /* 已发货 - 绿色 */
+}
+
+.el-tabs__item:nth-child(5) .tab-badge :deep(.el-badge__content) {
+  background: linear-gradient(135deg, #5856d6, #7c7ce8); /* 运输中 - 紫色 */
+}
+
+.el-tabs__item:nth-child(6) .tab-badge :deep(.el-badge__content) {
+  background: linear-gradient(135deg, #32d74b, #5dd679); /* 已完成 - 深绿色 */
+}
+
+.el-tabs__item:nth-child(7) .tab-badge :deep(.el-badge__content) {
+  background: linear-gradient(135deg, #ff3b30, #ff6b6b); /* 已取消 - 红色 */
 }
 
 /* 加载状态 */
@@ -1562,6 +1641,35 @@ onUnmounted(() => {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* 面包屑导航样式 */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #618961;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: #4a6b4a;
+}
+
+.breadcrumb .separator {
+  margin: 0 8px;
+  color: #999;
+}
+
+.breadcrumb .current {
+  color: #333;
+  font-weight: 500;
 }
 
 /* 响应式设计 */

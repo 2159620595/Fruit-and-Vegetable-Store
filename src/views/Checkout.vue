@@ -1,195 +1,166 @@
 <template>
   <div class="checkout-page">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-content">
-        <div class="logo">
-          <span class="leaf-icon">🌱</span>
-          <span class="brand-name">果蔬商城</span>
-        </div>
-        <nav class="nav-links">
-          <a href="#" class="nav-link" @click="router.push('/')">首页</a>
-          <a href="#" class="nav-link">菜谱</a>
-          <a href="#" class="nav-link">关于我们</a>
-          <a href="#" class="nav-link">联系我们</a>
-        </nav>
-        <div class="header-actions">
-          <button class="cart-btn" @click="router.push('/cart')">
-            购物车 ({{ cartStore.cartCount }})
+    <div class="container">
+      <!-- Breadcrumbs -->
+      <Breadcrumb current-page="结账" />
+
+      <!-- 空购物车提示 -->
+      <div v-if="cartStore.selectedItems.length === 0" class="empty-cart-message">
+        <div class="empty-icon">🛒</div>
+        <h2>没有要结账的商品</h2>
+        <p>请先在购物车中选择要购买的商品</p>
+        <button class="back-to-cart-btn" @click="router.push('/cart')">返回购物车</button>
+      </div>
+
+      <!-- Main Content -->
+      <div v-else class="main-content">
+        <!-- Left Section - Checkout Form -->
+        <div class="checkout-form-section">
+          <h1 class="checkout-title">结账</h1>
+
+          <!-- Shipping Address -->
+          <AddressSelector v-model="selectedAddressId" @change="onAddressChange" />
+          <div v-if="errors.address" class="error-message">{{ errors.address }}</div>
+
+          <!-- Delivery Method -->
+          <div class="form-section">
+            <h2 class="section-title">配送时效</h2>
+            <div class="radio-group">
+              <label class="radio-option" :class="{ selected: deliveryMethod === 'standard' }">
+                <input v-model="deliveryMethod" type="radio" name="delivery" value="standard" />
+                <div class="radio-content">
+                  <div class="radio-title">标准配送 - ¥5.00</div>
+                  <div class="radio-description">3-5个工作日内送达</div>
+                </div>
+              </label>
+              <label class="radio-option" :class="{ selected: deliveryMethod === 'express' }">
+                <input v-model="deliveryMethod" type="radio" name="delivery" value="express" />
+                <div class="radio-content">
+                  <div class="radio-title">特快配送 - ¥10.00</div>
+                  <div class="radio-description">1-2 个工作日内送达</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="form-section">
+            <h2 class="section-title">付款方式</h2>
+            <div class="radio-group">
+              <label class="radio-option" :class="{ selected: paymentMethod === 'credit-card' }">
+                <input v-model="paymentMethod" type="radio" name="payment" value="credit-card" />
+                <div class="radio-content">
+                  <div class="radio-title">💳 信用卡/借记卡</div>
+                </div>
+              </label>
+              <label class="radio-option" :class="{ selected: paymentMethod === 'wechat' }">
+                <input v-model="paymentMethod" type="radio" name="payment" value="wechat" />
+                <div class="radio-content">
+                  <div class="radio-title">💚 微信支付</div>
+                </div>
+              </label>
+              <label class="radio-option" :class="{ selected: paymentMethod === 'alipay' }">
+                <input v-model="paymentMethod" type="radio" name="payment" value="alipay" />
+                <div class="radio-content">
+                  <div class="radio-title">💙 支付宝</div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Credit Card Fields -->
+            <div v-if="paymentMethod === 'credit-card'" class="payment-fields">
+              <div class="form-row">
+                <input
+                  v-model="cardInfo.number"
+                  type="text"
+                  placeholder="卡号"
+                  class="form-input full-width"
+                  :class="{ error: errors.cardNumber }"
+                  maxlength="19"
+                />
+              </div>
+              <div v-if="errors.cardNumber" class="error-message">{{ errors.cardNumber }}</div>
+
+              <div class="form-row">
+                <input
+                  v-model="cardInfo.expiry"
+                  type="text"
+                  placeholder="有效期 (MM/YY)"
+                  class="form-input half-width"
+                  :class="{ error: errors.expiry }"
+                  maxlength="5"
+                />
+                <input
+                  v-model="cardInfo.cvv"
+                  type="text"
+                  placeholder="CVV"
+                  class="form-input half-width"
+                  :class="{ error: errors.cvv }"
+                  maxlength="4"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button class="submit-btn" @click="submitOrder" :disabled="submitting">
+            {{ submitting ? '提交中...' : '提交订单' }}
           </button>
-          <div class="profile-pic" @click="router.push('/profile')">
-            <img
-              src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNEMUQ1REIiLz4KPHBhdGggZD0iTTE2IDE2QzE4LjIwOTEgMTYgMjAgMTQuMjA5MSAyMCAxMkMyMCA5Ljc5MDg2IDE4LjIwOTEgOCAxNiA4QzEzLjc5MDkgOCAxMiA5Ljc5MDg2IDEyIDEyQzEyIDE0LjIwOTEgMTMuNzkwOSAxNiAxNiAxNloiIGZpbGw9IiM2NjY2NjYiLz4KPHBhdGggZD0iTTE2IDI0QzE5LjMxMzcgMjQgMjIgMjEuMzEzNyAyMiAxOEgyMkMyMiAxNi44OTU0IDIxLjEwNDYgMTYgMjAgMTZIMTJDMTAuODk1NCAxNiAxMCAxNi44OTU0IDEwIDE4SDhDOCAyMS4zMTM3IDEwLjY4NjMgMjQgMTYgMjRaIiBmaWxsPSIjNjY2NjY2Ii8+Cjwvc3ZnPgo="
-              alt="Profile"
-            />
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Breadcrumbs -->
-    <div class="breadcrumbs">
-      <a href="#" class="breadcrumb-link" @click.prevent="router.push('/cart')">购物车</a>
-      <span class="breadcrumb-separator">/</span>
-      <span class="breadcrumb-current">结账</span>
-    </div>
-
-    <!-- 空购物车提示 -->
-    <div v-if="cartStore.selectedItems.length === 0" class="empty-cart-message">
-      <div class="empty-icon">🛒</div>
-      <h2>没有要结账的商品</h2>
-      <p>请先在购物车中选择要购买的商品</p>
-      <button class="back-to-cart-btn" @click="router.push('/cart')">返回购物车</button>
-    </div>
-
-    <!-- Main Content -->
-    <div v-else class="main-content">
-      <!-- Left Section - Checkout Form -->
-      <div class="checkout-form-section">
-        <h1 class="checkout-title">结账</h1>
-
-        <!-- Shipping Address -->
-        <AddressSelector v-model="selectedAddressId" @change="onAddressChange" />
-        <div v-if="errors.address" class="error-message">{{ errors.address }}</div>
-
-        <!-- Delivery Method -->
-        <div class="form-section">
-          <h2 class="section-title">配送时效</h2>
-          <div class="radio-group">
-            <label class="radio-option" :class="{ selected: deliveryMethod === 'standard' }">
-              <input v-model="deliveryMethod" type="radio" name="delivery" value="standard" />
-              <div class="radio-content">
-                <div class="radio-title">标准配送 - ¥5.00</div>
-                <div class="radio-description">3-5个工作日内送达</div>
-              </div>
-            </label>
-            <label class="radio-option" :class="{ selected: deliveryMethod === 'express' }">
-              <input v-model="deliveryMethod" type="radio" name="delivery" value="express" />
-              <div class="radio-content">
-                <div class="radio-title">特快配送 - ¥10.00</div>
-                <div class="radio-description">1-2 个工作日内送达</div>
-              </div>
-            </label>
-          </div>
         </div>
 
-        <!-- Payment Method -->
-        <div class="form-section">
-          <h2 class="section-title">付款方式</h2>
-          <div class="radio-group">
-            <label class="radio-option" :class="{ selected: paymentMethod === 'credit-card' }">
-              <input v-model="paymentMethod" type="radio" name="payment" value="credit-card" />
-              <div class="radio-content">
-                <div class="radio-title">💳 信用卡/借记卡</div>
-              </div>
-            </label>
-            <label class="radio-option" :class="{ selected: paymentMethod === 'wechat' }">
-              <input v-model="paymentMethod" type="radio" name="payment" value="wechat" />
-              <div class="radio-content">
-                <div class="radio-title">💚 微信支付</div>
-              </div>
-            </label>
-            <label class="radio-option" :class="{ selected: paymentMethod === 'alipay' }">
-              <input v-model="paymentMethod" type="radio" name="payment" value="alipay" />
-              <div class="radio-content">
-                <div class="radio-title">💙 支付宝</div>
-              </div>
-            </label>
-          </div>
+        <!-- Right Section - Order Summary -->
+        <div class="order-summary-section">
+          <h2 class="summary-title">订单详情</h2>
 
-          <!-- Credit Card Fields -->
-          <div v-if="paymentMethod === 'credit-card'" class="payment-fields">
-            <div class="form-row">
-              <input
-                v-model="cardInfo.number"
-                type="text"
-                placeholder="卡号"
-                class="form-input full-width"
-                :class="{ error: errors.cardNumber }"
-                maxlength="19"
-              />
-            </div>
-            <div v-if="errors.cardNumber" class="error-message">{{ errors.cardNumber }}</div>
-
-            <div class="form-row">
-              <input
-                v-model="cardInfo.expiry"
-                type="text"
-                placeholder="有效期 (MM/YY)"
-                class="form-input half-width"
-                :class="{ error: errors.expiry }"
-                maxlength="5"
-              />
-              <input
-                v-model="cardInfo.cvv"
-                type="text"
-                placeholder="CVV"
-                class="form-input half-width"
-                :class="{ error: errors.cvv }"
-                maxlength="4"
-              />
+          <!-- Product Items -->
+          <div class="product-items">
+            <div v-for="item in cartStore.selectedItems" :key="item.id" class="product-item">
+              <div class="product-image">
+                <img
+                  v-if="item.image_url || item.image"
+                  :src="item.image_url || item.image"
+                  :alt="item.name"
+                />
+                <div v-else class="image-placeholder">🍎</div>
+              </div>
+              <div class="product-info">
+                <div class="product-name">{{ item.name }}</div>
+                <div class="product-quantity">
+                  {{ item.quantity }} × ¥{{ formatPrice(item.price) }}
+                </div>
+              </div>
+              <div class="product-price">¥{{ formatPrice(item.price * item.quantity) }}</div>
             </div>
           </div>
-        </div>
 
-        <!-- Submit Button -->
-        <button class="submit-btn" @click="submitOrder" :disabled="submitting">
-          {{ submitting ? '提交中...' : '提交订单' }}
-        </button>
-      </div>
-
-      <!-- Right Section - Order Summary -->
-      <div class="order-summary-section">
-        <h2 class="summary-title">订单详情</h2>
-
-        <!-- Product Items -->
-        <div class="product-items">
-          <div v-for="item in cartStore.selectedItems" :key="item.id" class="product-item">
-            <div class="product-image">
-              <img
-                v-if="item.image_url || item.image"
-                :src="item.image_url || item.image"
-                :alt="item.name"
-              />
-              <div v-else class="image-placeholder">🍎</div>
+          <!-- Cost Breakdown -->
+          <div class="cost-breakdown">
+            <div class="cost-row">
+              <span class="cost-label">小计 ({{ cartStore.selectedCount }} 件商品)</span>
+              <span class="cost-value">¥{{ cartStore.selectedTotal.toFixed(2) }}</span>
             </div>
-            <div class="product-info">
-              <div class="product-name">{{ item.name }}</div>
-              <div class="product-quantity">
-                {{ item.quantity }} × ¥{{ formatPrice(item.price) }}
-              </div>
+            <div class="cost-row">
+              <span class="cost-label">运费</span>
+              <span class="cost-value">
+                {{ shippingCost === 0 ? '免费' : `¥${shippingCost.toFixed(2)}` }}
+              </span>
             </div>
-            <div class="product-price">¥{{ formatPrice(item.price * item.quantity) }}</div>
+            <div v-if="discount > 0" class="cost-row">
+              <span class="cost-label">优惠</span>
+              <span class="cost-value discount">-¥{{ discount.toFixed(2) }}</span>
+            </div>
+            <div class="cost-row total">
+              <span class="cost-label">总计</span>
+              <span class="cost-value">¥{{ totalAmount.toFixed(2) }}</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Cost Breakdown -->
-        <div class="cost-breakdown">
-          <div class="cost-row">
-            <span class="cost-label">小计 ({{ cartStore.selectedCount }} 件商品)</span>
-            <span class="cost-value">¥{{ cartStore.selectedTotal.toFixed(2) }}</span>
+          <!-- Order Tips -->
+          <div class="order-tips">
+            <p class="tip-item">✓ 所有商品均为新鲜配送</p>
+            <p class="tip-item">✓ 支持7天无理由退货</p>
+            <p class="tip-item">✓ 满¥50免运费</p>
           </div>
-          <div class="cost-row">
-            <span class="cost-label">运费</span>
-            <span class="cost-value">
-              {{ shippingCost === 0 ? '免费' : `¥${shippingCost.toFixed(2)}` }}
-            </span>
-          </div>
-          <div v-if="discount > 0" class="cost-row">
-            <span class="cost-label">优惠</span>
-            <span class="cost-value discount">-¥{{ discount.toFixed(2) }}</span>
-          </div>
-          <div class="cost-row total">
-            <span class="cost-label">总计</span>
-            <span class="cost-value">¥{{ totalAmount.toFixed(2) }}</span>
-          </div>
-        </div>
-
-        <!-- Order Tips -->
-        <div class="order-tips">
-          <p class="tip-item">✓ 所有商品均为新鲜配送</p>
-          <p class="tip-item">✓ 支持7天无理由退货</p>
-          <p class="tip-item">✓ 满¥50免运费</p>
         </div>
       </div>
     </div>
@@ -199,12 +170,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCartStore } from '../stores/cartStore'
 import { useOrderStore } from '../stores/orderStore'
 import { useUserStore } from '../stores/userStore'
 import { useAddressStore } from '../stores/addressStore'
 import AddressSelector from '../components/AddressSelector.vue'
+import Breadcrumb from '../components/Breadcrumb.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -355,16 +327,33 @@ const submitOrder = async () => {
     // 创建订单
     const result = await orderStore.createOrder(orderData)
 
-    // 模拟支付处理（实际项目中这里应该调用真实的支付接口）
-    ElMessage.info('正在处理支付...')
-
-    // 模拟支付成功，更新订单状态
+    // 获取订单ID
     const orderId = result.order_id || result.id
-    if (result && orderId) {
-      console.log('订单创建成功，订单ID:', orderId)
+    if (!orderId) {
+      console.error('订单创建失败或没有返回订单ID:', result)
+      ElMessage.error('订单创建失败，请重试')
+      return
+    }
 
-      // 这里应该调用支付接口，支付成功后更新订单状态
-      // 暂时模拟支付成功
+    console.log('订单创建成功，订单ID:', orderId)
+
+    // 显示支付确认对话框
+    try {
+      await ElMessageBox.confirm(
+        `确认支付 ¥${cartStore.selectedTotal.toFixed(2)} 吗？`,
+        '确认支付',
+        {
+          confirmButtonText: '确认支付',
+          cancelButtonText: '取消',
+          type: 'warning',
+          customClass: 'payment-confirm-dialog',
+        },
+      )
+
+      // 用户确认支付，更新订单状态为待发货
+      ElMessage.info('正在处理支付...')
+
+      // 模拟支付处理
       setTimeout(async () => {
         try {
           console.log('开始模拟支付处理，订单ID:', orderId)
@@ -374,26 +363,37 @@ const submitOrder = async () => {
 
           ElMessage.success('支付成功！订单已确认')
 
-          // 跳转到订单详情页
-          router.push(`/orders/${orderId}`)
+          // 清除购物车中已购买的商品
+          await cartStore.removeSelectedItems()
+
+          // 跳转到订单列表页
+          router.push('/orders')
         } catch (error) {
           console.error('支付处理失败:', error)
           ElMessage.error('支付处理失败，请重试')
+        } finally {
+          submitting.value = false
         }
       }, 2000) // 模拟2秒支付处理时间
-    } else {
-      console.error('订单创建失败或没有返回订单ID:', result)
-      ElMessage.error('订单创建失败，请重试')
+    } catch (error) {
+      // 用户取消支付，将订单状态设为待支付
+      if (error === 'cancel' || error === 'close') {
+        try {
+          await orderStore.updateOrderStatus(orderId, 'pending')
+          ElMessage.info('已取消支付，订单状态已更新为待支付')
+        } catch (updateError) {
+          console.error('更新订单状态失败:', updateError)
+          ElMessage.error('更新订单状态失败')
+        }
+        submitting.value = false
+      } else {
+        submitting.value = false
+        throw error
+      }
     }
-
-    // 只清除已购买的商品（已选中的商品）
-    await cartStore.removeSelectedItems()
-
-    ElMessage.success('订单提交成功！正在处理支付...')
   } catch (error) {
-    console.error('订单提交失败:', error)
-    ElMessage.error('订单提交失败，请重试：' + (error.message || '未知错误'))
-  } finally {
+    console.error('提交订单失败:', error)
+    ElMessage.error('提交订单失败，请重试')
     submitting.value = false
   }
 }
@@ -406,10 +406,45 @@ const formatPrice = (price) => {
 </script>
 
 <style scoped>
+/* 支付确认对话框样式 */
+:deep(.payment-confirm-dialog .el-message-box__title) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+:deep(.payment-confirm-dialog .el-message-box__content) {
+  font-size: 16px;
+  color: #666;
+  padding: 20px 0;
+}
+
+:deep(.payment-confirm-dialog .el-message-box__btns) {
+  padding: 20px 0 0 0;
+}
+
+:deep(.payment-confirm-dialog .el-button--primary) {
+  background: linear-gradient(135deg, #67c23a, #85ce61);
+  border: none;
+  font-weight: 600;
+}
+
+:deep(.payment-confirm-dialog .el-button--default) {
+  background: #f5f7fa;
+  color: #606266;
+  border: 1px solid #dcdfe6;
+}
+
 .checkout-page {
   min-height: 100vh;
   background-color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 /* Header Styles */
@@ -567,9 +602,7 @@ const formatPrice = (price) => {
 
 /* Main Content */
 .main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
+  padding: 24px 0;
   display: grid;
   grid-template-columns: 1fr 400px;
   gap: 48px;

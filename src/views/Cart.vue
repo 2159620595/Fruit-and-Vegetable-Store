@@ -2,7 +2,8 @@
   <div class="cart-page">
     <div class="root">
       <div class="container">
-        <Back></Back>
+        <!-- 面包屑导航 -->
+        <Breadcrumb current-page="购物车" />
         <!-- 主内容区开始 -->
         <div class="main">
           <div class="main-content">
@@ -151,13 +152,19 @@ import router from '@/router'
 import { computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCartStore } from '@/stores/cartStore'
-import Back from '../components/Back.vue'
+import Breadcrumb from '../components/Breadcrumb.vue'
 
 const cartStore = useCartStore()
 
 // 组件挂载时加载购物车数据
 onMounted(async () => {
+  console.log('🛒 购物车页面初始化')
+  console.log('cartStore.items before fetch:', cartStore.items)
+
   await cartStore.fetchCartList()
+
+  console.log('cartStore.items after fetch:', cartStore.items)
+  console.log('cartItems computed:', cartItems.value)
 })
 
 // 购物车商品列表（格式化显示）
@@ -300,6 +307,9 @@ const reloadCart = async () => {
 }
 
 .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
   display: flex;
   height: 100%;
   flex-grow: 1;
@@ -834,6 +844,35 @@ const reloadCart = async () => {
   opacity: 0.5;
   cursor: not-allowed;
   background-color: #11d411;
+}
+
+/* 面包屑导航样式 */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #618961;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: #4a6b4a;
+}
+
+.breadcrumb .separator {
+  margin: 0 8px;
+  color: #999;
+}
+
+.breadcrumb .current {
+  color: #333;
+  font-weight: 500;
 }
 
 /* 响应式设计 */

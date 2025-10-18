@@ -5,7 +5,8 @@
 
     <!-- Main Content -->
     <div class="main-content">
-      <back></back>
+      <!-- 面包屑导航 -->
+      <Breadcrumb current-page="个人中心" />
 
       <!-- User Profile Section -->
       <div class="user-profile-section">
@@ -67,7 +68,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '../stores/userStore'
 import { useOrderStore } from '../stores/orderStore'
 import ProductCard from '../components/ProductCard.vue'
-import Back from '../components/Back.vue'
+import Breadcrumb from '../components/Breadcrumb.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -100,7 +101,7 @@ const handleLogout = async () => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    userStore.logout()
+    await userStore.logout()
     ElMessage.success('已退出登录')
     router.push('/login')
   } catch {
@@ -133,6 +134,35 @@ onMounted(async () => {
   min-height: 100vh;
   background-color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 面包屑导航样式 */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #618961;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: #4a6b4a;
+}
+
+.breadcrumb .separator {
+  margin: 0 8px;
+  color: #999;
+}
+
+.breadcrumb .current {
+  color: #333;
+  font-weight: 500;
 }
 
 /* Header Styles */

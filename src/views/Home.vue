@@ -1,5 +1,36 @@
 <template>
   <div class="home">
+    <!-- 测试导航条 -->
+    <div class="test-nav">
+      <button @click="toggleTestNav" class="test-nav-toggle">
+        {{ testNavOpen ? '✕' : '☰' }}
+      </button>
+      <div class="test-nav-content" :class="{ open: testNavOpen }">
+        <div class="nav-section">
+          <h4>主要页面</h4>
+          <a href="#" @click.prevent="router.push('/')" class="nav-link">首页</a>
+          <a href="#" @click.prevent="router.push('/shop')" class="nav-link">商品列表</a>
+          <a href="#" @click.prevent="router.push('/cart')" class="nav-link">购物车</a>
+          <a href="#" @click.prevent="router.push('/checkout')" class="nav-link">结账</a>
+        </div>
+        <div class="nav-section">
+          <h4>用户相关</h4>
+          <a href="#" @click.prevent="router.push('/login')" class="nav-link">登录</a>
+          <a href="#" @click.prevent="router.push('/signup')" class="nav-link">注册</a>
+          <a href="#" @click.prevent="router.push('/profile')" class="nav-link">个人中心</a>
+        </div>
+        <div class="nav-section">
+          <h4>订单相关</h4>
+          <a href="#" @click.prevent="router.push('/orders')" class="nav-link">我的订单</a>
+          <a href="#" @click.prevent="router.push('/order/1')" class="nav-link">订单详情</a>
+        </div>
+        <div class="nav-section">
+          <h4>商品相关</h4>
+          <a href="#" @click.prevent="router.push('/product/1')" class="nav-link">商品详情</a>
+        </div>
+      </div>
+    </div>
+
     <div class="root">
       <div class="container">
         <!-- header 开始 -->
@@ -324,6 +355,41 @@
         </div>
         <!-- 内容区结束 -->
 
+        <!-- 联系我们部分 -->
+        <section id="contact-section" class="contact-section">
+          <div class="container">
+            <div class="contact-content">
+              <h2 class="contact-title">联系我们</h2>
+              <div class="contact-info">
+                <div class="contact-item">
+                  <div class="contact-icon">📞</div>
+                  <div class="contact-details">
+                    <h3>客服热线</h3>
+                    <p>400-123-4567</p>
+                    <p>工作时间：9:00-18:00</p>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <div class="contact-icon">📧</div>
+                  <div class="contact-details">
+                    <h3>邮箱联系</h3>
+                    <p>service@freshharvest.com</p>
+                    <p>24小时内回复</p>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <div class="contact-icon">📍</div>
+                  <div class="contact-details">
+                    <h3>公司地址</h3>
+                    <p>北京市朝阳区果蔬大厦</p>
+                    <p>欢迎预约参观</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- 底部开始 -->
         <footer class="footer">
           <div class="footer-container">
@@ -351,6 +417,14 @@ import Header from '@/components/Header.vue'
 import { getGoodsList } from '@/api/index.js'
 
 const router = useRouter()
+
+// 测试导航条状态
+const testNavOpen = ref(false)
+
+// 测试导航条方法
+const toggleTestNav = () => {
+  testNavOpen.value = !testNavOpen.value
+}
 
 // 数据状态
 const loading = ref(false)
@@ -603,6 +677,93 @@ onUnmounted(() => {
 .home {
   background-color: #ffffff;
   min-height: 100vh;
+  position: relative;
+}
+
+/* 测试导航条样式 */
+.test-nav {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+.test-nav-toggle {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.test-nav-toggle:hover {
+  background-color: #34495e;
+  transform: scale(1.1);
+}
+
+.test-nav-content {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  width: 300px;
+  background-color: #2c3e50;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.test-nav-content.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.nav-section {
+  padding: 20px;
+  border-bottom: 1px solid #34495e;
+}
+
+.nav-section:last-child {
+  border-bottom: none;
+}
+
+.nav-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #ecf0f1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-link {
+  display: block;
+  color: #bdc3c7;
+  text-decoration: none;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.nav-link:hover {
+  background-color: #34495e;
+  color: white;
+  transform: translateX(4px);
 }
 
 .root {
@@ -618,6 +779,9 @@ onUnmounted(() => {
 }
 
 .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
   display: flex;
   height: 100%;
   flex-grow: 1;
@@ -1171,6 +1335,91 @@ onUnmounted(() => {
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
+}
+
+/* 联系我们部分样式 */
+.contact-section {
+  background-color: #f8f9fa;
+  padding: 60px 0;
+  margin-top: 40px;
+}
+
+.contact-content {
+  text-align: center;
+}
+
+.contact-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #2d5a27;
+  margin-bottom: 40px;
+}
+
+.contact-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.contact-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.contact-icon {
+  font-size: 32px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f8f0;
+  border-radius: 50%;
+}
+
+.contact-details h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d5a27;
+  margin-bottom: 8px;
+}
+
+.contact-details p {
+  color: #666;
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .contact-info {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .contact-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .contact-title {
+    font-size: 24px;
+  }
 }
 
 /* 响应式设计 */

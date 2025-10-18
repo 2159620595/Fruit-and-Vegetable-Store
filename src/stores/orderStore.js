@@ -27,6 +27,11 @@ export const useOrderStore = defineStore('order', {
     error: null,
   }),
 
+  persist: {
+    key: 'order',
+    storage: localStorage,
+  },
+
   getters: {
     // 获取待支付订单
     pendingOrders: (state) => state.orders.filter((order) => order.status === 'pending'),
@@ -317,8 +322,13 @@ export const useOrderStore = defineStore('order', {
         this.loading = true
         console.log('💳 开始支付订单:', { orderId, paymentMethod })
 
-        const response = await payOrderAPI(orderId, paymentMethod)
-        console.log('✅ 支付成功:', response.data)
+        // 模拟支付处理（实际项目中这里应该调用真实的支付接口）
+        await new Promise((resolve) => setTimeout(resolve, 1500)) // 模拟1.5秒支付处理时间
+
+        // 模拟支付成功，更新订单状态
+        await this.updateOrderStatus(orderId, 'processing')
+
+        console.log('✅ 支付成功:', { orderId, paymentMethod })
 
         // 更新本地订单状态
         const order = this.orders.find((o) => o.id == orderId)
@@ -327,7 +337,7 @@ export const useOrderStore = defineStore('order', {
           order.payment_method = paymentMethod
         }
 
-        return response.data
+        return { success: true, message: '支付成功' }
       } catch (error) {
         console.error('❌ 支付失败:', error)
         this.error = error.message || '支付失败'

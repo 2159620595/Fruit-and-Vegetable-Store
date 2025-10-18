@@ -1,8 +1,5 @@
 <template>
   <div class="product-detail-page">
-    <!-- Header -->
-    <Header />
-
     <!-- Toast Notification -->
     <Transition name="toast">
       <div v-if="showToast" class="toast-notification" :class="toastType">
@@ -10,15 +7,6 @@
         <span class="toast-message">{{ toastMessage }}</span>
       </div>
     </Transition>
-
-    <!-- Breadcrumbs -->
-    <div class="breadcrumbs">
-      <a href="#" class="breadcrumb-link" @click.prevent="router.push('/')">首页</a>
-      <span class="breadcrumb-separator">/</span>
-      <a href="#" class="breadcrumb-link" @click.prevent="router.push('/shop')">商城</a>
-      <span class="breadcrumb-separator">/</span>
-      <span class="breadcrumb-current">{{ product?.name || '商品详情' }}</span>
-    </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="loading-container">
@@ -39,6 +27,9 @@
 
     <!-- Main Product Section -->
     <div class="main-content" v-else-if="product">
+      <!-- Breadcrumbs -->
+      <Breadcrumb :current-page="product?.name || '商品详情'" />
+
       <div class="product-section">
         <!-- Product Image -->
         <div class="product-image-section">
@@ -631,6 +622,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
 import { useUserStore } from '@/stores/userStore'
 import Header from '@/components/Header.vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -830,7 +822,7 @@ const buyNow = async () => {
     })
     // 只选中当前商品
     addedItem.selected = true
-    cartStore.saveLocalCart()
+    // Pinia 持久化插件会自动保存，无需手动调用 saveLocalCart
   }
 
   // 直接跳转到结账页面
@@ -1158,7 +1150,7 @@ onMounted(() => {
 
 /* Main Content */
 .main-content {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
