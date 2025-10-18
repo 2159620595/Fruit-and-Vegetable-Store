@@ -10,6 +10,9 @@ import Checkout from '@/views/Checkout.vue'
 import OrderList from '@/views/OrderList.vue'
 import OrderDetail from '@/views/OrderDetail.vue'
 import Profile from '@/views/Profile.vue'
+import Favorites from '@/views/Favorites.vue'
+import AddressManagement from '@/views/AddressManagement.vue'
+import AccountSettings from '@/views/AccountSettings.vue'
 import Login from '@/views/Login.vue'
 
 const router = createRouter({
@@ -99,6 +102,39 @@ const router = createRouter({
       },
     },
 
+    // 我的收藏（需要登录）
+    {
+      path: '/favorites',
+      name: 'Favorites',
+      component: Favorites,
+      meta: {
+        requiresAuth: true,
+        title: '我的收藏 - 果蔬商城',
+      },
+    },
+
+    // 收货地址管理（需要登录）
+    {
+      path: '/addresses',
+      name: 'AddressManagement',
+      component: AddressManagement,
+      meta: {
+        requiresAuth: true,
+        title: '收货地址 - 果蔬商城',
+      },
+    },
+
+    // 账户设置（需要登录）
+    {
+      path: '/settings',
+      name: 'AccountSettings',
+      component: AccountSettings,
+      meta: {
+        requiresAuth: true,
+        title: '账户设置 - 果蔬商城',
+      },
+    },
+
     // 登录/注册（统一页面）
     {
       path: '/login',
@@ -149,7 +185,6 @@ router.beforeEach((to, from, next) => {
   // 检查是否需要登录
   if (to.meta.requiresAuth) {
     if (!userStore.isLoggedIn) {
-      console.warn('⚠️ 需要登录才能访问:', to.path)
       // 保存目标路由，登录后跳转回来
       next({
         path: '/login',
@@ -161,7 +196,6 @@ router.beforeEach((to, from, next) => {
 
   // 已登录用户访问登录页，重定向到首页
   if (to.meta.hideForAuth && userStore.isLoggedIn) {
-    console.log('✅ 已登录，重定向到首页')
     next('/')
     return
   }
@@ -170,8 +204,8 @@ router.beforeEach((to, from, next) => {
 })
 
 // 路由错误处理
-router.onError((error) => {
-  console.error('❌ 路由错误:', error)
+router.onError(() => {
+  // 路由错误处理
 })
 
 export default router

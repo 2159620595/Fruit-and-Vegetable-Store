@@ -1,16 +1,12 @@
 import request from '@/utils/request'
 
-/**
- * 地址相关 API
- */
-
 // 获取地址列表
 export const getAddressList = () => {
   return request.get('/addresses')
 }
 
 // 添加地址
-export const addAddress = (data) => {
+export const createAddress = data => {
   return request.post('/addresses', data)
 }
 
@@ -20,11 +16,16 @@ export const updateAddress = (id, data) => {
 }
 
 // 删除地址
-export const deleteAddress = (id) => {
+export const deleteAddress = id => {
   return request.delete(`/addresses/${id}`)
 }
 
 // 设置默认地址
-export const setDefaultAddress = (id) => {
-  return request.put(`/addresses/${id}`, { is_default: true })
+export const setDefaultAddress = id => {
+  return request.put(`/addresses/${id}/default`)
+}
+
+// 获取省市区数据
+export const getRegionData = () => {
+  return request.get('/regions')
 }

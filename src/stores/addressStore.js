@@ -2,9 +2,10 @@
 import { defineStore } from 'pinia'
 import {
   getAddressList,
-  addAddress as addAddressAPI,
+  createAddress as addAddressAPI,
   updateAddress as updateAddressAPI,
   deleteAddress as deleteAddressAPI,
+  setDefaultAddress as setDefaultAddressAPI,
 } from '@/api/address'
 
 export const useAddressStore = defineStore('address', {
@@ -21,10 +22,10 @@ export const useAddressStore = defineStore('address', {
 
   getters: {
     // 获取默认地址
-    defaultAddress: (state) => state.addresses.find((addr) => addr.is_default),
+    defaultAddress: state => state.addresses.find(addr => addr.is_default),
 
     // 获取地址数量
-    addressCount: (state) => state.addresses.length,
+    addressCount: state => state.addresses.length,
   },
 
   actions: {
@@ -119,7 +120,7 @@ export const useAddressStore = defineStore('address', {
         await deleteAddressAPI(id)
 
         // 从本地列表中删除
-        this.addresses = this.addresses.filter((addr) => addr.id !== id)
+        this.addresses = this.addresses.filter(addr => addr.id !== id)
 
         console.log('✅ 删除地址成功')
 
@@ -138,16 +139,27 @@ export const useAddressStore = defineStore('address', {
      * @param {Number} id - 地址ID
      */
     async setDefaultAddress(id) {
-      const address = this.addresses.find((addr) => addr.id === id)
-      if (!address) {
-        throw new Error('地址不存在')
-      }
+      this.loading = true
+      this.error = null
 
-      // 更新地址，设置为默认
-      return await this.updateAddress(id, {
-        ...address,
-        is_default: true,
-      })
+      try {
+        await setDefaultAddressAPI(id)
+
+        // 更新本地状态
+        this.addresses.forEach(addr => {
+          addr.is_default = addr.id === id
+        })
+
+        console.log('✅ 设置默认地址成功')
+
+        return true
+      } catch (error) {
+        console.error('❌ 设置默认地址失败:', error)
+        this.error = error.message || '设置默认地址失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
     },
 
     /**
