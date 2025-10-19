@@ -843,7 +843,12 @@ const handleSearch = async () => {
       page_size: pageSize.value,
     }
 
+    console.log('🔍 开始搜索:', params)
     const result = await orderStore.searchOrders(params)
+    console.log('🔍 搜索结果:', result)
+    console.log('🔍 订单列表:', orders.value)
+    console.log('🔍 isSearching:', isSearching.value)
+    console.log('🔍 filteredOrders 长度:', filteredOrders.value?.length)
 
     // 更新总数
     if (result.total !== undefined) {
@@ -866,6 +871,7 @@ const handleSearch = async () => {
       })
     }
   } catch (error) {
+    console.error('❌ 搜索失败:', error)
     ElMessage.error(error.message || '搜索失败')
   }
 }

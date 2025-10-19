@@ -8,6 +8,7 @@ const cors = require('cors')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const mysql = require('mysql2/promise')
+const pinyinMatch = require('pinyin-match')
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -1023,6 +1024,157 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
   }
 })
 
+// ============================================
+// 订单搜索（支持模糊搜索和拼音搜索）
+// 注意：必须放在 /api/orders/:id 之前，否则 search 会被当作 id
+// ============================================
+
+app.get('/api/orders/search', authenticateToken, async (req, res) => {
+  try {
+    const { keyword, page = 1, page_size = 10 } = req.query
+    const offset = (page - 1) * page_size
+    const userId = req.user.userId
+
+    console.log('🔍 收到搜索请求:', { keyword, page, page_size, userId })
+
+    if (!keyword || !keyword.trim()) {
+      return sendResponse(res, 400, '请输入搜索关键词')
+    }
+
+    const searchTerm = `%${keyword.trim()}%`
+
+    // 模糊搜索：订单号、商品名称、收货人姓名、手机号
+    const query = `
+      SELECT DISTINCT o.* 
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.user_id = ?
+        AND (
+          o.order_number LIKE ?
+          OR oi.product_name LIKE ?
+          OR o.shipping_address LIKE ?
+        )
+      ORDER BY o.created_at DESC
+      LIMIT ? OFFSET ?
+    `
+
+    const [orders] = await pool.query(query, [
+      userId,
+      searchTerm,
+      searchTerm,
+      searchTerm,
+      parseInt(page_size),
+      offset,
+    ])
+
+    console.log('🔍 数据库搜索结果数量:', orders.length)
+
+    // 获取订单商品信息
+    const ordersWithItems = await Promise.all(
+      orders.map(async order => {
+        const [orderItems] = await pool.query(
+          `
+          SELECT 
+            oi.id,
+            oi.order_id,
+            oi.product_id,
+            oi.quantity,
+            oi.price,
+            COALESCE(p.name, oi.product_name) as product_name,
+            COALESCE(p.image_url, oi.product_image) as product_image
+          FROM order_items oi
+          LEFT JOIN products p ON oi.product_id = p.id
+          WHERE oi.order_id = ?
+        `,
+          [order.id]
+        )
+
+        return {
+          ...order,
+          items: orderItems,
+        }
+      })
+    )
+
+    // 🆕 拼音搜索增强：如果数据库搜索结果较少，尝试拼音匹配
+    const finalOrders = [...ordersWithItems]
+    if (ordersWithItems.length < 5 && /^[a-zA-Z]+$/.test(keyword.trim())) {
+      // 如果关键词是纯字母，可能是拼音搜索
+      const allOrdersQuery = `
+        SELECT DISTINCT o.* 
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        WHERE o.user_id = ?
+        ORDER BY o.created_at DESC
+        LIMIT 100
+      `
+      const [allOrders] = await pool.query(allOrdersQuery, [userId])
+
+      const pinyinMatched = []
+      for (const order of allOrders) {
+        const [items] = await pool.query(
+          'SELECT product_name FROM order_items WHERE order_id = ?',
+          [order.id]
+        )
+
+        // 检查商品名称是否匹配拼音
+        const hasMatch = items.some(item =>
+          pinyinMatch.match(item.product_name, keyword.trim())
+        )
+
+        if (hasMatch) {
+          const [orderItems] = await pool.query(
+            `
+            SELECT 
+              oi.id,
+              oi.order_id,
+              oi.product_id,
+              oi.quantity,
+              oi.price,
+              COALESCE(p.name, oi.product_name) as product_name,
+              COALESCE(p.image_url, oi.product_image) as product_image
+            FROM order_items oi
+            LEFT JOIN products p ON oi.product_id = p.id
+            WHERE oi.order_id = ?
+          `,
+            [order.id]
+          )
+          pinyinMatched.push({
+            ...order,
+            items: orderItems,
+          })
+        }
+      }
+
+      // 合并结果并去重
+      const existingIds = new Set(ordersWithItems.map(o => o.id))
+      pinyinMatched.forEach(order => {
+        if (!existingIds.has(order.id)) {
+          finalOrders.push(order)
+        }
+      })
+    }
+
+    const responseData = {
+      orders: finalOrders.slice(0, parseInt(page_size)),
+      total: finalOrders.length,
+      page: parseInt(page),
+      page_size: parseInt(page_size),
+      keyword,
+    }
+
+    console.log('🔍 返回搜索结果:', {
+      订单数量: responseData.orders.length,
+      总数: responseData.total,
+    })
+
+    sendResponse(res, 200, '搜索成功', responseData)
+  } catch (error) {
+    console.error('❌ 搜索订单失败:', error)
+    handleError(res, error, '搜索订单失败')
+  }
+})
+
 // 获取订单详情
 app.get('/api/orders/:id', authenticateToken, async (req, res) => {
   try {
@@ -1575,159 +1727,6 @@ app.get('/api/logistics/:orderId', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('❌ 获取物流信息失败:', error)
     handleError(res, error, '获取物流信息失败')
-  }
-})
-
-// ============================================
-// 7. 新增：订单搜索（支持模糊搜索和拼音搜索）
-// ============================================
-
-const pinyinMatch = require('pinyin-match')
-
-app.get('/api/orders/search', authenticateToken, async (req, res) => {
-  try {
-    const { keyword, page = 1, page_size = 10 } = req.query
-    const offset = (page - 1) * page_size
-    const userId = req.user.userId
-
-    if (!keyword || !keyword.trim()) {
-      return sendResponse(res, 400, '请输入搜索关键词')
-    }
-
-    const searchTerm = `%${keyword.trim()}%`
-
-    // 模糊搜索：订单号、商品名称、收货人姓名、手机号
-    const query = `
-      SELECT DISTINCT o.* 
-      FROM orders o
-      LEFT JOIN order_items oi ON o.id = oi.order_id
-      WHERE o.user_id = ?
-        AND (
-          o.order_number LIKE ?
-          OR oi.product_name LIKE ?
-          OR o.shipping_address LIKE ?
-        )
-      ORDER BY o.created_at DESC
-      LIMIT ? OFFSET ?
-    `
-
-    const [orders] = await pool.query(query, [
-      userId,
-      searchTerm,
-      searchTerm,
-      searchTerm,
-      parseInt(page_size),
-      offset,
-    ])
-
-    const countQuery = `
-      SELECT COUNT(DISTINCT o.id) as total
-      FROM orders o
-      LEFT JOIN order_items oi ON o.id = oi.order_id
-      WHERE o.user_id = ?
-        AND (
-          o.order_number LIKE ?
-          OR oi.product_name LIKE ?
-          OR o.shipping_address LIKE ?
-        )
-    `
-
-    // 获取订单商品信息
-    const ordersWithItems = await Promise.all(
-      orders.map(async order => {
-        const [orderItems] = await pool.query(
-          `
-          SELECT 
-            oi.id,
-            oi.order_id,
-            oi.product_id,
-            oi.quantity,
-            oi.price,
-            COALESCE(p.name, oi.product_name) as product_name,
-            COALESCE(p.image_url, oi.product_image) as product_image
-          FROM order_items oi
-          LEFT JOIN products p ON oi.product_id = p.id
-          WHERE oi.order_id = ?
-        `,
-          [order.id]
-        )
-
-        return {
-          ...order,
-          items: orderItems,
-        }
-      })
-    )
-
-    // 🆕 拼音搜索增强：如果数据库搜索结果较少，尝试拼音匹配
-    const finalOrders = [...ordersWithItems]
-    if (ordersWithItems.length < 5 && /^[a-zA-Z]+$/.test(keyword.trim())) {
-      // 如果关键词是纯字母，可能是拼音搜索
-      const allOrdersQuery = `
-        SELECT DISTINCT o.* 
-        FROM orders o
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        WHERE o.user_id = ?
-        ORDER BY o.created_at DESC
-        LIMIT 100
-      `
-      const [allOrders] = await pool.query(allOrdersQuery, [userId])
-
-      const pinyinMatched = []
-      for (const order of allOrders) {
-        const [items] = await pool.query(
-          'SELECT product_name FROM order_items WHERE order_id = ?',
-          [order.id]
-        )
-
-        // 检查商品名称是否匹配拼音
-        const hasMatch = items.some(item =>
-          pinyinMatch.match(item.product_name, keyword.trim())
-        )
-
-        if (hasMatch) {
-          const [orderItems] = await pool.query(
-            `
-            SELECT 
-              oi.id,
-              oi.order_id,
-              oi.product_id,
-              oi.quantity,
-              oi.price,
-              COALESCE(p.name, oi.product_name) as product_name,
-              COALESCE(p.image_url, oi.product_image) as product_image
-            FROM order_items oi
-            LEFT JOIN products p ON oi.product_id = p.id
-            WHERE oi.order_id = ?
-          `,
-            [order.id]
-          )
-          pinyinMatched.push({
-            ...order,
-            items: orderItems,
-          })
-        }
-      }
-
-      // 合并结果并去重
-      const existingIds = new Set(ordersWithItems.map(o => o.id))
-      pinyinMatched.forEach(order => {
-        if (!existingIds.has(order.id)) {
-          finalOrders.push(order)
-        }
-      })
-    }
-
-    sendResponse(res, 200, '搜索成功', {
-      orders: finalOrders.slice(0, parseInt(page_size)),
-      total: finalOrders.length,
-      page: parseInt(page),
-      page_size: parseInt(page_size),
-      keyword,
-    })
-  } catch (error) {
-    console.error('❌ 搜索订单失败:', error)
-    handleError(res, error, '搜索订单失败')
   }
 })
 
