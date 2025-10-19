@@ -6,24 +6,55 @@
 
       <div class="page-header">
         <h1 class="page-title">我的订单</h1>
-        <el-button
-          type="primary"
-          :icon="loading ? 'Loading' : 'Refresh'"
-          :loading="loading"
-          @click="refreshOrders"
-        >
-          刷新
-        </el-button>
+        <div class="header-actions">
+          <!-- 🆕 搜索框 -->
+          <el-input
+            v-model="searchKeyword"
+            placeholder="搜索订单号或商品名称"
+            class="search-input"
+            clearable
+            @clear="handleSearchClear"
+            @keyup.enter="handleSearch"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+            <template #append>
+              <el-button
+                :icon="Search"
+                @click="handleSearch"
+                :loading="loading"
+              />
+            </template>
+          </el-input>
+          <el-button
+            type="primary"
+            :icon="loading ? 'Loading' : 'Refresh'"
+            :loading="loading"
+            @click="refreshOrders"
+          >
+            刷新
+          </el-button>
+        </div>
       </div>
 
       <!-- 订单状态筛选标签 -->
       <div class="order-tabs">
-        <el-tabs v-model="activeTab" @tab-change="handleTabChange" :before-leave="beforeTabLeave">
+        <el-tabs
+          v-model="activeTab"
+          @tab-change="handleTabChange"
+          :before-leave="beforeTabLeave"
+        >
           <el-tab-pane label="全部订单" name="all">
             <template #label>
               <span class="tab-label">
                 全部订单
-                <el-badge v-if="totalCount > 0" :value="totalCount" :max="99" class="tab-badge" />
+                <el-badge
+                  v-if="allOrdersCount > 0"
+                  :value="allOrdersCount"
+                  :max="99"
+                  class="tab-badge"
+                />
               </span>
             </template>
           </el-tab-pane>
@@ -108,14 +139,9 @@
         </el-tabs>
       </div>
 
-      <!-- 加载状态 -->
-      <div v-if="initialLoading" class="loading-container">
-        <el-skeleton :rows="3" animated />
-      </div>
-
       <!-- 空状态 -->
       <el-empty
-        v-if="!initialLoading && filteredOrders.length === 0"
+        v-if="filteredOrders.length === 0"
         :description="getEmptyDescription()"
         :image-size="120"
       >
@@ -132,19 +158,31 @@
 
       <!-- 订单列表 -->
       <div
-        v-if="!initialLoading && filteredOrders.length > 0"
+        v-if="filteredOrders.length > 0"
         class="order-list"
         :key="forceUpdateKey"
       >
         <transition-group name="order-list" tag="div" :key="activeTab">
-          <div v-for="order in filteredOrders" :key="order.id" class="order-card">
+          <div
+            v-for="order in filteredOrders"
+            :key="order.id"
+            class="order-card"
+          >
             <!-- 订单头部 -->
             <div class="order-header">
               <div class="order-info">
-                <span class="order-number">订单号: {{ order.order_number }}</span>
-                <span class="order-date">{{ formatDate(order.created_at) }}</span>
+                <span class="order-number">
+                  订单号: {{ order.order_number }}
+                </span>
+                <span class="order-date">
+                  {{ formatDate(order.created_at) }}
+                </span>
               </div>
-              <el-tag :type="getStatusType(order.status)" effect="light" size="large">
+              <el-tag
+                :type="getStatusType(order.status)"
+                effect="light"
+                size="large"
+              >
                 {{ getStatusText(order.status) }}
               </el-tag>
             </div>
@@ -153,7 +191,10 @@
             <div class="order-items" @click="goToOrderDetail(order.id)">
               <div class="order-products">
                 <!-- 商品图片展示 -->
-                <div class="order-product-images" v-if="getOrderItems(order).length > 0">
+                <div
+                  class="order-product-images"
+                  v-if="getOrderItems(order).length > 0"
+                >
                   <div class="product-images-container">
                     <div
                       v-for="(item, index) in getOrderItems(order).slice(0, 4)"
@@ -170,21 +211,29 @@
                       <div v-else class="product-image-placeholder">🍎</div>
                     </div>
                     <!-- 显示更多商品数量 -->
-                    <div v-if="getOrderItems(order).length > 4" class="product-image-more">
-                      <span class="more-count">+{{ getOrderItems(order).length - 4 }}</span>
+                    <div
+                      v-if="getOrderItems(order).length > 4"
+                      class="product-image-more"
+                    >
+                      <span class="more-count">
+                        +{{ getOrderItems(order).length - 4 }}
+                      </span>
                     </div>
                   </div>
-                  <div class="product-names" v-if="getOrderItems(order).length > 0">
+                  <div
+                    class="product-names"
+                    v-if="getOrderItems(order).length > 0"
+                  >
                     <span class="product-names-text">
                       {{
                         getOrderItems(order)
                           .slice(0, 2)
-                          .map((item) => item.product_name)
+                          .map(item => item.product_name)
                           .join('、')
                       }}
-                      <span v-if="getOrderItems(order).length > 2"
-                        >等{{ getOrderItems(order).length }}件商品</span
-                      >
+                      <span v-if="getOrderItems(order).length > 2">
+                        等{{ getOrderItems(order).length }}件商品
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -193,11 +242,15 @@
                 <div class="order-summary">
                   <div class="summary-item">
                     <span class="label">配送方式:</span>
-                    <span class="value">{{ getDeliveryMethodText(order.delivery_method) }}</span>
+                    <span class="value">
+                      {{ getDeliveryMethodText(order.delivery_method) }}
+                    </span>
                   </div>
                   <div class="summary-item">
                     <span class="label">支付方式:</span>
-                    <span class="value">{{ getPaymentMethodText(order.payment_method) }}</span>
+                    <span class="value">
+                      {{ getPaymentMethodText(order.payment_method) }}
+                    </span>
                   </div>
                   <div class="summary-item" v-if="order.remark">
                     <span class="label">备注:</span>
@@ -207,7 +260,9 @@
               </div>
               <div class="order-total">
                 <div class="total-label">订单总额</div>
-                <div class="total-amount">¥{{ formatPrice(order.total_amount) }}</div>
+                <div class="total-amount">
+                  ¥{{ formatPrice(order.total_amount) }}
+                </div>
                 <div class="shipping-fee" v-if="order.shipping_fee">
                   (含运费 ¥{{ formatPrice(order.shipping_fee) }})
                 </div>
@@ -216,7 +271,9 @@
 
             <!-- 订单操作按钮 -->
             <div class="order-actions">
-              <el-button size="small" @click.stop="goToOrderDetail(order.id)"> 查看详情 </el-button>
+              <el-button size="small" @click.stop="goToOrderDetail(order.id)">
+                查看详情
+              </el-button>
 
               <!-- 待支付状态 -->
               <template v-if="order.status === 'pending'">
@@ -240,13 +297,15 @@
 
               <!-- 待发货状态 -->
               <template v-if="order.status === 'processing'">
+                <!-- 🆕 自动流转按钮（已优化） -->
                 <el-button
                   type="success"
                   size="small"
-                  @click.stop="startAutoStatusFlow(order.id)"
-                  :disabled="autoStatusTimers.has(order.id)"
+                  @click.stop="startAutoStatusFlow(order)"
+                  :disabled="actionLoading"
+                  :loading="actionLoading"
                 >
-                  {{ autoStatusTimers.has(order.id) ? '流转中...' : '启动自动流转' }}
+                  流转到下一状态
                 </el-button>
                 <el-button
                   type="info"
@@ -267,8 +326,18 @@
 
               <!-- 已发货状态 -->
               <template v-if="order.status === 'shipped'">
+                <!-- 🆕 流转到运输中 -->
                 <el-button
                   type="success"
+                  size="small"
+                  @click.stop="startAutoStatusFlow(order)"
+                  :disabled="actionLoading"
+                  :loading="actionLoading"
+                >
+                  标记为运输中
+                </el-button>
+                <el-button
+                  type="primary"
                   size="small"
                   :loading="actionLoading"
                   @click.stop="handleConfirmOrder(order.id, $event)"
@@ -286,8 +355,18 @@
 
               <!-- 运输中状态 -->
               <template v-if="order.status === 'in_transit'">
+                <!-- 🆕 流转到已送达 -->
                 <el-button
                   type="success"
+                  size="small"
+                  @click.stop="startAutoStatusFlow(order)"
+                  :disabled="actionLoading"
+                  :loading="actionLoading"
+                >
+                  标记为已送达
+                </el-button>
+                <el-button
+                  type="primary"
                   size="small"
                   :loading="actionLoading"
                   @click.stop="handleConfirmOrder(order.id, $event)"
@@ -305,8 +384,23 @@
 
               <!-- 已完成状态 -->
               <template v-if="order.status === 'delivered'">
-                <el-button type="primary" size="small" @click.stop="handleReview(order.id, $event)">
+                <!-- 根据是否已评价显示不同按钮 -->
+                <el-button
+                  v-if="!order.is_reviewed"
+                  type="primary"
+                  size="small"
+                  @click.stop="handleReview(order.id, $event)"
+                >
                   评价
+                </el-button>
+                <el-button
+                  v-else
+                  type="success"
+                  size="small"
+                  plain
+                  @click.stop="handleViewReview(order.id, $event)"
+                >
+                  查看我的评价
                 </el-button>
                 <el-button
                   type="info"
@@ -315,7 +409,11 @@
                 >
                   查看物流
                 </el-button>
-                <el-button type="info" size="small" @click.stop="handleBuyAgain(order.id, $event)">
+                <el-button
+                  type="info"
+                  size="small"
+                  @click.stop="handleBuyAgain(order.id, $event)"
+                >
                   再次购买
                 </el-button>
               </template>
@@ -337,11 +435,11 @@
       </div>
 
       <!-- 分页 -->
-      <div v-if="!loading && orders.length > 0" class="pagination-container">
+      <div v-if="orders.length > 0" class="pagination-container">
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
+          :page-sizes="[5, 10, 20, 50, 100]"
           :total="totalCount"
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
@@ -358,6 +456,13 @@
       :order="currentReviewOrder"
       @submit="handleReviewSubmit"
     />
+
+    <!-- 查看评价对话框 -->
+    <ReviewDetailDialog
+      v-model="reviewDetailDialogVisible"
+      :order-id="currentReviewOrderId"
+      :order="currentReviewOrder"
+    />
   </div>
 </template>
 
@@ -365,10 +470,12 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import { useOrderStore } from '@/stores/orderStore'
 import { useLogisticsStore } from '@/stores/logisticsStore'
 import Footer from '@/components/Footer.vue'
 import OrderReviewDialog from '@/components/OrderReviewDialog.vue'
+import ReviewDetailDialog from '@/components/ReviewDetailDialog.vue'
 import LogisticsDialog from '@/components/LogisticsDialog.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { h } from 'vue'
@@ -381,50 +488,66 @@ const logisticsStore = useLogisticsStore()
 // 状态
 const activeTab = ref('all')
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const totalCount = ref(0)
 const actionLoading = ref(false) // 操作加载状态
-const initialLoading = ref(true) // 首次加载状态
+const searchKeyword = ref('') // 🆕 搜索关键词
+const isSearching = ref(false) // 🆕 是否处于搜索模式
 
 // 评价对话框状态
 const reviewDialogVisible = ref(false)
 const currentReviewOrder = ref(null)
 
+// 查看评价对话框状态
+const reviewDetailDialogVisible = ref(false)
+const currentReviewOrderId = ref(null)
+
 // 自动状态流转相关
 const autoStatusTimers = ref(new Map()) // 存储每个订单的定时器
-const statusFlow = ['processing', 'in_transit', 'shipped', 'delivered'] // 状态流转顺序
 
 // 计算属性
 const loading = computed(() => orderStore.loading)
 const orders = computed(() => orderStore.orders)
 
-// 基于实际订单数据计算各状态的数量
-const orderCounts = computed(() => {
-  const allOrders = orders.value || []
-
-  console.log('🔄 计算orderCounts:', {
-    totalOrders: allOrders.length,
-    orders: allOrders.map((o) => ({ id: o.id, status: o.status })),
-  })
-
-  const counts = {
-    to_pay: allOrders.filter((order) => order.status === 'pending').length,
-    to_ship: allOrders.filter((order) => order.status === 'processing').length,
-    to_receive: allOrders.filter((order) => order.status === 'shipped').length,
-    in_transit: allOrders.filter((order) => order.status === 'in_transit').length,
-    to_review: allOrders.filter((order) => order.status === 'delivered').length,
-    cancelled: allOrders.filter((order) => order.status === 'cancelled').length,
-  }
-
-  console.log('📊 计算出的counts:', counts)
-  return counts
+// 计算"全部订单"徽章数量
+// 始终使用各状态 counts 的总和，确保数据准确
+const allOrdersCount = computed(() => {
+  const counts = orderCounts.value
+  return (
+    counts.to_pay +
+    counts.to_ship +
+    counts.to_receive +
+    counts.in_transit +
+    counts.to_review +
+    counts.cancelled
+  )
 })
 
-// 是否有操作正在进行
-const hasAction = computed(() => actionLoading.value)
+// 各状态的订单数量
+// 注意：后端 counts 使用业务状态名称（to_pay, to_ship等），需要映射到订单状态（pending, processing等）
+const orderCounts = computed(() => {
+  const backendCounts = orderStore.orderCounts || {}
+
+  // 后端返回的 counts 映射：
+  // to_pay → pending (待支付)
+  // to_ship → processing (待发货)
+  // to_receive → shipped (已发货)
+  // in_transit → in_transit (运输中)
+  // to_review → delivered (待评价)
+  // cancelled → cancelled (已取消)
+
+  return {
+    to_pay: backendCounts.to_pay || 0,
+    to_ship: backendCounts.to_ship || 0,
+    to_receive: backendCounts.to_receive || 0,
+    in_transit: backendCounts.in_transit || 0,
+    to_review: backendCounts.to_review || 0,
+    cancelled: backendCounts.cancelled || 0,
+  }
+})
 
 // 获取订单状态文本
-const getStatusText = (status) => {
+const getStatusText = status => {
   const statusMap = {
     pending: '待支付',
     processing: '待发货',
@@ -437,7 +560,7 @@ const getStatusText = (status) => {
 }
 
 // 获取订单状态类型（Element Plus Tag type）
-const getStatusType = (status) => {
+const getStatusType = status => {
   const typeMap = {
     pending: 'warning',
     processing: 'primary',
@@ -450,7 +573,7 @@ const getStatusType = (status) => {
 }
 
 // 获取配送方式文本
-const getDeliveryMethodText = (method) => {
+const getDeliveryMethodText = method => {
   const methodMap = {
     standard: '标准配送',
     express: '快速配送',
@@ -459,7 +582,7 @@ const getDeliveryMethodText = (method) => {
 }
 
 // 获取支付方式文本
-const getPaymentMethodText = (method) => {
+const getPaymentMethodText = method => {
   const methodMap = {
     wechat: '微信支付',
     alipay: '支付宝',
@@ -468,16 +591,21 @@ const getPaymentMethodText = (method) => {
   return methodMap[method] || method
 }
 
-// 计算属性 - 前端过滤订单
+// 计算属性 - 获取要显示的订单
+// loadOrders 已经根据 activeTab 向后端传递了 status 参数
+// 后端返回的就是筛选后的订单，前端再做一次防御性筛选确保数据准确
 const filteredOrders = computed(() => {
-  let filtered = orders.value
+  const allOrders = orders.value || []
 
-  // 如果当前标签不是'all'，进行前端过滤
-  if (activeTab.value !== 'all') {
-    filtered = orders.value.filter((order) => order.status === activeTab.value)
+  // 如果是"全部订单"标签，显示所有订单
+  if (activeTab.value === 'all') {
+    return allOrders
   }
 
-  return filtered
+  // 否则，筛选出与当前标签匹配的订单（防御性筛选）
+  return allOrders.filter(order => {
+    return order.status === activeTab.value
+  })
 })
 
 // 强制更新key
@@ -488,13 +616,13 @@ const forceUpdate = () => {
   forceUpdateKey.value++
 }
 // 格式化价格
-const formatPrice = (price) => {
+const formatPrice = price => {
   const numPrice = typeof price === 'number' ? price : parseFloat(price) || 0
   return numPrice.toFixed(2)
 }
 
 // 格式化日期
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleString('zh-CN', {
     year: 'numeric',
@@ -505,7 +633,8 @@ const formatDate = (date) => {
   })
 }
 
-// 加载所有订单（不进行状态筛选）
+// 加载所有订单（不进行状态筛选）- 已弃用，使用 loadOrders 代替
+// eslint-disable-next-line no-unused-vars
 const loadAllOrders = async (showLoading = false) => {
   try {
     const params = {
@@ -514,26 +643,7 @@ const loadAllOrders = async (showLoading = false) => {
       // 不传status参数，加载所有订单
     }
 
-    if (showLoading) {
-      loading.value = true
-    }
-
-    console.log('📋 loadAllOrders开始:', {
-      params,
-      currentPage: currentPage.value,
-      pageSize: pageSize.value,
-    })
-
     const result = await orderStore.fetchOrders(params)
-
-    console.log('📋 loadAllOrders完成:', {
-      params,
-      resultOrders: result.orders?.length || 0,
-      storeOrders: orderStore.orders?.length || 0,
-      computedOrders: orders.value?.length || 0,
-      resultTotal: result.total,
-      resultCounts: result.counts,
-    })
 
     // 强制触发响应式更新
     await nextTick()
@@ -545,23 +655,21 @@ const loadAllOrders = async (showLoading = false) => {
       totalCount.value = orders.value.length
     }
 
-    // 检查并启动待发货订单的自动流转
-    checkAndStartAutoFlow()
+    // 检查并启动待发货订单的自动流转（已禁用，避免每次刷新订单状态都变化）
+    // checkAndStartAutoFlow()
 
     // 强制更新页面
     forceUpdate()
-
-    console.log('🔄 加载所有订单完成')
   } catch (error) {
-    console.error('❌ 加载所有订单失败:', error)
+    // eslint-disable-next-line no-console
+    console.error('加载所有订单失败:', error)
     ElMessage.error('加载订单失败')
-  } finally {
-    loading.value = false
   }
+  // 注意: loading 是计算属性，不需要手动设置
 }
 
 // 加载订单列表
-const loadOrders = async (showLoading = true) => {
+const loadOrders = async () => {
   try {
     const params = {
       page: currentPage.value,
@@ -582,45 +690,30 @@ const loadOrders = async (showLoading = true) => {
       params.status = statusMapping[activeTab.value] || activeTab.value
     }
 
-    if (showLoading) {
-      loading.value = true
-    }
-
     const result = await orderStore.fetchOrders(params)
-
-    // 更新订单数据 - 通过store更新，而不是直接赋值computed
-    // orders.value = result.orders || [] // 错误：不能直接赋值computed属性
-
-    console.log('📋 loadOrders完成:', {
-      resultOrders: result.orders?.length || 0,
-      storeOrders: orderStore.orders?.length || 0,
-      computedOrders: orders.value?.length || 0,
-    })
 
     // 强制触发响应式更新
     await nextTick()
 
     // 后端返回格式: { orders: [...], counts: {...}, total: xxx }
-    // 或者可能没有 total 字段，需要计算
+    // 如果后端正确返回了 total，使用后端的值
     if (result.total !== undefined) {
       totalCount.value = result.total
     } else {
-      // 如果后端没有返回 total，使用 orders 的长度（注意这只是当前页）
-      totalCount.value = orders.value.length
+      // 如果后端没有返回 total，前端计算当前标签下的订单总数
+      totalCount.value = orders.value.filter(
+        order => activeTab.value === 'all' || order.status === activeTab.value
+      ).length
     }
 
-    // 检查并启动待发货订单的自动流转
-    checkAndStartAutoFlow()
+    // 检查并启动待发货订单的自动流转（已禁用，避免每次刷新订单状态都变化）
+    // checkAndStartAutoFlow()
 
     // 强制更新页面
     forceUpdate()
-
-    // 如果是静默刷新，不显示提示
-    if (!showLoading) {
-      console.log('🔄 静默刷新完成')
-    }
   } catch (error) {
-    console.error('❌ 加载订单列表失败:', error)
+    // eslint-disable-next-line no-console
+    console.error('加载订单列表失败:', error)
 
     // 更详细的错误提示
     let errorMsg = '加载订单列表失败'
@@ -640,21 +733,18 @@ const loadOrders = async (showLoading = true) => {
         router.push({ path: '/login', query: { redirect: route.fullPath } })
       }, 1500)
     }
-  } finally {
-    initialLoading.value = false
-    loading.value = false
   }
 }
 
 // 刷新订单列表
 const refreshOrders = async () => {
   ElMessage.info('正在刷新...')
-  await loadAllOrders()
+  await loadOrders()
   ElMessage.success('刷新成功')
 }
 
 // 标签切换前的处理
-const beforeTabLeave = (activeName, oldActiveName) => {
+const beforeTabLeave = () => {
   // 如果正在加载，阻止切换
   if (loading.value) {
     return false
@@ -672,14 +762,14 @@ const debounce = (func, delay) => {
 }
 
 // 切换标签
-const handleTabChange = (tabName) => {
-  console.log('切换到标签:', tabName)
-
+const handleTabChange = tabName => {
   // 防止重复切换
   if (tabName === activeTab.value) return
 
-  // 重置分页
+  // 立即清空旧数据（避免显示缓存数据）
+  orderStore.clearOrders()
   currentPage.value = 1
+  totalCount.value = 0
 
   // 使用防抖加载数据
   debouncedLoadOrders()
@@ -691,23 +781,65 @@ const debouncedLoadOrders = debounce(() => {
 }, 50) // 减少延迟时间
 
 // 分页变化
-const handlePageChange = (page) => {
-  console.log('切换到第', page, '页')
+const handlePageChange = page => {
   currentPage.value = page
   loadOrders()
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 // 每页数量变化
-const handleSizeChange = (size) => {
-  console.log('每页显示', size, '条')
+const handleSizeChange = size => {
   pageSize.value = size
   currentPage.value = 1
   loadOrders()
 }
 
+// 🆕 搜索订单
+const handleSearch = async () => {
+  if (!searchKeyword.value.trim()) {
+    ElMessage.warning('请输入搜索关键词')
+    return
+  }
+
+  try {
+    isSearching.value = true
+    const params = {
+      keyword: searchKeyword.value.trim(),
+      page: currentPage.value,
+      page_size: pageSize.value,
+    }
+
+    const result = await orderStore.searchOrders(params)
+
+    // 更新总数
+    if (result.total !== undefined) {
+      totalCount.value = result.total
+    } else {
+      totalCount.value = orders.value.length
+    }
+
+    if (orders.value.length === 0) {
+      ElMessage.info('未找到相关订单')
+    } else {
+      ElMessage.success(`找到 ${totalCount.value} 条相关订单`)
+    }
+  } catch (error) {
+    ElMessage.error(error.message || '搜索失败')
+  }
+}
+
+// 🆕 清除搜索
+const handleSearchClear = () => {
+  searchKeyword.value = ''
+  if (isSearching.value) {
+    isSearching.value = false
+    currentPage.value = 1
+    loadOrders()
+  }
+}
+
 // 跳转到订单详情
-const goToOrderDetail = (orderId) => {
+const goToOrderDetail = orderId => {
   router.push(`/orders/${orderId}`)
 }
 
@@ -744,12 +876,16 @@ const handleCancelOrder = async (orderId, event) => {
   }
 
   try {
-    await ElMessageBox.confirm('取消订单后将无法恢复，确定要取消吗？', '取消订单', {
-      confirmButtonText: '确定取消',
-      cancelButtonText: '再想想',
-      type: 'warning',
-      distinguishCancelAndClose: true,
-    })
+    await ElMessageBox.confirm(
+      '取消订单后将无法恢复，确定要取消吗？',
+      '取消订单',
+      {
+        confirmButtonText: '确定取消',
+        cancelButtonText: '再想想',
+        type: 'warning',
+        distinguishCancelAndClose: true,
+      }
+    )
 
     actionLoading.value = true
 
@@ -766,12 +902,14 @@ const handleCancelOrder = async (orderId, event) => {
     loading.close()
     ElMessage.success('订单已取消')
 
-    // 刷新列表 - 加载所有订单
-    await loadAllOrders()
+    // 刷新列表 - 根据当前标签加载订单
+    await loadOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
+      // eslint-disable-next-line no-console
       console.error('❌ 取消订单失败:', error)
-      const errorMsg = error.response?.data?.message || error.message || '取消订单失败'
+      const errorMsg =
+        error.response?.data?.message || error.message || '取消订单失败'
       ElMessage.error(errorMsg)
     }
   } finally {
@@ -818,12 +956,14 @@ const handleConfirmOrder = async (orderId, event) => {
       showClose: true,
     })
 
-    // 刷新列表 - 加载所有订单
-    await loadAllOrders()
+    // 刷新列表 - 根据当前标签加载订单
+    await loadOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
+      // eslint-disable-next-line no-console
       console.error('❌ 确认收货失败:', error)
-      const errorMsg = error.response?.data?.message || error.message || '确认收货失败'
+      const errorMsg =
+        error.response?.data?.message || error.message || '确认收货失败'
       ElMessage.error(errorMsg)
     }
   } finally {
@@ -845,12 +985,16 @@ const handleDeleteOrder = async (orderId, event) => {
   }
 
   try {
-    await ElMessageBox.confirm('删除后将无法恢复，确定要删除这个订单吗？', '删除订单', {
-      confirmButtonText: '确定删除',
-      cancelButtonText: '取消',
-      type: 'error',
-      distinguishCancelAndClose: true,
-    })
+    await ElMessageBox.confirm(
+      '删除后将无法恢复，确定要删除这个订单吗？',
+      '删除订单',
+      {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'error',
+        distinguishCancelAndClose: true,
+      }
+    )
 
     actionLoading.value = true
 
@@ -866,12 +1010,14 @@ const handleDeleteOrder = async (orderId, event) => {
     loading.close()
     ElMessage.success('订单已删除')
 
-    // 刷新列表 - 加载所有订单
-    await loadAllOrders()
+    // 刷新列表 - 根据当前标签加载订单
+    await loadOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
+      // eslint-disable-next-line no-console
       console.error('❌ 删除订单失败:', error)
-      const errorMsg = error.response?.data?.message || error.message || '删除订单失败'
+      const errorMsg =
+        error.response?.data?.message || error.message || '删除订单失败'
       ElMessage.error(errorMsg)
     }
   } finally {
@@ -894,7 +1040,7 @@ const handleReview = async (orderId, event) => {
 
   try {
     // 获取订单信息
-    const order = orders.value.find((o) => o.id === orderId)
+    const order = orders.value.find(o => o.id === orderId)
     if (!order) {
       ElMessage.error('订单不存在')
       return
@@ -904,13 +1050,14 @@ const handleReview = async (orderId, event) => {
     currentReviewOrder.value = order
     reviewDialogVisible.value = true
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('❌ 打开评价对话框失败:', error)
     ElMessage.error('打开评价对话框失败')
   }
 }
 
 // 处理评价提交
-const handleReviewSubmit = async (reviewData) => {
+const handleReviewSubmit = async reviewData => {
   try {
     actionLoading.value = true
 
@@ -922,27 +1069,66 @@ const handleReviewSubmit = async (reviewData) => {
     })
 
     // 调用评价API
-    await orderStore.reviewOrder(currentReviewOrder.value.id, reviewData)
+    const result = await orderStore.reviewOrder(
+      currentReviewOrder.value.id,
+      reviewData
+    )
 
     loading.close()
-    ElMessage.success({
-      message: '✅ 评价提交成功！感谢您的反馈',
-      duration: 3000,
-      showClose: true,
-    })
+
+    // 检查是否是已评价的情况
+    if (result && result.alreadyReviewed) {
+      ElMessage.warning({
+        message: '您已评价过此商品',
+        duration: 3000,
+        showClose: true,
+      })
+    } else {
+      ElMessage.success({
+        message: '✅ 评价提交成功！感谢您的反馈',
+        duration: 3000,
+        showClose: true,
+      })
+    }
 
     // 关闭对话框
     reviewDialogVisible.value = false
     currentReviewOrder.value = null
 
-    // 刷新列表 - 加载所有订单
-    await loadAllOrders()
+    // 刷新列表 - 根据当前标签加载订单
+    await loadOrders()
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('❌ 评价失败:', error)
-    const errorMsg = error.response?.data?.message || error.message || '评价失败'
+    const errorMsg =
+      error.response?.data?.message || error.message || '评价失败'
     ElMessage.error(errorMsg)
   } finally {
     actionLoading.value = false
+  }
+}
+
+// 查看我的评价
+const handleViewReview = async (orderId, event) => {
+  if (event) {
+    event.stopPropagation()
+  }
+
+  try {
+    // 找到对应的订单
+    const order = orderStore.orders.find(o => o.id === orderId)
+    if (!order) {
+      ElMessage.error('订单不存在')
+      return
+    }
+
+    currentReviewOrderId.value = orderId
+    currentReviewOrder.value = order
+    reviewDetailDialogVisible.value = true
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('打开评价详情失败:', error)
+    ElMessage.error('打开评价详情失败')
   }
 }
 
@@ -955,7 +1141,7 @@ const handleTrackOrder = async (orderId, event) => {
 
   try {
     // 获取订单信息
-    const order = orders.value.find((o) => o.id === orderId)
+    const order = orders.value.find(o => o.id === orderId)
     if (!order) {
       ElMessage.error('订单不存在')
       return
@@ -966,7 +1152,12 @@ const handleTrackOrder = async (orderId, event) => {
     const carrier = order.carrier || '顺丰速运'
 
     // 使用物流store获取数据
-    await logisticsStore.fetchLogisticsInfo(trackingNumber, carrier, order.id, true)
+    await logisticsStore.fetchLogisticsInfo(
+      trackingNumber,
+      carrier,
+      order.id,
+      true
+    )
 
     // 显示物流跟踪对话框
     ElMessageBox({
@@ -978,11 +1169,11 @@ const handleTrackOrder = async (orderId, event) => {
         orderStatus: order.status,
         autoRefresh: true,
         refreshInterval: 30000,
-        onUpdate: (data) => {
-          console.log('物流信息更新:', data)
+        onUpdate: () => {
+          // 物流信息已更新
         },
-        onError: (error) => {
-          console.error('物流信息错误:', error)
+        onError: () => {
+          // 物流信息错误
         },
       }),
       customClass: 'logistics-dialog',
@@ -994,6 +1185,7 @@ const handleTrackOrder = async (orderId, event) => {
       },
     })
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('❌ 查看物流失败:', error)
     ElMessage.error('查看物流信息失败')
   }
@@ -1042,8 +1234,10 @@ const handleBuyAgain = async (orderId, event) => {
       ElMessage.warning('订单中的商品已下架或库存不足')
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('❌ 再次购买失败:', error)
-    const errorMsg = error.response?.data?.message || error.message || '再次购买失败'
+    const errorMsg =
+      error.response?.data?.message || error.message || '再次购买失败'
     ElMessage.error(errorMsg)
   } finally {
     actionLoading.value = false
@@ -1065,18 +1259,22 @@ const handlePayOrder = async (orderId, event) => {
 
   try {
     // 显示支付方式选择对话框
-    const { value: paymentMethod } = await ElMessageBox.prompt('请选择支付方式', '订单支付', {
-      confirmButtonText: '确认支付',
-      cancelButtonText: '取消',
-      inputType: 'select',
-      inputOptions: {
-        wechat: '微信支付',
-        alipay: '支付宝',
-        credit_card: '信用卡',
-      },
-      inputValue: 'wechat',
-      inputPlaceholder: '请选择支付方式',
-    })
+    const { value: paymentMethod } = await ElMessageBox.prompt(
+      '请选择支付方式',
+      '订单支付',
+      {
+        confirmButtonText: '确认支付',
+        cancelButtonText: '取消',
+        inputType: 'select',
+        inputOptions: {
+          wechat: '微信支付',
+          alipay: '支付宝',
+          credit_card: '信用卡',
+        },
+        inputValue: 'wechat',
+        inputPlaceholder: '请选择支付方式',
+      }
+    )
 
     if (!paymentMethod) {
       return
@@ -1101,12 +1299,14 @@ const handlePayOrder = async (orderId, event) => {
       showClose: true,
     })
 
-    // 刷新列表 - 加载所有订单而不是只加载当前标签的订单
-    await loadAllOrders()
+    // 刷新列表 - 根据当前标签加载订单
+    await loadOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
+      // eslint-disable-next-line no-console
       console.error('❌ 支付失败:', error)
-      const errorMsg = error.response?.data?.message || error.message || '支付失败'
+      const errorMsg =
+        error.response?.data?.message || error.message || '支付失败'
       ElMessage.error(errorMsg)
     }
   } finally {
@@ -1123,7 +1323,7 @@ const handleContactSeller = async (orderId, event) => {
 
   try {
     // 获取订单信息
-    const order = orders.value.find((o) => o.id === orderId)
+    const order = orders.value.find(o => o.id === orderId)
     if (!order) {
       ElMessage.error('订单不存在')
       return
@@ -1177,10 +1377,11 @@ const handleContactSeller = async (orderId, event) => {
         customStyle: {
           width: '450px',
         },
-      },
+      }
     )
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
+      // eslint-disable-next-line no-console
       console.error('❌ 联系商家失败:', error)
       ElMessage.error('联系商家失败')
     }
@@ -1188,7 +1389,7 @@ const handleContactSeller = async (orderId, event) => {
 }
 
 // 处理图片加载错误
-const handleImageError = (event) => {
+const handleImageError = event => {
   const img = event.target
   img.style.display = 'none'
   // 创建占位符
@@ -1199,7 +1400,7 @@ const handleImageError = (event) => {
 }
 
 // 获取订单商品信息
-const getOrderItems = (order) => {
+const getOrderItems = order => {
   // 直接返回订单的商品信息（后端API现在会返回items字段）
   return order.items || []
 }
@@ -1207,88 +1408,103 @@ const getOrderItems = (order) => {
 // 监听路由查询参数变化（支持通过 URL 参数筛选）
 watch(
   () => route.query.status,
-  (newStatus) => {
+  newStatus => {
     if (newStatus && newStatus !== activeTab.value) {
       activeTab.value = newStatus
       currentPage.value = 1
       loadOrders()
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
-// 自动状态流转功能
-const startAutoStatusFlow = (orderId) => {
-  console.log('🚀 开始自动状态流转，订单ID:', orderId)
-
-  // 清除已存在的定时器
-  if (autoStatusTimers.value.has(orderId)) {
-    clearInterval(autoStatusTimers.value.get(orderId))
+// 🆕 自动状态流转功能（已优化 - 调用后端 API 验证）
+const startAutoStatusFlow = async order => {
+  // 防止重复操作
+  if (autoStatusTimers.value.has(order.id) || actionLoading.value) {
+    ElMessage.warning('请等待当前操作完成')
+    return
   }
 
-  let currentStatusIndex = 0 // 从 processing 开始
+  // 状态流转映射
+  const statusFlowMap = {
+    processing: 'shipped', // 待发货 → 已发货
+    shipped: 'in_transit', // 已发货 → 运输中
+    in_transit: 'delivered', // 运输中 → 已送达
+  }
 
-  const timer = setInterval(async () => {
-    try {
-      if (currentStatusIndex >= statusFlow.length) {
-        console.log('✅ 订单状态流转完成，订单ID:', orderId)
-        clearInterval(timer)
-        autoStatusTimers.value.delete(orderId)
-        return
+  const nextStatus = statusFlowMap[order.status]
+
+  if (!nextStatus) {
+    ElMessage.warning('该订单无法继续流转')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定将订单状态从 "${getStatusText(order.status)}" 变更为 "${getStatusText(nextStatus)}" 吗？`,
+      '订单状态流转',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info',
       }
+    )
 
-      const nextStatus = statusFlow[currentStatusIndex]
-      console.log(`🔄 自动更新订单状态: ${orderId} -> ${nextStatus}`)
+    actionLoading.value = true
 
-      await orderStore.updateOrderStatus(orderId, nextStatus)
+    // 调用后端 API 更新订单状态（后端会进行状态流转验证）
+    await orderStore.updateOrderStatus(order.id, nextStatus)
 
-      // 显示状态更新提示
-      const statusText = getStatusText(nextStatus)
-      ElMessage.success(`订单状态已更新为：${statusText}`)
+    ElMessage.success(`订单已更新为：${getStatusText(nextStatus)}`)
 
-      currentStatusIndex++
-    } catch (error) {
-      console.error('❌ 自动状态流转失败:', error)
-      clearInterval(timer)
-      autoStatusTimers.value.delete(orderId)
-      ElMessage.error('自动状态流转失败')
+    // 刷新订单列表
+    await loadOrders()
+  } catch (error) {
+    if (error !== 'cancel') {
+      // 后端会返回详细错误信息（如：非法状态流转）
+      const errorMsg = error.message || '状态更新失败'
+      ElMessage.error(errorMsg)
     }
-  }, 60000) // 每60秒（1分钟）执行一次
-
-  // 存储定时器
-  autoStatusTimers.value.set(orderId, timer)
-}
-
-// 停止自动状态流转
-const stopAutoStatusFlow = (orderId) => {
-  if (autoStatusTimers.value.has(orderId)) {
-    clearInterval(autoStatusTimers.value.get(orderId))
-    autoStatusTimers.value.delete(orderId)
-    console.log('⏹️ 停止自动状态流转，订单ID:', orderId)
+  } finally {
+    actionLoading.value = false
   }
 }
+
+// 停止自动状态流转（暂未使用，但保留供将来使用）
+// const stopAutoStatusFlow = orderId => {
+//   if (autoStatusTimers.value.has(orderId)) {
+//     clearInterval(autoStatusTimers.value.get(orderId))
+//     autoStatusTimers.value.delete(orderId)
+//   }
+// }
 
 // 清理所有定时器
 const clearAllAutoStatusTimers = () => {
-  autoStatusTimers.value.forEach((timer, orderId) => {
+  autoStatusTimers.value.forEach(timer => {
     clearInterval(timer)
-    console.log('🧹 清理定时器，订单ID:', orderId)
   })
   autoStatusTimers.value.clear()
 }
 
-// 检查并启动待发货订单的自动流转
-const checkAndStartAutoFlow = () => {
-  orders.value.forEach((order) => {
-    if (order.status === 'processing' && !autoStatusTimers.value.has(order.id)) {
-      console.log('🔍 发现待发货订单，启动自动流转:', order.id)
-      startAutoStatusFlow(order.id)
-    }
-  })
-}
+// 检查并启动待发货订单的自动流转（已禁用）
+// const checkAndStartAutoFlow = () => {
+//   orders.value.forEach(order => {
+//     if (
+//       order.status === 'processing' &&
+//       !autoStatusTimers.value.has(order.id)
+//     ) {
+//       console.log('🔍 发现待发货订单，启动自动流转:', order.id)
+//       startAutoStatusFlow(order.id)
+//     }
+//   })
+// }
 
 // 初始化
 onMounted(() => {
+  // 清理旧的持久化数据（移除 orders 字段）
+  orderStore.initCleanupPersist()
+
   // 如果 URL 有状态参数，使用它
   const statusFromQuery = route.query.status
   if (statusFromQuery) {
@@ -1296,12 +1512,6 @@ onMounted(() => {
   }
 
   loadOrders()
-
-  console.log('📋 订单列表页面初始化完成', {
-    activeTab: activeTab.value,
-    currentPage: currentPage.value,
-    pageSize: pageSize.value,
-  })
 })
 
 // 页面卸载时清理定时器
@@ -1373,6 +1583,27 @@ onUnmounted(() => {
   font-weight: 700;
   color: #333;
   margin: 0;
+}
+
+/* 🆕 头部操作区域 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 🆕 搜索框样式 */
+.search-input {
+  width: 350px;
+}
+
+.search-input :deep(.el-input__inner) {
+  border-radius: 20px;
+}
+
+.search-input :deep(.el-input-group__append) {
+  border-radius: 0 20px 20px 0;
+  padding: 0 15px;
 }
 
 /* 订单标签页 */

@@ -190,8 +190,8 @@ onMounted(async () => {
 const cartItems = computed(() => {
   return cartStore.items.map(item => ({
     ...item,
-    price: `$${item.price}`,
-    subtotal: `$${(item.price * item.quantity).toFixed(2)}`,
+    price: `¥${item.price}`,
+    subtotal: `¥${(item.price * item.quantity).toFixed(2)}`,
     image: item.image_url || item.image,
   }))
 })
@@ -200,9 +200,9 @@ const cartItems = computed(() => {
 const orderSummary = computed(() => {
   const subtotal = cartStore.selectedTotal.toFixed(2)
   return {
-    subtotal: `$${subtotal}`,
+    subtotal: `¥${subtotal}`,
     shipping: '免费',
-    total: `$${subtotal}`,
+    total: `¥${subtotal}`,
   }
 })
 

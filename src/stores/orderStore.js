@@ -9,9 +9,13 @@ import {
   deleteOrder as deleteOrderAPI,
   updateOrderStatus as updateOrderStatusAPI,
   // payOrder as payOrderAPI, // 暂时未使用
-  reviewOrder as reviewOrderAPI,
   buyAgain as buyAgainAPI,
+  // 🆕 新增接口
+  searchOrders as searchOrdersAPI,
+  batchUpdateOrderStatus as batchUpdateOrderStatusAPI,
+  getOrderStatistics as getOrderStatisticsAPI,
 } from '@/api/order'
+import { createReview } from '@/api/review'
 
 export const useOrderStore = defineStore('order', {
   state: () => ({
@@ -21,8 +25,11 @@ export const useOrderStore = defineStore('order', {
       to_pay: 0,
       to_ship: 0,
       to_receive: 0,
+      in_transit: 0,
       to_review: 0,
+      cancelled: 0,
     },
+    reviewedOrders: [], // 已评价的订单ID列表
     loading: false,
     error: null,
   }),
@@ -30,6 +37,19 @@ export const useOrderStore = defineStore('order', {
   persist: {
     key: 'order',
     storage: localStorage,
+    // 只持久化评价记录，订单数据和统计都从服务器获取
+    paths: ['reviewedOrders'],
+    // 自定义序列化，确保只保存 reviewedOrders
+    serializer: {
+      serialize: state => {
+        return JSON.stringify({
+          reviewedOrders: state.reviewedOrders || [],
+        })
+      },
+      deserialize: value => {
+        return JSON.parse(value)
+      },
+    },
   },
 
   getters: {
@@ -53,6 +73,38 @@ export const useOrderStore = defineStore('order', {
   },
 
   actions: {
+    /**
+     * 清空订单列表（切换标签时使用）
+     */
+    clearOrders() {
+      this.orders = []
+    },
+
+    /**
+     * 初始化时清理持久化数据（只保留 reviewedOrders）
+     */
+    initCleanupPersist() {
+      try {
+        const storageKey = 'order'
+        const stored = localStorage.getItem(storageKey)
+        if (stored) {
+          const data = JSON.parse(stored)
+
+          // 如果存在 orders 或 orderCounts 字段，说明是旧数据，需要清理
+          if (data.orders || data.orderCounts) {
+            // 只保留评价记录
+            const cleaned = {
+              reviewedOrders: data.reviewedOrders || [],
+            }
+            localStorage.setItem(storageKey, JSON.stringify(cleaned))
+          }
+        }
+      } catch {
+        // 如果清理失败，直接删除整个缓存
+        localStorage.removeItem('order')
+      }
+    },
+
     /**
      * 创建订单
      * @param {Object} orderData - 订单数据
@@ -106,8 +158,28 @@ export const useOrderStore = defineStore('order', {
         const response = await getOrderList(params)
         const result = response.data.data || response.data
 
-        this.orders = result.orders || []
-        this.orderCounts = result.counts || this.orderCounts
+        // 对订单按创建时间倒序排序（最新的在前）
+        const orders = result.orders || []
+        this.orders = orders.sort((a, b) => {
+          const dateA = new Date(a.created_at || 0)
+          const dateB = new Date(b.created_at || 0)
+          return dateB - dateA // 倒序：最新的在前
+        })
+
+        // 保存后端返回的 counts，确保所有字段都存在
+        if (result.counts) {
+          this.orderCounts = {
+            to_pay: result.counts.to_pay || 0,
+            to_ship: result.counts.to_ship || 0,
+            to_receive: result.counts.to_receive || 0,
+            in_transit: result.counts.in_transit || 0,
+            to_review: result.counts.to_review || 0,
+            cancelled: result.counts.cancelled || 0,
+          }
+        }
+
+        // 同步评价状态：优先服务器，补充本地缓存
+        this.syncReviewStatus()
 
         return result
       } catch (error) {
@@ -115,6 +187,49 @@ export const useOrderStore = defineStore('order', {
         throw error
       } finally {
         this.loading = false
+      }
+    },
+
+    /**
+     * 同步评价状态
+     */
+    syncReviewStatus() {
+      try {
+        const reviewedSet = new Set(this.reviewedOrders)
+
+        this.orders.forEach(order => {
+          // 优先使用服务器返回的状态
+          if (order.is_reviewed !== undefined && order.is_reviewed !== null) {
+            if (order.is_reviewed) {
+              reviewedSet.add(order.id)
+            } else {
+              reviewedSet.delete(order.id)
+            }
+          } else {
+            // 服务器没有返回，使用 Pinia 缓存
+            if (reviewedSet.has(order.id)) {
+              order.is_reviewed = true
+            }
+          }
+        })
+
+        // 同步到 Pinia state（会自动持久化）
+        this.reviewedOrders = Array.from(reviewedSet)
+      } catch {
+        // 忽略错误
+      }
+    },
+
+    /**
+     * 保存已评价订单到缓存（使用 Pinia persist）
+     */
+    saveReviewedOrderToCache(orderId) {
+      try {
+        if (!this.reviewedOrders.includes(orderId)) {
+          this.reviewedOrders.push(orderId)
+        }
+      } catch {
+        // 忽略错误
       }
     },
 
@@ -229,7 +344,7 @@ export const useOrderStore = defineStore('order', {
     },
 
     /**
-     * 更新订单状态
+     * 更新订单状态（优化版 - 支持后端状态流转验证）
      * @param {Number} id - 订单ID
      * @param {String} status - 新状态
      */
@@ -238,35 +353,31 @@ export const useOrderStore = defineStore('order', {
       this.error = null
 
       try {
-        // 调用后端API更新订单状态
-        await updateOrderStatusAPI(id, status)
+        // 调用后端API更新订单状态（后端会进行状态流转验证）
+        const response = await updateOrderStatusAPI(id, status)
+        const result = response.data.data || response.data
 
         // 更新本地状态
-        const order = this.orders.find(o => o.id === id) // 使用 === 进行严格比较
+        const order = this.orders.find(o => o.id === id)
         if (order) {
           order.status = status
           // 同时更新 updated_at 时间
           order.updated_at = new Date().toISOString()
-        } else {
-          // 如果订单列表中找不到，可能是新创建的订单，先刷新列表
-          await this.fetchOrders()
-
-          // 再次尝试更新
-          const updatedOrder = this.orders.find(o => o.id === id)
-          if (updatedOrder) {
-            updatedOrder.status = status
-            updatedOrder.updated_at = new Date().toISOString()
-          } else {
-            // 订单未找到
-          }
         }
 
-        if (this.currentOrder && this.currentOrder.order.id === id) {
+        // 更新当前订单详情
+        if (
+          this.currentOrder &&
+          this.currentOrder.order &&
+          this.currentOrder.order.id === id
+        ) {
           this.currentOrder.order.status = status
+          this.currentOrder.order.updated_at = new Date().toISOString()
         }
 
-        return true
+        return result
       } catch (error) {
+        // 后端会返回详细的错误信息（例如：订单状态不能从"已送达"变更为"已发货"）
         this.error = error.message || '更新订单状态失败'
         throw error
       } finally {
@@ -316,9 +427,84 @@ export const useOrderStore = defineStore('order', {
       try {
         this.loading = true
 
-        const response = await reviewOrderAPI(orderId, reviewData)
+        // 准备评价数据
+        let reviewPayload = null
+        if (
+          reviewData.product_reviews &&
+          reviewData.product_reviews.length > 0
+        ) {
+          const firstProduct = reviewData.product_reviews[0]
+          reviewPayload = {
+            product_id: firstProduct.product_id,
+            order_id: orderId,
+            rating: firstProduct.rating || reviewData.rating,
+            comment: reviewData.comment || '',
+            images: reviewData.images || [],
+          }
+        } else {
+          const order = this.orders.find(o => o.id === orderId)
+          if (order && order.items && order.items.length > 0) {
+            reviewPayload = {
+              product_id: order.items[0].product_id,
+              order_id: orderId,
+              rating: reviewData.rating,
+              comment: reviewData.comment || '',
+              images: reviewData.images || [],
+            }
+          }
+        }
 
-        return response.data
+        if (reviewPayload) {
+          try {
+            await createReview(reviewPayload)
+
+            // 标记订单为已评价
+            const order = this.orders.find(o => o.id === orderId)
+            if (order) {
+              order.is_reviewed = true
+            }
+
+            // 保存到缓存
+            this.saveReviewedOrderToCache(orderId)
+          } catch (err) {
+            // 检查是否已评价
+            if (err.message && err.message.includes('已评价')) {
+              const order = this.orders.find(o => o.id === orderId)
+              if (order) {
+                order.is_reviewed = true
+              }
+              this.saveReviewedOrderToCache(orderId)
+              return {
+                success: true,
+                message: '您已评价过此商品',
+                alreadyReviewed: true,
+              }
+            }
+
+            // 检查是否是超时或网络错误
+            if (
+              err.code === 'ECONNABORTED' ||
+              err.message.includes('网络错误') ||
+              err.message.includes('timeout')
+            ) {
+              // 超时或网络错误，降级处理：标记为已评价
+              const order = this.orders.find(o => o.id === orderId)
+              if (order) {
+                order.is_reviewed = true
+              }
+              this.saveReviewedOrderToCache(orderId)
+              return {
+                success: true,
+                message: '评价已提交，请稍后刷新查看',
+                timeout: true,
+              }
+            }
+
+            throw err
+          }
+        }
+
+        return { success: true, message: '评价成功' }
       } catch (error) {
         this.error = error.message || '评价失败'
         throw error
@@ -351,6 +537,94 @@ export const useOrderStore = defineStore('order', {
      */
     clearError() {
       this.error = null
+    },
+
+    /**
+     * 🆕 搜索订单（按订单号或商品名称）
+     * @param {Object} params - 搜索参数
+     * @param {String} params.keyword - 搜索关键词
+     * @param {Number} params.page - 页码
+     * @param {Number} params.page_size - 每页数量
+     */
+    async searchOrders(params = {}) {
+      this.loading = true
+      this.error = null
+
+      try {
+        const response = await searchOrdersAPI(params)
+        const result = response.data.data || response.data
+
+        // 更新订单列表
+        const orders = result.orders || []
+        this.orders = orders.sort((a, b) => {
+          const dateA = new Date(a.created_at || 0)
+          const dateB = new Date(b.created_at || 0)
+          return dateB - dateA
+        })
+
+        return result
+      } catch (error) {
+        this.error = error.message || '搜索订单失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * 🆕 批量更新订单状态
+     * @param {Object} data - 批量更新数据
+     * @param {Array} data.order_ids - 订单ID数组
+     * @param {String} data.status - 目标状态
+     */
+    async batchUpdateOrderStatus(data) {
+      this.loading = true
+      this.error = null
+
+      try {
+        const response = await batchUpdateOrderStatusAPI(data)
+        const result = response.data.data || response.data
+
+        // 更新本地订单状态
+        if (data.order_ids && Array.isArray(data.order_ids)) {
+          data.order_ids.forEach(orderId => {
+            const order = this.orders.find(o => o.id === orderId)
+            if (order) {
+              order.status = data.status
+              order.updated_at = new Date().toISOString()
+            }
+          })
+        }
+
+        return result
+      } catch (error) {
+        this.error = error.message || '批量更新订单状态失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * 🆕 获取订单统计数据
+     * @param {Object} params - 查询参数
+     * @param {String} params.period - 统计周期 (today/week/month/year)
+     */
+    async getOrderStatistics(params = {}) {
+      this.loading = true
+      this.error = null
+
+      try {
+        const response = await getOrderStatisticsAPI(params)
+        const result = response.data.data || response.data
+
+        return result
+      } catch (error) {
+        this.error = error.message || '获取订单统计失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
     },
   },
 })

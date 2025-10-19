@@ -40,7 +40,9 @@
               :disabled="loading"
               :class="{ refreshing: loading }"
             >
-              <span class="refresh-icon" :class="{ spinning: loading }">🔄</span>
+              <span class="refresh-icon" :class="{ spinning: loading }">
+                🔄
+              </span>
               {{ loading ? '更新中...' : '刷新' }}
             </button>
             <div class="last-update">
@@ -125,7 +127,10 @@
                 <span v-if="step.completed">✓</span>
                 <span v-else>{{ step.icon }}</span>
               </div>
-              <div v-if="index < logisticsSteps.length - 1" class="step-line"></div>
+              <div
+                v-if="index < logisticsSteps.length - 1"
+                class="step-line"
+              ></div>
             </div>
             <div class="step-content">
               <div class="step-title">{{ step.title }}</div>
@@ -154,7 +159,10 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="!loading && !error && !logisticsSteps.length" class="empty-state">
+      <div
+        v-if="!loading && !error && !logisticsSteps.length"
+        class="empty-state"
+      >
         <div class="empty-icon">📦</div>
         <div class="empty-text">暂无物流信息</div>
         <div class="empty-description">订单可能还未发货或物流信息尚未更新</div>
@@ -164,7 +172,9 @@
       <div v-if="logisticsSteps.length > 0" class="tips-section">
         <div class="tips-content">
           <span class="tips-icon">💡</span>
-          <span class="tips-text">如有疑问请联系客服 400-123-4567，或通过在线客服咨询</span>
+          <span class="tips-text">
+            如有疑问请联系客服 400-123-4567，或通过在线客服咨询
+          </span>
         </div>
       </div>
     </div>
@@ -176,6 +186,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import logisticsRealTimeService from '@/services/logisticsRealTimeService'
 import { useAddressStore } from '@/stores/addressStore'
+import { getLogistics } from '@/api/order' // 🆕 导入新的物流接口
 
 // Props
 const props = defineProps({
@@ -226,7 +237,7 @@ const originAddress = ref(null)
 const currentStatus = computed(() => {
   if (!logisticsSteps.value.length) return null
 
-  const currentStep = logisticsSteps.value.find((step) => step.current)
+  const currentStep = logisticsSteps.value.find(step => step.current)
   const latestStep = logisticsSteps.value[0]
 
   const step = currentStep || latestStep
@@ -236,7 +247,11 @@ const currentStatus = computed(() => {
     text: step.title,
     description: step.description,
     time: step.time,
-    statusClass: step.completed ? 'completed' : step.current ? 'current' : 'pending',
+    statusClass: step.completed
+      ? 'completed'
+      : step.current
+        ? 'current'
+        : 'pending',
   }
 })
 
@@ -255,7 +270,7 @@ const estimatedDelivery = computed(() => {
   })
 })
 
-// 方法
+// 🆕 方法（已优化 - 优先使用后端 API）
 const refreshLogistics = async () => {
   if (loading.value) return
 
@@ -263,13 +278,48 @@ const refreshLogistics = async () => {
     loading.value = true
     error.value = null
 
-    // 获取物流信息
-    const logisticsData = await logisticsRealTimeService.generateMockLogisticsData(
-      props.trackingNumber,
-      props.carrier,
-      deliveryAddress.value,
-      props.orderStatus,
-    )
+    // 优先尝试从后端API获取物流信息
+    try {
+      const response = await getLogistics(props.orderId)
+      const result = response.data?.data || response.data
+
+      if (result && result.traces) {
+        // 将后端返回的数据转换为前端需要的格式
+        logisticsSteps.value = result.traces.map((trace, index) => ({
+          title: trace.status || trace.title,
+          description: trace.description,
+          time: new Date(trace.time).toLocaleString('zh-CN'),
+          location: trace.location || '',
+          icon: index === 0 ? '📍' : '📦',
+          completed: index > 0,
+          current: index === 0,
+          pending: false,
+        }))
+
+        lastUpdateTime.value = new Date().toLocaleString('zh-CN')
+
+        // 如果有发货地址信息
+        if (result.origin_address) {
+          originAddress.value = result.origin_address
+        }
+
+        emit('update', result)
+        return
+      }
+    } catch (apiError) {
+      // API 失败，fallback 到模拟数据
+      // eslint-disable-next-line no-console
+      console.warn('后端物流API调用失败，使用模拟数据:', apiError)
+    }
+
+    // Fallback: 使用模拟数据服务
+    const logisticsData =
+      await logisticsRealTimeService.generateMockLogisticsData(
+        props.trackingNumber,
+        props.carrier,
+        deliveryAddress.value,
+        props.orderStatus
+      )
 
     logisticsSteps.value = logisticsData.steps || []
     lastUpdateTime.value = new Date().toLocaleString('zh-CN')
@@ -299,7 +349,7 @@ const startRealTimeUpdates = () => {
   subscriptionId.value = logisticsRealTimeService.subscribe(
     props.trackingNumber,
     props.carrier,
-    (data) => {
+    data => {
       logisticsSteps.value = data.steps || []
       lastUpdateTime.value = new Date().toLocaleString('zh-CN')
       originAddress.value = data.originAddress
@@ -311,7 +361,7 @@ const startRealTimeUpdates = () => {
       autoStart: true,
       deliveryAddress: deliveryAddress.value,
       orderStatus: props.orderStatus,
-    },
+    }
   )
 
   isRealTimeEnabled.value = true
@@ -331,7 +381,8 @@ const getDeliveryAddress = async () => {
     // 从地址store获取默认地址或订单关联的地址
     const addresses = addressStore.addresses
     if (addresses && addresses.length > 0) {
-      deliveryAddress.value = addresses.find((addr) => addr.isDefault) || addresses[0]
+      deliveryAddress.value =
+        addresses.find(addr => addr.isDefault) || addresses[0]
     }
   } catch (err) {
     console.warn('获取收货地址失败:', err)
@@ -341,24 +392,24 @@ const getDeliveryAddress = async () => {
 // 监听器
 watch(
   () => props.trackingNumber,
-  (newTrackingNumber) => {
+  newTrackingNumber => {
     if (newTrackingNumber) {
       refreshLogistics()
       startRealTimeUpdates()
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   () => props.autoRefresh,
-  (newAutoRefresh) => {
+  newAutoRefresh => {
     if (newAutoRefresh) {
       startRealTimeUpdates()
     } else {
       stopRealTimeUpdates()
     }
-  },
+  }
 )
 
 // 生命周期

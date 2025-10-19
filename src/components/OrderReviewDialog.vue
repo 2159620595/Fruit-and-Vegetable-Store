@@ -1,11 +1,22 @@
 <template>
-  <el-dialog v-model="visible" title="订单评价" width="500px" :before-close="handleClose">
+  <el-dialog
+    v-model="visible"
+    title="订单评价"
+    width="500px"
+    :before-close="handleClose"
+  >
     <div class="review-dialog">
       <!-- 订单信息 -->
       <div class="order-info">
         <h4>订单信息</h4>
-        <p><strong>订单号：</strong>{{ order.order_number }}</p>
-        <p><strong>订单状态：</strong>{{ getStatusText(order.status) }}</p>
+        <p>
+          <strong>订单号：</strong>
+          {{ order.order_number }}
+        </p>
+        <p>
+          <strong>订单状态：</strong>
+          {{ getStatusText(order.status) }}
+        </p>
       </div>
 
       <!-- 商品列表 -->
@@ -26,7 +37,12 @@
       </div>
 
       <!-- 评价表单 -->
-      <el-form :model="reviewForm" :rules="rules" ref="reviewFormRef" label-width="80px">
+      <el-form
+        :model="reviewForm"
+        :rules="rules"
+        ref="reviewFormRef"
+        label-width="80px"
+      >
         <el-form-item label="整体评分" prop="rating" required>
           <el-rate
             v-model="reviewForm.rating"
@@ -49,9 +65,16 @@
         </el-form-item>
 
         <!-- 商品评价 -->
-        <div v-if="order.items && order.items.length > 0" class="product-reviews">
+        <div
+          v-if="order.items && order.items.length > 0"
+          class="product-reviews"
+        >
           <h4>商品评价</h4>
-          <div class="product-review-item" v-for="item in order.items" :key="item.id">
+          <div
+            class="product-review-item"
+            v-for="item in order.items"
+            :key="item.id"
+          >
             <div class="product-review-header">
               <img
                 :src="item.product_image"
@@ -76,7 +99,9 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="loading"> 提交评价 </el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="loading">
+          提交评价
+        </el-button>
       </div>
     </template>
   </el-dialog>
@@ -117,7 +142,7 @@ const rules = {
 // 监听显示状态
 watch(
   () => props.modelValue,
-  (newVal) => {
+  newVal => {
     visible.value = newVal
     if (newVal) {
       // 重置表单
@@ -126,20 +151,20 @@ watch(
 
       // 重置商品评分
       if (props.order.items) {
-        props.order.items.forEach((item) => {
+        props.order.items.forEach(item => {
           item.rating = 5
         })
       }
     }
-  },
+  }
 )
 
-watch(visible, (newVal) => {
+watch(visible, newVal => {
   emit('update:modelValue', newVal)
 })
 
 // 获取状态文本
-const getStatusText = (status) => {
+const getStatusText = status => {
   const statusMap = {
     pending: '待支付',
     processing: '待发货',
@@ -152,7 +177,7 @@ const getStatusText = (status) => {
 }
 
 // 处理图片加载错误
-const handleImageError = (event) => {
+const handleImageError = event => {
   const img = event.target
   img.style.display = 'none'
   const placeholder = document.createElement('div')
@@ -173,22 +198,32 @@ const handleSubmit = async () => {
 
     loading.value = true
 
+    // 检查order是否存在
+    if (!props.order || !props.order.items) {
+      ElMessage.error('订单信息不完整')
+      loading.value = false
+      return
+    }
+
     // 准备评价数据
     const reviewData = {
       rating: reviewForm.rating,
-      comment: reviewForm.comment,
-      product_reviews: props.order.items
-        ? props.order.items.map((item) => ({
-            product_id: item.product_id,
-            rating: item.rating || 5,
-          }))
-        : [],
+      comment: reviewForm.comment || '',
+      images: [],
+      product_reviews: props.order.items.map(item => ({
+        product_id: item.product_id,
+        rating: item.rating || reviewForm.rating || 5,
+      })),
     }
 
     emit('submit', reviewData)
-  } catch (error) {
-    console.error('表单验证失败:', error)
-  } finally {
+
+    // 关闭对话框
+    visible.value = false
+    loading.value = false
+  } catch {
+    // 表单验证失败
+    ElMessage.error('请完善评价信息')
     loading.value = false
   }
 }

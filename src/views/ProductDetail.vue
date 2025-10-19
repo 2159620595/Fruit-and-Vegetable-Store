@@ -910,21 +910,37 @@ const buyNow = async () => {
     return
   }
 
-  // 添加到购物车并选中该商品
-  await cartStore.addToCart(product.value, quantity.value)
-
-  // 取消其他商品的选中状态，只保留刚添加的商品
-  const addedItem = cartStore.items.find(
-    item => item.product_id === product.value.id
+  // 🔧 修复：立即购买时，先检查购物车中是否已有该商品
+  const existingItem = cartStore.items.find(
+    item => item.product_id === product.value.id || item.id === product.value.id
   )
-  if (addedItem) {
+
+  if (existingItem) {
+    // 如果商品已存在，直接设置数量（不累加）
+    existingItem.quantity = quantity.value
     // 取消所有商品选中
     cartStore.items.forEach(item => {
       item.selected = false
     })
     // 只选中当前商品
-    addedItem.selected = true
-    // Pinia 持久化插件会自动保存，无需手动调用 saveLocalCart
+    existingItem.selected = true
+  } else {
+    // 如果商品不存在，添加到购物车
+    await cartStore.addToCart(product.value, quantity.value)
+
+    // 找到刚添加的商品
+    const addedItem = cartStore.items.find(
+      item =>
+        item.product_id === product.value.id || item.id === product.value.id
+    )
+    if (addedItem) {
+      // 取消所有商品选中
+      cartStore.items.forEach(item => {
+        item.selected = false
+      })
+      // 只选中当前商品
+      addedItem.selected = true
+    }
   }
 
   // 直接跳转到结账页面

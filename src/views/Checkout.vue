@@ -75,13 +75,13 @@
             <div class="radio-group">
               <label
                 class="radio-option"
-                :class="{ selected: paymentMethod === 'credit-card' }"
+                :class="{ selected: paymentMethod === 'credit_card' }"
               >
                 <input
                   v-model="paymentMethod"
                   type="radio"
                   name="payment"
-                  value="credit-card"
+                  value="credit_card"
                 />
                 <div class="radio-content">
                   <div class="radio-title">💳 信用卡/借记卡</div>
@@ -118,7 +118,7 @@
             </div>
 
             <!-- Credit Card Fields -->
-            <div v-if="paymentMethod === 'credit-card'" class="payment-fields">
+            <div v-if="paymentMethod === 'credit_card'" class="payment-fields">
               <div class="form-row">
                 <input
                   v-model="cardInfo.number"
@@ -229,7 +229,12 @@
           <div class="order-tips">
             <p class="tip-item">✓ 所有商品均为新鲜配送</p>
             <p class="tip-item">✓ 支持7天无理由退货</p>
-            <p class="tip-item">✓ 满¥50免运费</p>
+            <p v-if="freeShippingRemaining > 0" class="tip-item shipping-tip">
+              💡 再购买 ¥{{ freeShippingRemaining.toFixed(2) }} 即可免运费
+            </p>
+            <p v-else class="tip-item shipping-tip success">
+              🎉 恭喜！已满 ¥50，享受免运费
+            </p>
           </div>
         </div>
       </div>
@@ -289,16 +294,27 @@ const discount = ref(0)
 
 // 运费计算
 const shippingCost = computed(() => {
-  // 满50免运费
-  if (cartStore.selectedTotal >= 50) {
+  const subtotal = Number(cartStore.selectedTotal) || 0
+  // 满50免运费（严格判断）
+  if (subtotal >= 50) {
     return 0
   }
   return deliveryMethod.value === 'express' ? 10.0 : 5.0
 })
 
+// 距离免运费还差多少
+const freeShippingRemaining = computed(() => {
+  const subtotal = Number(cartStore.selectedTotal) || 0
+  const remaining = 50 - subtotal
+  return remaining > 0 ? remaining : 0
+})
+
 // 总金额计算
 const totalAmount = computed(() => {
-  return cartStore.selectedTotal + shippingCost.value - discount.value
+  const subtotal = Number(cartStore.selectedTotal) || 0
+  const shipping = Number(shippingCost.value) || 0
+  const discountAmount = Number(discount.value) || 0
+  return subtotal + shipping - discountAmount
 })
 
 // 页面加载时检查购物车
@@ -332,7 +348,7 @@ const validateForm = () => {
   }
 
   // 如果选择信用卡支付，验证卡信息
-  if (paymentMethod.value === 'credit-card') {
+  if (paymentMethod.value === 'credit_card') {
     if (!cardInfo.value.number.trim()) {
       errors.value.cardNumber = '请输入卡号'
       isValid = false
@@ -967,6 +983,22 @@ const formatPrice = price => {
 
 .tip-item:last-child {
   margin-bottom: 0;
+}
+
+/* 运费提示特殊样式 */
+.tip-item.shipping-tip {
+  padding: 8px 12px;
+  background-color: #fff3cd;
+  border-left: 3px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  font-weight: 500;
+}
+
+.tip-item.shipping-tip.success {
+  background-color: #d4edda;
+  border-left-color: #28a745;
+  color: #155724;
 }
 
 /* Responsive Design */

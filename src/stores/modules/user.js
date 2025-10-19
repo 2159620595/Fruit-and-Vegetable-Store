@@ -7,7 +7,7 @@ export const useUserStore = defineStore(
   () => {
     const token = ref('')
     // 获取token
-    const setToken = (newToken) => {
+    const setToken = newToken => {
       token.value = newToken
     }
     // 删除token
@@ -20,7 +20,7 @@ export const useUserStore = defineStore(
       const res = await userGetInfService() // 请求获取数据
       user.value = res.data.data
     }
-    const setUset = (obj) => {
+    const setUset = obj => {
       user.value = obj
     }
     return {
@@ -34,5 +34,5 @@ export const useUserStore = defineStore(
   },
   {
     persist: true,
-  },
+  }
 )
