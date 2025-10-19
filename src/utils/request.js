@@ -15,7 +15,6 @@ const instance = axios.create({
 // 请求拦截器
 instance.interceptors.request.use(
   (config) => {
-    console.log('📤 API请求:', config.method.toUpperCase(), config.url)
     if (config.data) {
       console.log('📦 请求数据:', config.data)
     }

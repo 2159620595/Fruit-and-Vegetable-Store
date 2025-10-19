@@ -74,16 +74,13 @@ export const useOrderStore = defineStore('order', {
           remark: orderData.remark || '',
         }
 
-        console.log('📦 创建订单:', formattedData)
 
         const response = await createOrderAPI(formattedData)
         const result = response.data.data || response.data
 
-        console.log('✅ 订单创建成功:', result)
 
         return result
       } catch (error) {
-        console.error('❌ 创建订单失败:', error)
         this.error = error.message || '创建订单失败'
         throw error
       } finally {
@@ -109,11 +106,9 @@ export const useOrderStore = defineStore('order', {
         this.orders = result.orders || []
         this.orderCounts = result.counts || this.orderCounts
 
-        console.log('✅ 获取订单列表成功:', this.orders.length, '条')
 
         return result
       } catch (error) {
-        console.error('❌ 获取订单列表失败:', error)
         this.error = error.message || '获取订单列表失败'
         throw error
       } finally {
@@ -139,11 +134,9 @@ export const useOrderStore = defineStore('order', {
 
         this.currentOrder = result
 
-        console.log('✅ 获取订单详情成功:', result)
 
         return result
       } catch (error) {
-        console.error('❌ 获取订单详情失败:', error)
         this.error = error.message || '获取订单详情失败'
         throw error
       } finally {
@@ -172,11 +165,9 @@ export const useOrderStore = defineStore('order', {
           this.currentOrder.order.status = 'cancelled'
         }
 
-        console.log('✅ 订单取消成功')
 
         return true
       } catch (error) {
-        console.error('❌ 取消订单失败:', error)
         this.error = error.message || '取消订单失败'
         throw error
       } finally {
@@ -205,11 +196,9 @@ export const useOrderStore = defineStore('order', {
           this.currentOrder.order.status = 'delivered'
         }
 
-        console.log('✅ 确认收货成功')
 
         return true
       } catch (error) {
-        console.error('❌ 确认收货失败:', error)
         this.error = error.message || '确认收货失败'
         throw error
       } finally {
@@ -231,11 +220,9 @@ export const useOrderStore = defineStore('order', {
         // 从列表中移除
         this.orders = this.orders.filter((o) => o.id !== id)
 
-        console.log('✅ 订单删除成功')
 
         return true
       } catch (error) {
-        console.error('❌ 删除订单失败:', error)
         this.error = error.message || '删除订单失败'
         throw error
       } finally {
@@ -253,37 +240,24 @@ export const useOrderStore = defineStore('order', {
       this.error = null
 
       try {
-        console.log('🔄 开始更新订单状态:', { id, status })
-        console.log(
-          '当前订单列表:',
-          this.orders.map((o) => ({ id: o.id, status: o.status })),
-        )
-
+ 
         // 调用后端API更新订单状态
-        console.log('📡 调用后端API更新订单状态...')
         await updateOrderStatusAPI(id, status)
-        console.log('✅ 后端API调用成功')
 
         // 更新本地状态
-        const order = this.orders.find((o) => o.id == id) // 使用 == 进行类型转换比较
+        const order = this.orders.find((o) => o.id === id) // 使用 == 进行类型转换比较
         if (order) {
-          console.log('找到订单，更新本地状态:', { 原状态: order.status, 新状态: status })
           order.status = status
           // 同时更新 updated_at 时间
           order.updated_at = new Date().toISOString()
         } else {
-          console.warn('未找到订单，ID:', id)
           // 如果订单列表中找不到，可能是新创建的订单，先刷新列表
-          console.log('刷新订单列表以获取最新数据...')
           await this.fetchOrders()
 
           // 再次尝试更新
           const updatedOrder = this.orders.find((o) => o.id == id)
           if (updatedOrder) {
-            console.log('刷新后找到订单，更新本地状态:', {
-              原状态: updatedOrder.status,
-              新状态: status,
-            })
+
             updatedOrder.status = status
             updatedOrder.updated_at = new Date().toISOString()
           } else {
@@ -292,19 +266,13 @@ export const useOrderStore = defineStore('order', {
         }
 
         if (this.currentOrder && this.currentOrder.order.id == id) {
-          console.log('更新当前订单状态')
           this.currentOrder.order.status = status
         }
 
-        console.log('✅ 订单状态更新成功:', { id, status })
-        console.log(
-          '更新后的订单列表:',
-          this.orders.map((o) => ({ id: o.id, status: o.status })),
-        )
+
 
         return true
       } catch (error) {
-        console.error('❌ 更新订单状态失败:', error)
         this.error = error.message || '更新订单状态失败'
         throw error
       } finally {
@@ -320,7 +288,6 @@ export const useOrderStore = defineStore('order', {
     async payOrder(orderId, paymentMethod) {
       try {
         this.loading = true
-        console.log('💳 开始支付订单:', { orderId, paymentMethod })
 
         // 模拟支付处理（实际项目中这里应该调用真实的支付接口）
         await new Promise((resolve) => setTimeout(resolve, 1500)) // 模拟1.5秒支付处理时间
@@ -328,7 +295,6 @@ export const useOrderStore = defineStore('order', {
         // 模拟支付成功，更新订单状态
         await this.updateOrderStatus(orderId, 'processing')
 
-        console.log('✅ 支付成功:', { orderId, paymentMethod })
 
         // 更新本地订单状态
         const order = this.orders.find((o) => o.id == orderId)
@@ -339,7 +305,6 @@ export const useOrderStore = defineStore('order', {
 
         return { success: true, message: '支付成功' }
       } catch (error) {
-        console.error('❌ 支付失败:', error)
         this.error = error.message || '支付失败'
         throw error
       } finally {
@@ -357,14 +322,11 @@ export const useOrderStore = defineStore('order', {
     async reviewOrder(orderId, reviewData) {
       try {
         this.loading = true
-        console.log('⭐ 开始评价订单:', { orderId, reviewData })
 
         const response = await reviewOrderAPI(orderId, reviewData)
-        console.log('✅ 评价成功:', response.data)
 
         return response.data
       } catch (error) {
-        console.error('❌ 评价失败:', error)
         this.error = error.message || '评价失败'
         throw error
       } finally {
@@ -379,14 +341,11 @@ export const useOrderStore = defineStore('order', {
     async buyAgain(orderId) {
       try {
         this.loading = true
-        console.log('🛒 开始再次购买:', orderId)
 
         const response = await buyAgainAPI(orderId)
-        console.log('✅ 再次购买成功:', response.data)
 
         return response.data
       } catch (error) {
-        console.error('❌ 再次购买失败:', error)
         this.error = error.message || '再次购买失败'
         throw error
       } finally {

@@ -42,11 +42,9 @@ export const useAddressStore = defineStore('address', {
 
         this.addresses = Array.isArray(result) ? result : []
 
-        console.log('✅ 获取地址列表成功:', this.addresses.length, '条')
 
         return this.addresses
       } catch (error) {
-        console.error('❌ 获取地址列表失败:', error)
         this.error = error.message || '获取地址列表失败'
         throw error
       } finally {
@@ -66,14 +64,12 @@ export const useAddressStore = defineStore('address', {
         const response = await addAddressAPI(addressData)
         const result = response.data.data || response.data
 
-        console.log('✅ 添加地址成功')
 
         // 重新获取地址列表
         await this.fetchAddresses()
 
         return result
       } catch (error) {
-        console.error('❌ 添加地址失败:', error)
         this.error = error.message || '添加地址失败'
         throw error
       } finally {
@@ -93,14 +89,12 @@ export const useAddressStore = defineStore('address', {
       try {
         await updateAddressAPI(id, addressData)
 
-        console.log('✅ 更新地址成功')
 
         // 重新获取地址列表
         await this.fetchAddresses()
 
         return true
       } catch (error) {
-        console.error('❌ 更新地址失败:', error)
         this.error = error.message || '更新地址失败'
         throw error
       } finally {
@@ -122,11 +116,9 @@ export const useAddressStore = defineStore('address', {
         // 从本地列表中删除
         this.addresses = this.addresses.filter(addr => addr.id !== id)
 
-        console.log('✅ 删除地址成功')
 
         return true
       } catch (error) {
-        console.error('❌ 删除地址失败:', error)
         this.error = error.message || '删除地址失败'
         throw error
       } finally {
@@ -150,11 +142,9 @@ export const useAddressStore = defineStore('address', {
           addr.is_default = addr.id === id
         })
 
-        console.log('✅ 设置默认地址成功')
 
         return true
       } catch (error) {
-        console.error('❌ 设置默认地址失败:', error)
         this.error = error.message || '设置默认地址失败'
         throw error
       } finally {

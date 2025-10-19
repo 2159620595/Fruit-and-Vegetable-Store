@@ -190,7 +190,7 @@ const loadFavorites = async () => {
         is_favorite: true,
       },
     ]
-  } catch (error) {
+  } catch  {
     ElMessage.error('加载收藏列表失败')
   } finally {
     loading.value = false
@@ -288,7 +288,7 @@ const addToCart = async product => {
       product: product,
     })
     ElMessage.success('已加入购物车')
-  } catch (error) {
+  } catch  {
     ElMessage.error('加入购物车失败')
   }
 }

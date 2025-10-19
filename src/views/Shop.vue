@@ -63,8 +63,9 @@
           ></path>
         </svg>
         <p>
-          搜索 "<strong>{{ searchKeyword }}</strong
-          >" 的结果
+          搜索 "
+          <strong>{{ searchKeyword }}</strong>
+          " 的结果
           <button @click="clearSearch" class="clear-search-btn">×</button>
         </p>
       </div>
@@ -88,7 +89,11 @@
               </svg>
               筛选条件
             </h2>
-            <button v-if="hasActiveFilters" class="clear-all-btn" @click="resetFilters">
+            <button
+              v-if="hasActiveFilters"
+              class="clear-all-btn"
+              @click="resetFilters"
+            >
               清除全部
             </button>
           </div>
@@ -189,7 +194,9 @@
                   </span>
                 </div>
                 <span class="rating-text">{{ rating.text }}</span>
-                <span class="rating-count">({{ getRatingCount(rating.value) }})</span>
+                <span class="rating-count">
+                  ({{ getRatingCount(rating.value) }})
+                </span>
               </label>
             </div>
           </div>
@@ -211,18 +218,44 @@
               库存状态
             </h3>
             <div class="stock-options">
-              <label class="stock-item" :class="{ active: stockFilter === 'all' }">
-                <input type="radio" value="all" v-model="stockFilter" class="stock-input" />
+              <label
+                class="stock-item"
+                :class="{ active: stockFilter === 'all' }"
+              >
+                <input
+                  type="radio"
+                  value="all"
+                  v-model="stockFilter"
+                  class="stock-input"
+                />
                 <span>全部商品</span>
-                <span class="stock-count">({{ productStore.productList.length }})</span>
+                <span class="stock-count">
+                  ({{ productStore.productList.length }})
+                </span>
               </label>
-              <label class="stock-item" :class="{ active: stockFilter === 'in-stock' }">
-                <input type="radio" value="in-stock" v-model="stockFilter" class="stock-input" />
+              <label
+                class="stock-item"
+                :class="{ active: stockFilter === 'in-stock' }"
+              >
+                <input
+                  type="radio"
+                  value="in-stock"
+                  v-model="stockFilter"
+                  class="stock-input"
+                />
                 <span>有库存</span>
                 <span class="stock-count">({{ getInStockCount() }})</span>
               </label>
-              <label class="stock-item" :class="{ active: stockFilter === 'low-stock' }">
-                <input type="radio" value="low-stock" v-model="stockFilter" class="stock-input" />
+              <label
+                class="stock-item"
+                :class="{ active: stockFilter === 'low-stock' }"
+              >
+                <input
+                  type="radio"
+                  value="low-stock"
+                  v-model="stockFilter"
+                  class="stock-input"
+                />
                 <span>库存紧张</span>
                 <span class="stock-count">({{ getLowStockCount() }})</span>
               </label>
@@ -266,7 +299,11 @@
 
           <!-- 重置按钮 -->
           <div class="filter-actions">
-            <button class="reset-btn" @click="resetFilters" :disabled="!hasActiveFilters">
+            <button
+              class="reset-btn"
+              @click="resetFilters"
+              :disabled="!hasActiveFilters"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -314,7 +351,9 @@
                   viewBox="0 0 256 256"
                   :class="{
                     'sort-desc':
-                      sortBy.includes('high') || sortBy === 'newest' || sortBy === 'popular',
+                      sortBy.includes('high') ||
+                      sortBy === 'newest' ||
+                      sortBy === 'popular',
                     'sort-asc': sortBy.includes('low'),
                   }"
                 >
@@ -350,7 +389,10 @@
           </div>
 
           <!-- 商品列表 -->
-          <div v-else-if="sortedProducts.length > 0" :class="['products-grid', viewMode]">
+          <div
+            v-else-if="sortedProducts.length > 0"
+            :class="['products-grid', viewMode]"
+          >
             <div
               v-for="product in paginatedProducts"
               :key="product.id"
@@ -360,14 +402,18 @@
               <div class="product-image">
                 <!-- 商品标签 -->
                 <div class="product-badges">
-                  <span v-if="product.is_new" class="badge badge-new">新品</span>
+                  <span v-if="product.is_new" class="badge badge-new">
+                    新品
+                  </span>
                   <span
                     v-if="product.discount && product.discount > 0"
                     class="badge badge-discount"
                   >
                     {{ Math.round(product.discount * 10) }}折
                   </span>
-                  <span v-if="product.is_hot" class="badge badge-hot">热销</span>
+                  <span v-if="product.is_hot" class="badge badge-hot">
+                    热销
+                  </span>
                 </div>
 
                 <img
@@ -385,27 +431,37 @@
                 <h3>{{ product.name }}</h3>
 
                 <!-- 评分显示 -->
-                <div v-if="product.rating && typeof product.rating === 'number'" class="rating">
+                <div
+                  v-if="product.rating && typeof product.rating === 'number'"
+                  class="rating"
+                >
                   <span class="stars">
                     <span
                       v-for="i in 5"
                       :key="i"
-                      :class="['star', { filled: i <= Math.round(product.rating) }]"
+                      :class="[
+                        'star',
+                        { filled: i <= Math.round(product.rating) },
+                      ]"
                     >
                       ★
                     </span>
                   </span>
-                  <span class="rating-value">{{ Number(product.rating).toFixed(1) }}</span>
-                  <span v-if="product.review_count" class="review-count"
-                    >({{ product.review_count }})</span
-                  >
+                  <span class="rating-value">
+                    {{ Number(product.rating).toFixed(1) }}
+                  </span>
+                  <span v-if="product.review_count" class="review-count">
+                    ({{ product.review_count }})
+                  </span>
                 </div>
 
                 <div class="product-meta">
                   <div class="price-wrapper">
                     <p class="price">
                       ¥{{
-                        typeof product.price === 'number' ? product.price.toFixed(2) : product.price
+                        typeof product.price === 'number'
+                          ? product.price.toFixed(2)
+                          : product.price
                       }}
                     </p>
                     <p
@@ -422,7 +478,9 @@
                   <p v-if="product.unit" class="unit">/ {{ product.unit }}</p>
                 </div>
 
-                <p v-if="product.description" class="description">{{ product.description }}</p>
+                <p v-if="product.description" class="description">
+                  {{ product.description }}
+                </p>
 
                 <!-- 库存提示 -->
                 <p
@@ -459,11 +517,21 @@
 
           <!-- 分页 -->
           <div v-if="sortedProducts.length > itemsPerPage" class="pagination">
-            <button class="page-btn" @click="currentPage--" :disabled="currentPage === 1">
+            <button
+              class="page-btn"
+              @click="currentPage--"
+              :disabled="currentPage === 1"
+            >
               上一页
             </button>
-            <span class="page-info"> 第 {{ currentPage }} 页 / 共 {{ totalPages }} 页 </span>
-            <button class="page-btn" @click="currentPage++" :disabled="currentPage === totalPages">
+            <span class="page-info">
+              第 {{ currentPage }} 页 / 共 {{ totalPages }} 页
+            </span>
+            <button
+              class="page-btn"
+              @click="currentPage++"
+              :disabled="currentPage === totalPages"
+            >
               下一页
             </button>
           </div>
@@ -481,9 +549,12 @@
                 d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
               ></path>
             </svg>
-            <p>{{ searchKeyword ? '未找到匹配的商品' : '未找到符合条件的商品' }}</p>
+            <p>
+              {{ searchKeyword ? '未找到匹配的商品' : '未找到符合条件的商品' }}
+            </p>
             <p v-if="searchKeyword" class="suggestion">
-              尝试使用其他关键词或<button @click="clearSearch" class="link-btn">清除搜索</button>
+              尝试使用其他关键词或
+              <button @click="clearSearch" class="link-btn">清除搜索</button>
             </p>
           </div>
         </div>
@@ -528,7 +599,6 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProductStore } from '../stores/productStore'
 import { useCartStore } from '../stores/cartStore'
-import Header from '../components/Header.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
 
 const router = useRouter()
@@ -586,7 +656,7 @@ const toast = ref({
 // 从商品数据中提取分类
 const categories = computed(() => {
   const cats = new Set()
-  productStore.productList.forEach((p) => {
+  productStore.productList.forEach(p => {
     if (p.category) {
       cats.add(p.category)
     }
@@ -597,7 +667,7 @@ const categories = computed(() => {
 // 从商品数据中提取品牌
 const brands = computed(() => {
   const brandSet = new Set()
-  productStore.productList.forEach((p) => {
+  productStore.productList.forEach(p => {
     if (p.brand) {
       brandSet.add(p.brand)
     }
@@ -619,16 +689,16 @@ const hasActiveFilters = computed(() => {
 // 监听路由查询参数变化
 watch(
   () => route.query.search,
-  (newSearch) => {
+  newSearch => {
     searchKeyword.value = newSearch || ''
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // 监听filter查询参数
 watch(
   () => route.query.filter,
-  (newFilter) => {
+  newFilter => {
     if (newFilter === 'new') {
       // 新到商品筛选 - 可以根据创建时间或特殊标记筛选
       searchKeyword.value = ''
@@ -639,7 +709,7 @@ watch(
       // 这里可以添加促销商品的筛选逻辑
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const filteredProducts = computed(() => {
@@ -658,7 +728,7 @@ const filteredProducts = computed(() => {
       // 新到商品筛选 - 可以根据创建时间筛选最近7天的商品
       const sevenDaysAgo = new Date()
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-      products = products.filter((p) => {
+      products = products.filter(p => {
         if (p.created_at) {
           return new Date(p.created_at) > sevenDaysAgo
         }
@@ -667,7 +737,7 @@ const filteredProducts = computed(() => {
       })
     } else if (route.query.filter === 'sale') {
       // 促销活动筛选 - 可以根据折扣价格筛选
-      products = products.filter((p) => {
+      products = products.filter(p => {
         // 假设有原价和现价字段，或者有折扣字段
         if (p.original_price && p.price) {
           return p.original_price > p.price
@@ -682,16 +752,16 @@ const filteredProducts = computed(() => {
       const keyword = searchKeyword.value.toLowerCase().trim()
       if (keyword) {
         products = products.filter(
-          (p) =>
+          p =>
             (p.name && p.name.toLowerCase().includes(keyword)) ||
             (p.description && p.description.toLowerCase().includes(keyword)) ||
-            (p.category && p.category.toLowerCase().includes(keyword)),
+            (p.category && p.category.toLowerCase().includes(keyword))
         )
       }
     }
 
     // 价格过滤
-    products = products.filter((p) => {
+    products = products.filter(p => {
       // 将字符串价格转换为数字进行比较
       const price =
         parseFloat(p.price) ||
@@ -704,7 +774,7 @@ const filteredProducts = computed(() => {
 
     // 评分过滤
     if (selectedRating.value > 0) {
-      products = products.filter((p) => {
+      products = products.filter(p => {
         const rating = parseFloat(p.rating) || 0
         return rating >= selectedRating.value
       })
@@ -712,7 +782,7 @@ const filteredProducts = computed(() => {
 
     // 库存状态过滤
     if (stockFilter.value !== 'all') {
-      products = products.filter((p) => {
+      products = products.filter(p => {
         const stock = typeof p.stock === 'number' ? p.stock : 0
         if (stockFilter.value === 'in-stock') {
           return stock > 0
@@ -725,7 +795,9 @@ const filteredProducts = computed(() => {
 
     // 品牌过滤
     if (selectedBrands.value.length > 0) {
-      products = products.filter((p) => p.brand && selectedBrands.value.includes(p.brand))
+      products = products.filter(
+        p => p.brand && selectedBrands.value.includes(p.brand)
+      )
     }
 
     return products
@@ -744,23 +816,6 @@ const sortedProducts = computed(() => {
   }
 
   try {
-    console.log('当前排序方式:', sortBy.value)
-    console.log('排序前商品数量:', products.length)
-    console.log('第一个商品的数据结构:', products[0])
-    console.log('第一个商品的所有字段:', Object.keys(products[0]))
-    console.log('第一个商品的时间相关字段:', {
-      created_at: products[0].created_at,
-      updated_at: products[0].updated_at,
-      is_new: products[0].is_new,
-    })
-    console.log('第一个商品的受欢迎度相关字段:', {
-      sales_count: products[0].sales_count,
-      review_count: products[0].review_count,
-      is_favorite: products[0].is_favorite,
-      is_discount: products[0].is_discount,
-      discount_rate: products[0].discount_rate,
-    })
-
     let sortedResult
     switch (sortBy.value) {
       case 'price-low':
@@ -778,10 +833,8 @@ const sortedProducts = computed(() => {
             parseFloat(b.unit_price) ||
             parseFloat(b.sale_price) ||
             0
-          console.log(`比较: ${a.name} (${priceA}) vs ${b.name} (${priceB})`)
           return priceA - priceB
         })
-        console.log('价格从低到高排序完成')
         break
       case 'price-high':
         sortedResult = products.sort((a, b) => {
@@ -798,28 +851,22 @@ const sortedProducts = computed(() => {
             parseFloat(b.unit_price) ||
             parseFloat(b.sale_price) ||
             0
-          console.log(`比较: ${a.name} (${priceA}) vs ${b.name} (${priceB})`)
           return priceB - priceA
         })
-        console.log('价格从高到低排序完成')
         break
       case 'rating-high':
         sortedResult = products.sort((a, b) => {
           const ratingA = parseFloat(a.rating) || 0
           const ratingB = parseFloat(b.rating) || 0
-          console.log(`比较: ${a.name} (${ratingA}) vs ${b.name} (${ratingB})`)
           return ratingB - ratingA
         })
-        console.log('评分从高到低排序完成')
         break
       case 'rating-low':
         sortedResult = products.sort((a, b) => {
           const ratingA = parseFloat(a.rating) || 0
           const ratingB = parseFloat(b.rating) || 0
-          console.log(`比较: ${a.name} (${ratingA}) vs ${b.name} (${ratingB})`)
           return ratingA - ratingB
         })
-        console.log('评分从低到高排序完成')
         break
       case 'newest':
         sortedResult = products.sort((a, b) => {
@@ -832,22 +879,20 @@ const sortedProducts = computed(() => {
           if (a.created_at && b.created_at) {
             const timeA = new Date(a.created_at).getTime()
             const timeB = new Date(b.created_at).getTime()
-            console.log(`比较时间: ${a.name} (${a.created_at}) vs ${b.name} (${b.created_at})`)
+
             return timeB - timeA // 新的在前
           }
 
           // 最后按 ID 排序（假设 ID 越大越新）
           const idA = parseInt(a.id) || 0
           const idB = parseInt(b.id) || 0
-          console.log(`比较ID: ${a.name} (${idA}) vs ${b.name} (${idB})`)
           return idB - idA
         })
-        console.log('最新上架排序完成')
         break
       case 'popular':
         sortedResult = products.sort((a, b) => {
           // 综合多个受欢迎度指标进行排序
-          const getPopularityScore = (product) => {
+          const getPopularityScore = product => {
             let score = 0
 
             // 销量权重最高
@@ -878,17 +923,8 @@ const sortedProducts = computed(() => {
           const scoreA = getPopularityScore(a)
           const scoreB = getPopularityScore(b)
 
-          console.log(`受欢迎度比较: ${a.name} (${scoreA}) vs ${b.name} (${scoreB})`)
-          console.log(
-            `  ${a.name}: 销量${a.sales_count}, 评价${a.review_count}, 评分${a.rating}, 收藏${a.is_favorite}`,
-          )
-          console.log(
-            `  ${b.name}: 销量${b.sales_count}, 评价${b.review_count}, 评分${b.rating}, 收藏${b.is_favorite}`,
-          )
-
           return scoreB - scoreA // 分数高的在前
         })
-        console.log('最受欢迎排序完成')
         break
       default:
         sortedResult = products.sort((a, b) => {
@@ -896,14 +932,9 @@ const sortedProducts = computed(() => {
           const nameB = b.name || ''
           return nameA.localeCompare(nameB)
         })
-        console.log('按名称排序完成')
         break
     }
 
-    console.log(
-      '排序后前3个商品:',
-      sortedResult.slice(0, 3).map((p) => ({ name: p.name, price: p.price, rating: p.rating })),
-    )
     return sortedResult
   } catch (error) {
     console.error('排序商品时出错:', error)
@@ -932,10 +963,10 @@ const totalPages = computed(() => {
 })
 
 // 获取每个评分的商品数量
-const getRatingCount = (rating) => {
+const getRatingCount = rating => {
   if (!productStore.productList) return 0
   if (rating === 0) return productStore.productList.length
-  return productStore.productList.filter((p) => {
+  return productStore.productList.filter(p => {
     const productRating = parseFloat(p.rating) || 0
     return productRating >= rating
   }).length
@@ -944,7 +975,7 @@ const getRatingCount = (rating) => {
 // 获取有库存的商品数量
 const getInStockCount = () => {
   if (!productStore.productList) return 0
-  return productStore.productList.filter((p) => {
+  return productStore.productList.filter(p => {
     const stock = typeof p.stock === 'number' ? p.stock : 0
     return stock > 0
   }).length
@@ -953,37 +984,33 @@ const getInStockCount = () => {
 // 获取库存紧张的商品数量
 const getLowStockCount = () => {
   if (!productStore.productList) return 0
-  return productStore.productList.filter((p) => {
+  return productStore.productList.filter(p => {
     const stock = typeof p.stock === 'number' ? p.stock : 0
     return stock > 0 && stock <= 10
   }).length
 }
 
 // 获取每个品牌的商品数量
-const getBrandCount = (brand) => {
+const getBrandCount = brand => {
   if (!brand || !productStore.productList) return 0
-  return productStore.productList.filter((p) => p.brand === brand).length
+  return productStore.productList.filter(p => p.brand === brand).length
 }
 
 // 价格预设相关方法
-const isPricePresetActive = (preset) => {
+const isPricePresetActive = preset => {
   if (!preset) return false
   return preset.min === 0 && preset.max === maxPrice.value
 }
 
-const applyPricePreset = (preset) => {
+const applyPricePreset = preset => {
   if (!preset) return
 
-  console.log('应用价格预设:', preset)
-  let newValue = preset.max
+  const newValue = preset.max
 
   // 如果预设值超过当前价格范围，扩展价格范围
   if (newValue > priceRangeMax.value) {
     priceRangeMax.value = newValue
-    console.log('扩展价格范围到:', priceRangeMax.value)
   }
-
-  console.log('新价格值:', newValue, '当前最大价格范围:', priceRangeMax.value)
 
   maxPrice.value = newValue
 
@@ -991,18 +1018,17 @@ const applyPricePreset = (preset) => {
   nextTick(() => {
     if (priceSlider.value) {
       priceSlider.value.value = newValue
-      console.log('滑块值已设置为:', priceSlider.value.value)
     } else {
       console.log('滑块元素未找到')
     }
   })
 }
 
-const goToProduct = (id) => {
+const goToProduct = id => {
   router.push(`/product/${id}`)
 }
 
-const addToCart = (product) => {
+const addToCart = product => {
   if (product.stock === 0) {
     showToast('商品已售罄', 'error')
     return
@@ -1052,7 +1078,7 @@ const calculatePriceRange = () => {
 
   try {
     const prices = productStore.productList
-      .map((p) => {
+      .map(p => {
         // 将字符串价格转换为数字
         return (
           parseFloat(p.price) ||
@@ -1062,7 +1088,7 @@ const calculatePriceRange = () => {
           0
         )
       })
-      .filter((price) => price > 0)
+      .filter(price => price > 0)
 
     if (prices.length > 0) {
       const max = Math.max(...prices)
@@ -1082,8 +1108,8 @@ const calculatePriceRange = () => {
 // 图片懒加载
 const setupLazyLoading = () => {
   const images = document.querySelectorAll('.lazy-img')
-  const imageObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
+  const imageObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
       if (entry.isIntersecting) {
         const img = entry.target
         const src = img.getAttribute('data-src')
@@ -1096,16 +1122,12 @@ const setupLazyLoading = () => {
     })
   })
 
-  images.forEach((img) => imageObserver.observe(img))
+  images.forEach(img => imageObserver.observe(img))
 }
 
 onMounted(async () => {
-  console.log('=== Shop页面挂载 ===')
-
   try {
     await productStore.fetchProducts()
-    console.log('=== 数据加载完成 ===')
-    console.log('商品数量:', productStore.productList?.length || 0)
 
     // 计算价格范围
     calculatePriceRange()
@@ -1131,13 +1153,23 @@ watch(
     setTimeout(() => {
       setupLazyLoading()
     }, 100)
-  },
+  }
 )
 
 // 监听筛选条件变化，重置分页
-watch([maxPrice, sortBy, searchKeyword, selectedRating, stockFilter, selectedBrands], () => {
-  currentPage.value = 1
-})
+watch(
+  [
+    maxPrice,
+    sortBy,
+    searchKeyword,
+    selectedRating,
+    stockFilter,
+    selectedBrands,
+  ],
+  () => {
+    currentPage.value = 1
+  }
+)
 </script>
 
 <style scoped>

@@ -37,11 +37,9 @@ export const useProductStore = defineStore('product', {
       this.loading = true
       this.error = null
       try {
-        console.log('=== 开始加载商品数据 ===')
 
         // 直接从首页接口获取商品数据
         const response = await getGoodsList()
-        console.log('首页API响应:', response.data)
 
         if (response.data?.data) {
           const data = response.data.data
@@ -64,15 +62,11 @@ export const useProductStore = defineStore('product', {
           // 同时提取分类
           this.extractCategoriesFromHomeData(data)
 
-          console.log('✅ 商品加载成功')
-          console.log('商品数量:', this.products.length)
-          console.log('分类数量:', this.categories.length)
+
         } else {
-          console.warn('⚠️ 首页数据格式不正确')
           this.products = []
         }
       } catch (error) {
-        console.error('❌ 获取商品列表失败:', error)
         this.error = error.message
         this.products = []
       } finally {
@@ -83,7 +77,6 @@ export const useProductStore = defineStore('product', {
     async fetchProductById(id) {
       try {
         const response = await getProductDetail(id)
-        console.log('API返回的商品详情:', response.data)
 
         // 根据实际API返回结构处理数据
         if (response.data?.code === 200 && response.data?.data) {
@@ -110,9 +103,7 @@ export const useProductStore = defineStore('product', {
             }
           })
           this.categories = Array.from(categorySet).sort()
-          console.log('✅ 从商品数据中提取到的分类:', this.categories)
         } else {
-          console.warn('⚠️ 没有商品数据，无法提取分类')
           this.categories = []
         }
       } catch (error) {
@@ -132,7 +123,6 @@ export const useProductStore = defineStore('product', {
           // 字符串数组
           this.categories = homeData.categories
         }
-        console.log('✅ 从首页数据中获取到的分类:', this.categories)
       } else {
         // 从商品数据中提取分类
         const allProducts = [
@@ -149,7 +139,6 @@ export const useProductStore = defineStore('product', {
           }
         })
         this.categories = Array.from(categorySet).sort()
-        console.log('✅ 从首页商品中提取到的分类:', this.categories)
       }
     },
   },

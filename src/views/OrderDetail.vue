@@ -16,7 +16,9 @@
       <p class="error-message">{{ error }}</p>
       <div class="error-actions">
         <button class="btn btn-primary" @click="loadOrderDetail">重试</button>
-        <button class="btn btn-secondary" @click="router.push('/orders')">返回订单列表</button>
+        <button class="btn btn-secondary" @click="router.push('/orders')">
+          返回订单列表
+        </button>
       </div>
     </div>
 
@@ -36,7 +38,10 @@
               {{ orderStatusInfo?.statusText }}
             </span>
             <span class="order-date">{{ formatDate(order.created_at) }}</span>
-            <span v-if="orderStatusInfo?.statusDuration" class="status-duration">
+            <span
+              v-if="orderStatusInfo?.statusDuration"
+              class="status-duration"
+            >
               已{{ orderStatusInfo.statusDuration }}
             </span>
           </div>
@@ -45,7 +50,11 @@
           </div>
         </div>
         <div class="order-actions">
-          <button v-if="orderStatusInfo?.canPay" class="btn btn-primary" @click="handlePayOrder">
+          <button
+            v-if="orderStatusInfo?.canPay"
+            class="btn btn-primary"
+            @click="handlePayOrder"
+          >
             立即支付
           </button>
           <button
@@ -56,7 +65,11 @@
             评价订单
           </button>
           <button
-            v-if="['processing', 'shipped', 'in_transit', 'delivered'].includes(order.status)"
+            v-if="
+              ['processing', 'shipped', 'in_transit', 'delivered'].includes(
+                order.status
+              )
+            "
             class="btn btn-outline"
             @click="handleTrackOrder"
           >
@@ -102,7 +115,9 @@
             <div class="timeline-content">
               <div class="timeline-status">{{ step.status }}</div>
               <div class="timeline-date">{{ step.date }}</div>
-              <div v-if="step.description" class="timeline-description">{{ step.description }}</div>
+              <div v-if="step.description" class="timeline-description">
+                {{ step.description }}
+              </div>
             </div>
           </div>
         </div>
@@ -128,7 +143,9 @@
               <h3 class="item-name">{{ item.product_name }}</h3>
               <p class="item-spec">{{ item.specification || '标准规格' }}</p>
               <div class="item-price">
-                <span class="current-price">¥{{ formatPrice(item.price) }}</span>
+                <span class="current-price">
+                  ¥{{ formatPrice(item.price) }}
+                </span>
                 <span v-if="item.original_price" class="original-price">
                   ¥{{ formatPrice(item.original_price) }}
                 </span>
@@ -140,7 +157,9 @@
             </div>
             <div class="item-total">
               <span class="total-label">小计：</span>
-              <span class="total-value">¥{{ formatPrice(item.price * item.quantity) }}</span>
+              <span class="total-value">
+                ¥{{ formatPrice(item.price * item.quantity) }}
+              </span>
             </div>
           </div>
         </div>
@@ -152,25 +171,36 @@
         <div class="summary-content">
           <div class="summary-row">
             <span class="summary-label">商品总价：</span>
-            <span class="summary-value">¥{{ priceCalculations?.formattedSubtotal || '0.00' }}</span>
+            <span class="summary-value">
+              ¥{{ priceCalculations?.formattedSubtotal || '0.00' }}
+            </span>
           </div>
           <div v-if="priceCalculations?.hasShippingFee" class="summary-row">
             <span class="summary-label">运费：</span>
-            <span class="summary-value">¥{{ priceCalculations.formattedShippingFee }}</span>
+            <span class="summary-value">
+              ¥{{ priceCalculations.formattedShippingFee }}
+            </span>
           </div>
-          <div v-if="priceCalculations?.hasDiscount" class="summary-row discount">
+          <div
+            v-if="priceCalculations?.hasDiscount"
+            class="summary-row discount"
+          >
             <span class="summary-label">优惠：</span>
-            <span class="summary-value">-¥{{ priceCalculations.formattedDiscountAmount }}</span>
+            <span class="summary-value">
+              -¥{{ priceCalculations.formattedDiscountAmount }}
+            </span>
           </div>
           <div class="summary-row total">
             <span class="summary-label">实付金额：</span>
-            <span class="summary-value"
-              >¥{{ priceCalculations?.formattedTotalAmount || '0.00' }}</span
-            >
+            <span class="summary-value">
+              ¥{{ priceCalculations?.formattedTotalAmount || '0.00' }}
+            </span>
           </div>
           <div v-if="itemStatistics" class="summary-stats">
             <span class="stats-text">
-              共{{ itemStatistics.totalItems }}件商品，{{ itemStatistics.uniqueProducts }}种商品
+              共{{ itemStatistics.totalItems }}件商品，{{
+                itemStatistics.uniqueProducts
+              }}种商品
               <span v-if="itemStatistics.categoryCount > 1">
                 ，涉及{{ itemStatistics.categoryCount }}个分类
               </span>
@@ -185,15 +215,21 @@
         <div class="delivery-content">
           <div class="delivery-row">
             <span class="delivery-label">收货人：</span>
-            <span class="delivery-value">{{ addressInfo?.name || '未设置' }}</span>
+            <span class="delivery-value">
+              {{ addressInfo?.name || '未设置' }}
+            </span>
           </div>
           <div class="delivery-row">
             <span class="delivery-label">联系电话：</span>
-            <span class="delivery-value">{{ addressInfo?.displayPhone || '未设置' }}</span>
+            <span class="delivery-value">
+              {{ addressInfo?.displayPhone || '未设置' }}
+            </span>
           </div>
           <div class="delivery-row">
             <span class="delivery-label">收货地址：</span>
-            <span class="delivery-value">{{ addressInfo?.fullAddress || '未设置' }}</span>
+            <span class="delivery-value">
+              {{ addressInfo?.fullAddress || '未设置' }}
+            </span>
           </div>
           <div v-if="order.tracking_number" class="delivery-row">
             <span class="delivery-label">快递单号：</span>
@@ -205,9 +241,14 @@
           </div>
           <div v-if="orderStatusInfo?.estimatedDelivery" class="delivery-row">
             <span class="delivery-label">预计送达：</span>
-            <span class="delivery-value">{{ orderStatusInfo.estimatedDelivery }}</span>
+            <span class="delivery-value">
+              {{ orderStatusInfo.estimatedDelivery }}
+            </span>
           </div>
-          <div v-if="addressInfo && !addressInfo.isComplete" class="delivery-warning">
+          <div
+            v-if="addressInfo && !addressInfo.isComplete"
+            class="delivery-warning"
+          >
             <span class="warning-icon">⚠️</span>
             <span class="warning-text">地址信息不完整，可能影响配送</span>
           </div>
@@ -238,7 +279,9 @@
         <div class="payment-content">
           <div class="payment-row">
             <span class="payment-label">支付方式：</span>
-            <span class="payment-value">{{ getPaymentMethod(order.payment_method) }}</span>
+            <span class="payment-value">
+              {{ getPaymentMethod(order.payment_method) }}
+            </span>
           </div>
           <div v-if="order.paid_at" class="payment-row">
             <span class="payment-label">支付时间：</span>
@@ -246,31 +289,55 @@
           </div>
           <div v-if="order.payment_transaction_id" class="payment-row">
             <span class="payment-label">交易号：</span>
-            <span class="payment-value">{{ order.payment_transaction_id }}</span>
+            <span class="payment-value">
+              {{ order.payment_transaction_id }}
+            </span>
           </div>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="action-buttons">
-        <button class="btn btn-secondary" @click="router.push('/orders')">返回订单列表</button>
-        <button v-if="orderStatusInfo?.canPay" class="btn btn-primary" @click="handlePayOrder">
+        <button class="btn btn-secondary" @click="router.push('/orders')">
+          返回订单列表
+        </button>
+        <button
+          v-if="orderStatusInfo?.canPay"
+          class="btn btn-primary"
+          @click="handlePayOrder"
+        >
           立即支付
         </button>
-        <button v-if="order.status === 'delivered'" class="btn btn-primary" @click="handleReview">
+        <button
+          v-if="order.status === 'delivered'"
+          class="btn btn-primary"
+          @click="handleReview"
+        >
           评价订单
         </button>
         <button
-          v-if="['processing', 'shipped', 'in_transit', 'delivered'].includes(order.status)"
+          v-if="
+            ['processing', 'shipped', 'in_transit', 'delivered'].includes(
+              order.status
+            )
+          "
           class="btn btn-outline"
           @click="handleTrackOrder"
         >
           查看物流
         </button>
-        <button v-if="order.status === 'delivered'" class="btn btn-outline" @click="handleBuyAgain">
+        <button
+          v-if="order.status === 'delivered'"
+          class="btn btn-outline"
+          @click="handleBuyAgain"
+        >
           再次购买
         </button>
-        <button v-if="orderStatusInfo?.canCancel" class="btn btn-danger" @click="handleCancelOrder">
+        <button
+          v-if="orderStatusInfo?.canCancel"
+          class="btn btn-danger"
+          @click="handleCancelOrder"
+        >
           取消订单
         </button>
       </div>
@@ -282,13 +349,20 @@
       <h2 class="empty-title">订单不存在</h2>
       <p class="empty-message">该订单可能已被删除或不存在</p>
       <div class="empty-actions">
-        <button class="btn btn-primary" @click="router.push('/orders')">返回订单列表</button>
-        <button class="btn btn-secondary" @click="loadOrderDetail">重新加载</button>
+        <button class="btn btn-primary" @click="router.push('/orders')">
+          返回订单列表
+        </button>
+        <button class="btn btn-secondary" @click="loadOrderDetail">
+          重新加载
+        </button>
       </div>
     </div>
 
     <!-- Order Items Empty State -->
-    <div v-if="order && (!order.items || order.items.length === 0)" class="items-empty">
+    <div
+      v-if="order && (!order.items || order.items.length === 0)"
+      class="items-empty"
+    >
       <div class="empty-icon">🛒</div>
       <h3 class="empty-title">暂无商品信息</h3>
       <p class="empty-message">该订单的商品信息可能丢失</p>
@@ -303,7 +377,6 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useOrderStore } from '@/stores/orderStore'
 import { useUserStore } from '@/stores/userStore'
 import { useLogisticsStore } from '@/stores/logisticsStore'
-import Header from '@/components/Header.vue'
 import LogisticsTracker from '@/components/LogisticsTracker.vue'
 import LogisticsDialog from '@/components/LogisticsDialog.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
@@ -372,7 +445,11 @@ const orderSteps = computed(() => {
       current: isCurrent,
       active: isActive,
       date: getStepDate(step.statusValue, order.value),
-      description: getStepDescription(step.statusValue, currentStatus, order.value),
+      description: getStepDescription(
+        step.statusValue,
+        currentStatus,
+        order.value
+      ),
       progress: ((index + 1) / standardSteps.length) * 100,
     }
   })
@@ -394,7 +471,13 @@ const orderSteps = computed(() => {
 
 // 判断步骤是否完成
 const isStepCompleted = (stepStatus, currentStatus) => {
-  const statusOrder = ['pending', 'processing', 'shipped', 'in_transit', 'delivered']
+  const statusOrder = [
+    'pending',
+    'processing',
+    'shipped',
+    'in_transit',
+    'delivered',
+  ]
   const stepIndex = statusOrder.indexOf(stepStatus)
   const currentIndex = statusOrder.indexOf(currentStatus)
 
@@ -416,19 +499,23 @@ const getStepDate = (stepStatus, orderData) => {
     case 'in_transit':
       return '运输中'
     case 'delivered':
-      return orderData.delivered_at ? formatDate(orderData.delivered_at) : '待送达'
+      return orderData.delivered_at
+        ? formatDate(orderData.delivered_at)
+        : '待送达'
     default:
       return '进行中'
   }
 }
 
 // 获取步骤描述
-const getStepDescription = (stepStatus, currentStatus, orderData) => {
+const getStepDescription = (stepStatus, currentStatus) => {
   const descriptions = {
     pending: '您的订单已成功提交，请尽快完成支付',
-    processing: currentStatus === 'processing' ? '商家正在准备您的商品' : '订单已处理',
+    processing:
+      currentStatus === 'processing' ? '商家正在准备您的商品' : '订单已处理',
     shipped: currentStatus === 'shipped' ? '商品正在配送中' : '商品已发出',
-    in_transit: currentStatus === 'in_transit' ? '商品正在运输途中' : '商品运输中',
+    in_transit:
+      currentStatus === 'in_transit' ? '商品正在运输途中' : '商品运输中',
     delivered: currentStatus === 'delivered' ? '商品已成功送达' : '等待送达',
   }
 
@@ -441,7 +528,6 @@ const orderStatusInfo = computed(() => {
 
   const status = order.value.status
   const statusConfig = getStatusInfo(status)
-  console.log('🔍 订单状态调试:', { status, statusConfig })
   const createdDate = new Date(order.value.created_at)
   const now = new Date()
   const daysDiff = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24))
@@ -455,13 +541,19 @@ const orderStatusInfo = computed(() => {
         statusStartTime = new Date(order.value.created_at)
         break
       case 'processing':
-        statusStartTime = order.value.paid_at ? new Date(order.value.paid_at) : createdDate
+        statusStartTime = order.value.paid_at
+          ? new Date(order.value.paid_at)
+          : createdDate
         break
       case 'shipped':
-        statusStartTime = order.value.shipped_at ? new Date(order.value.shipped_at) : createdDate
+        statusStartTime = order.value.shipped_at
+          ? new Date(order.value.shipped_at)
+          : createdDate
         break
       case 'in_transit':
-        statusStartTime = order.value.shipped_at ? new Date(order.value.shipped_at) : createdDate
+        statusStartTime = order.value.shipped_at
+          ? new Date(order.value.shipped_at)
+          : createdDate
         break
       case 'delivered':
         statusStartTime = order.value.delivered_at
@@ -503,7 +595,7 @@ const orderStatusInfo = computed(() => {
 })
 
 // 获取下一步操作建议
-const getNextAction = (status) => {
+const getNextAction = status => {
   const actions = {
     pending: '请尽快完成支付',
     processing: '商家正在处理，请耐心等待',
@@ -517,7 +609,7 @@ const getNextAction = (status) => {
 }
 
 // Helper functions
-const formatPrice = (price) => {
+const formatPrice = price => {
   const numPrice = typeof price === 'number' ? price : parseFloat(price) || 0
   return numPrice.toFixed(2)
 }
@@ -556,9 +648,14 @@ const itemStatistics = computed(() => {
   if (!order.value?.items) return null
 
   const items = order.value.items
-  const totalItems = items.reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0)
+  const totalItems = items.reduce(
+    (sum, item) => sum + (parseInt(item.quantity) || 1),
+    0
+  )
   const uniqueProducts = items.length
-  const categories = [...new Set(items.map((item) => item.category).filter(Boolean))]
+  const categories = [
+    ...new Set(items.map(item => item.category).filter(Boolean)),
+  ]
 
   return {
     totalItems,
@@ -568,7 +665,7 @@ const itemStatistics = computed(() => {
   }
 })
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleString('zh-CN', {
     year: 'numeric',
@@ -637,15 +734,15 @@ const orderStatusConfig = {
   },
 }
 
-const getStatusText = (status) => {
+const getStatusText = status => {
   return orderStatusConfig[status]?.text || status || '未知状态'
 }
 
-const getStatusClass = (status) => {
+const getStatusClass = status => {
   return orderStatusConfig[status]?.class || 'status-default'
 }
 
-const getStatusInfo = (status) => {
+const getStatusInfo = status => {
   return (
     orderStatusConfig[status] || {
       text: status || '未知状态',
@@ -659,7 +756,7 @@ const getStatusInfo = (status) => {
   )
 }
 
-const getPaymentMethod = (method) => {
+const getPaymentMethod = method => {
   const methodMap = {
     wechat: '微信支付',
     alipay: '支付宝',
@@ -670,7 +767,7 @@ const getPaymentMethod = (method) => {
   return methodMap[method] || method || '未设置'
 }
 
-const getFullAddress = (address) => {
+const getFullAddress = address => {
   if (!address) return '未设置'
 
   const parts = [
@@ -702,11 +799,13 @@ const addressInfo = computed(() => {
     detail: addr.detail || '',
     postalCode: addr.postal_code || '',
     isComplete: !!(addr.province && addr.city && addr.district && addr.detail),
-    displayPhone: addr.phone ? addr.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : '未设置', // 手机号脱敏
+    displayPhone: addr.phone
+      ? addr.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
+      : '未设置', // 手机号脱敏
   }
 })
 
-const getProductIcon = (category) => {
+const getProductIcon = category => {
   const icons = {
     水果: '🍎',
     蔬菜: '🥬',
@@ -718,7 +817,7 @@ const getProductIcon = (category) => {
   return icons[category] || '📦'
 }
 
-const handleImageError = (event) => {
+const handleImageError = event => {
   const img = event.target
   const container = img.parentNode
 
@@ -738,11 +837,17 @@ const handleImageError = (event) => {
         ? '蔬菜'
         : itemElement.querySelector('.item-name')?.textContent?.includes('肉类')
           ? '肉类'
-          : itemElement.querySelector('.item-name')?.textContent?.includes('海鲜')
+          : itemElement
+                .querySelector('.item-name')
+                ?.textContent?.includes('海鲜')
             ? '海鲜'
-            : itemElement.querySelector('.item-name')?.textContent?.includes('饮品')
+            : itemElement
+                  .querySelector('.item-name')
+                  ?.textContent?.includes('饮品')
               ? '饮品'
-              : itemElement.querySelector('.item-name')?.textContent?.includes('零食')
+              : itemElement
+                    .querySelector('.item-name')
+                    ?.textContent?.includes('零食')
                 ? '零食'
                 : '其他'
     : '其他'
@@ -761,17 +866,21 @@ const handleImageError = (event) => {
 // Action handlers
 const handlePayOrder = async () => {
   try {
-    const { value: paymentMethod } = await ElMessageBox.prompt('请选择支付方式', '支付订单', {
-      confirmButtonText: '确认支付',
-      cancelButtonText: '取消',
-      inputType: 'select',
-      inputOptions: {
-        wechat: '微信支付',
-        alipay: '支付宝',
-        credit_card: '信用卡',
-      },
-      inputPlaceholder: '请选择支付方式',
-    })
+    const { value: paymentMethod } = await ElMessageBox.prompt(
+      '请选择支付方式',
+      '支付订单',
+      {
+        confirmButtonText: '确认支付',
+        cancelButtonText: '取消',
+        inputType: 'select',
+        inputOptions: {
+          wechat: '微信支付',
+          alipay: '支付宝',
+          credit_card: '信用卡',
+        },
+        inputPlaceholder: '请选择支付方式',
+      }
+    )
 
     if (!paymentMethod) return
 
@@ -802,7 +911,12 @@ const handleTrackOrder = async () => {
     const carrier = order.value.carrier || '顺丰速运'
 
     // 使用物流store获取数据
-    await logisticsStore.fetchLogisticsInfo(trackingNumber, carrier, order.value.id, true)
+    await logisticsStore.fetchLogisticsInfo(
+      trackingNumber,
+      carrier,
+      order.value.id,
+      true
+    )
 
     // 显示物流跟踪对话框
     ElMessageBox({
@@ -814,12 +928,8 @@ const handleTrackOrder = async () => {
         orderStatus: order.value.status,
         autoRefresh: true,
         refreshInterval: 30000,
-        onUpdate: (data) => {
-          console.log('物流信息更新:', data)
-        },
-        onError: (error) => {
-          console.error('物流信息错误:', error)
-        },
+        onUpdate: () => {},
+        onError: () => {},
       }),
       customClass: 'logistics-dialog',
       showCancelButton: false,
@@ -861,20 +971,17 @@ const handleCancelOrder = async () => {
     await loadOrderDetail()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
-      console.error('取消订单失败:', error)
       ElMessage.error('取消订单失败，请重试')
     }
   }
 }
 
 // 物流更新事件处理
-const handleLogisticsUpdate = (data) => {
-  console.log('物流信息更新:', data)
+const handleLogisticsUpdate = () => {
   // 可以在这里更新订单状态或显示通知
 }
 
-const handleLogisticsError = (error) => {
-  console.error('物流信息错误:', error)
+const handleLogisticsError = () => {
   ElMessage.error('获取物流信息失败')
 }
 
@@ -884,8 +991,6 @@ const loadOrderDetail = async () => {
   error.value = null
 
   try {
-    console.log('🔍 加载订单详情 ID:', route.params.id)
-
     const orderData = await orderStore.fetchOrderById(route.params.id)
 
     if (orderData) {
@@ -893,14 +998,10 @@ const loadOrderDetail = async () => {
       // 如果 orderData 包含 order 字段，则使用 order 字段
       const orderInfo = orderData.order || orderData
       order.value = validateAndNormalizeOrderData(orderInfo)
-      console.log('✅ 订单详情加载成功:', order.value)
-      console.log('🔍 订单状态:', order.value.status)
-      console.log('🔍 状态配置:', getStatusInfo(order.value.status))
     } else {
       error.value = '订单不存在'
     }
   } catch (err) {
-    console.error('❌ 加载订单详情失败:', err)
     error.value = err.message || '加载失败，请稍后重试'
   } finally {
     loading.value = false
@@ -908,7 +1009,7 @@ const loadOrderDetail = async () => {
 }
 
 // 数据验证和标准化处理
-const validateAndNormalizeOrderData = (orderData) => {
+const validateAndNormalizeOrderData = orderData => {
   // 确保必要字段存在
   const normalizedOrder = {
     id: orderData.id || null,
@@ -922,7 +1023,7 @@ const validateAndNormalizeOrderData = (orderData) => {
 
     // 商品信息
     items: Array.isArray(orderData.items)
-      ? orderData.items.map((item) => ({
+      ? orderData.items.map(item => ({
           id: item.id || null,
           product_id: item.product_id || null,
           product_name: item.product_name || '商品名称未知',
@@ -930,7 +1031,9 @@ const validateAndNormalizeOrderData = (orderData) => {
           category: item.category || '其他',
           specification: item.specification || '标准规格',
           price: parseFloat(item.price) || 0,
-          original_price: item.original_price ? parseFloat(item.original_price) : null,
+          original_price: item.original_price
+            ? parseFloat(item.original_price)
+            : null,
           quantity: parseInt(item.quantity) || 1,
           subtotal:
             parseFloat(item.subtotal) ||
@@ -977,10 +1080,15 @@ const validateAndNormalizeOrderData = (orderData) => {
 
   // 计算总金额（如果后端没有提供）
   if (!orderData.total_amount && normalizedOrder.items.length > 0) {
-    const itemsTotal = normalizedOrder.items.reduce((sum, item) => sum + item.subtotal, 0)
+    const itemsTotal = normalizedOrder.items.reduce(
+      (sum, item) => sum + item.subtotal,
+      0
+    )
     normalizedOrder.subtotal = itemsTotal
     normalizedOrder.total_amount =
-      itemsTotal + normalizedOrder.shipping_fee - normalizedOrder.discount_amount
+      itemsTotal +
+      normalizedOrder.shipping_fee -
+      normalizedOrder.discount_amount
   }
 
   return normalizedOrder
@@ -996,7 +1104,8 @@ onMounted(() => {
 .order-detail-page {
   min-height: 100vh;
   background-color: #f8f9fa;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Breadcrumbs */

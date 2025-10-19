@@ -21,7 +21,9 @@
       <p class="error-message">{{ error }}</p>
       <div class="error-actions">
         <button class="btn btn-primary" @click="loadProduct">重试</button>
-        <button class="btn btn-secondary" @click="router.push('/shop')">返回商城</button>
+        <button class="btn btn-secondary" @click="router.push('/shop')">
+          返回商城
+        </button>
       </div>
     </div>
 
@@ -39,7 +41,9 @@
               <div class="image-container" @click="toggleImageZoom">
                 <!-- Placeholder (No Image) -->
                 <div v-if="!product.image_url" class="placeholder-image">
-                  <div class="placeholder-icon">{{ getProductIcon(product.category) }}</div>
+                  <div class="placeholder-icon">
+                    {{ getProductIcon(product.category) }}
+                  </div>
                   <p class="placeholder-text">暂无图片</p>
                 </div>
 
@@ -122,22 +126,28 @@
             <div class="product-badges">
               <span v-if="product.is_new" class="badge badge-new">新品</span>
               <span v-if="product.is_hot" class="badge badge-hot">热卖</span>
-              <span v-if="product.is_discount" class="badge badge-discount">促销</span>
+              <span v-if="product.is_discount" class="badge badge-discount">
+                促销
+              </span>
             </div>
           </div>
 
-          <p class="product-subtitle" v-if="product.name_en">{{ product.name_en }}</p>
+          <p class="product-subtitle" v-if="product.name_en">
+            {{ product.name_en }}
+          </p>
 
           <!-- Rating Section -->
           <div class="rating-section">
             <div class="star-rating">
               <span class="stars">{{ renderStars(product.rating || 0) }}</span>
-              <span class="rating-value">{{ formatRating(product.rating) }}</span>
+              <span class="rating-value">
+                {{ formatRating(product.rating) }}
+              </span>
             </div>
             <span class="review-count">{{ reviews.length }} 条评价</span>
-            <span class="sales-count" v-if="product.sales_count"
-              >已售 {{ product.sales_count }}</span
-            >
+            <span class="sales-count" v-if="product.sales_count">
+              已售 {{ product.sales_count }}
+            </span>
           </div>
 
           <!-- Price Section -->
@@ -152,7 +162,10 @@
                 ¥{{ formatPrice(product.original_price) }}
               </div>
             </div>
-            <div class="promotion-tag" v-if="product.is_discount && product.discount_rate">
+            <div
+              class="promotion-tag"
+              v-if="product.is_discount && product.discount_rate"
+            >
               {{ product.discount_rate }}
             </div>
           </div>
@@ -169,7 +182,11 @@
           <div class="quantity-section">
             <span class="quantity-label">数量:</span>
             <div class="quantity-selector">
-              <button class="quantity-btn" :disabled="quantity <= 1" @click="decreaseQuantity">
+              <button
+                class="quantity-btn"
+                :disabled="quantity <= 1"
+                @click="decreaseQuantity"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -177,7 +194,9 @@
                   fill="currentColor"
                   viewBox="0 0 256 256"
                 >
-                  <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"></path>
+                  <path
+                    d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"
+                  ></path>
                 </svg>
               </button>
               <input
@@ -210,7 +229,11 @@
 
           <!-- Action Buttons -->
           <div class="action-buttons">
-            <button class="btn btn-outline" :class="{ active: isFavorite }" @click="toggleFavorite">
+            <button
+              class="btn btn-outline"
+              :class="{ active: isFavorite }"
+              @click="toggleFavorite"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -229,7 +252,11 @@
               </svg>
               <span>{{ isFavorite ? '已收藏' : '收藏' }}</span>
             </button>
-            <button class="btn btn-secondary" :disabled="!canAddToCart" @click="addToCart">
+            <button
+              class="btn btn-secondary"
+              :disabled="!canAddToCart"
+              @click="addToCart"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -243,7 +270,11 @@
               </svg>
               <span>加入购物车</span>
             </button>
-            <button class="btn btn-primary" :disabled="!canAddToCart" @click="buyNow">
+            <button
+              class="btn btn-primary"
+              :disabled="!canAddToCart"
+              @click="buyNow"
+            >
               <span>立即购买</span>
             </button>
           </div>
@@ -395,7 +426,9 @@
                   </tr>
                   <tr>
                     <td class="spec-label">商品分类</td>
-                    <td class="spec-value">{{ product.category || '生鲜果蔬' }}</td>
+                    <td class="spec-value">
+                      {{ product.category || '生鲜果蔬' }}
+                    </td>
                   </tr>
                   <tr>
                     <td class="spec-label">销售单位</td>
@@ -408,26 +441,28 @@
                   <tr>
                     <td class="spec-label">当前价格</td>
                     <td class="spec-value">
-                      <span class="price-highlight"
-                        >¥{{ formatPrice(product.price) }}{{ product.unit }}</span
-                      >
+                      <span class="price-highlight">
+                        ¥{{ formatPrice(product.price) }}{{ product.unit }}
+                      </span>
                     </td>
                   </tr>
                   <tr v-if="product.original_price">
                     <td class="spec-label">原价</td>
                     <td class="spec-value">
-                      <span class="original-price-text"
-                        >¥{{ formatPrice(product.original_price) }}</span
-                      >
-                      <span v-if="product.discount_rate" class="discount-tag"
-                        >{{ product.discount_rate }} OFF</span
-                      >
+                      <span class="original-price-text">
+                        ¥{{ formatPrice(product.original_price) }}
+                      </span>
+                      <span v-if="product.discount_rate" class="discount-tag">
+                        {{ product.discount_rate }} OFF
+                      </span>
                     </td>
                   </tr>
                   <tr>
                     <td class="spec-label">库存</td>
                     <td class="spec-value">
-                      <span :class="stockClass">{{ product.stock || 0 }} 件</span>
+                      <span :class="stockClass">
+                        {{ product.stock || 0 }} 件
+                      </span>
                     </td>
                   </tr>
                   <tr v-if="product.sales_count">
@@ -439,8 +474,13 @@
                     <td class="spec-value">
                       <span class="rating-display">
                         {{ formatRating(product.rating) }}
-                        <span class="stars-inline">{{ renderStars(product.rating) }}</span>
-                        <span class="review-count-inline" v-if="product.review_count">
+                        <span class="stars-inline">
+                          {{ renderStars(product.rating) }}
+                        </span>
+                        <span
+                          class="review-count-inline"
+                          v-if="product.review_count"
+                        >
                           ({{ product.review_count }} 条评价)
                         </span>
                       </span>
@@ -465,7 +505,9 @@
           <div v-show="activeTab === 'nutrition'" class="tab-panel">
             <div class="nutrition-content">
               <h4 class="nutrition-title">营养价值</h4>
-              <p class="nutrition-desc">富含多种维生素和矿物质，是健康饮食的重要组成部分。</p>
+              <p class="nutrition-desc">
+                富含多种维生素和矿物质，是健康饮食的重要组成部分。
+              </p>
               <div class="nutrition-grid">
                 <div class="nutrition-item">
                   <div class="nutrition-icon">💪</div>
@@ -498,7 +540,9 @@
         <div class="reviews-header">
           <h2 class="section-title">客户评价</h2>
           <div class="reviews-summary" v-if="reviews.length > 0">
-            <span class="average-rating">{{ formatRating(averageRating) }}</span>
+            <span class="average-rating">
+              {{ formatRating(averageRating) }}
+            </span>
             <div class="rating-stars">{{ renderStars(averageRating) }}</div>
             <span class="total-reviews">基于 {{ reviews.length }} 条评价</span>
           </div>
@@ -527,7 +571,9 @@
                   <div class="reviewer-name">
                     {{ review.user_name || review.full_name || '匿名用户' }}
                   </div>
-                  <div class="review-date">{{ formatDate(review.created_at) }}</div>
+                  <div class="review-date">
+                    {{ formatDate(review.created_at) }}
+                  </div>
                 </div>
               </div>
               <div class="star-rating">
@@ -562,7 +608,12 @@
             @click="goToProduct(item.id)"
           >
             <div class="related-product-image">
-              <img v-if="item.image_url" :src="item.image_url" :alt="item.name" loading="lazy" />
+              <img
+                v-if="item.image_url"
+                :src="item.image_url"
+                :alt="item.name"
+                loading="lazy"
+              />
               <div v-else class="product-placeholder">🍎</div>
               <div class="product-overlay">
                 <span class="view-detail">查看详情</span>
@@ -571,10 +622,14 @@
             <div class="related-product-info">
               <h3 class="related-product-name">{{ item.name }}</h3>
               <div class="related-product-rating">
-                <span class="stars-small">{{ renderStars(item.rating || 0) }}</span>
+                <span class="stars-small">
+                  {{ renderStars(item.rating || 0) }}
+                </span>
               </div>
               <div class="related-product-price">
-                <span class="price-current">¥{{ formatPrice(item.price) }}</span>
+                <span class="price-current">
+                  ¥{{ formatPrice(item.price) }}
+                </span>
                 <span class="price-original" v-if="item.original_price">
                   ¥{{ formatPrice(item.original_price) }}
                 </span>
@@ -591,7 +646,9 @@
       <h2 class="error-title">商品不存在</h2>
       <p class="error-message">该商品可能已下架或不存在</p>
       <div class="error-actions">
-        <button class="btn btn-primary" @click="router.push('/shop')">返回商城</button>
+        <button class="btn btn-primary" @click="router.push('/shop')">
+          返回商城
+        </button>
       </div>
     </div>
 
@@ -621,7 +678,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
 import { useUserStore } from '@/stores/userStore'
-import Header from '@/components/Header.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()
@@ -680,35 +736,46 @@ const stockText = computed(() => {
 
 const averageRating = computed(() => {
   if (reviews.value.length === 0) return 0
-  const sum = reviews.value.reduce((acc, review) => acc + (review.rating || 0), 0)
+  const sum = reviews.value.reduce(
+    (acc, review) => acc + (review.rating || 0),
+    0
+  )
   return sum / reviews.value.length
 })
 
 const toastIcon = computed(() => {
-  return toastType.value === 'success' ? '✓' : toastType.value === 'error' ? '✗' : 'ℹ'
+  return toastType.value === 'success'
+    ? '✓'
+    : toastType.value === 'error'
+      ? '✗'
+      : 'ℹ'
 })
 
 // Helper functions
-const formatPrice = (price) => {
+const formatPrice = price => {
   const numPrice = typeof price === 'number' ? price : parseFloat(price) || 0
   return numPrice.toFixed(2)
 }
 
-const formatRating = (rating) => {
-  const numRating = typeof rating === 'number' ? rating : parseFloat(rating) || 0
+const formatRating = rating => {
+  const numRating =
+    typeof rating === 'number' ? rating : parseFloat(rating) || 0
   return numRating.toFixed(1)
 }
 
-const renderStars = (rating) => {
-  const numRating = typeof rating === 'number' ? rating : parseFloat(rating) || 0
+const renderStars = rating => {
+  const numRating =
+    typeof rating === 'number' ? rating : parseFloat(rating) || 0
   const fullStars = Math.floor(numRating)
   const hasHalfStar = numRating % 1 >= 0.5
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
 
-  return '★'.repeat(fullStars) + (hasHalfStar ? '☆' : '') + '☆'.repeat(emptyStars)
+  return (
+    '★'.repeat(fullStars) + (hasHalfStar ? '☆' : '') + '☆'.repeat(emptyStars)
+  )
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('zh-CN', {
     year: 'numeric',
@@ -718,7 +785,7 @@ const formatDate = (date) => {
 }
 
 // Image functions
-const getProductIcon = (category) => {
+const getProductIcon = category => {
   const icons = {
     水果: '🍎',
     蔬菜: '🥬',
@@ -814,10 +881,12 @@ const buyNow = async () => {
   await cartStore.addToCart(product.value, quantity.value)
 
   // 取消其他商品的选中状态，只保留刚添加的商品
-  const addedItem = cartStore.items.find((item) => item.product_id === product.value.id)
+  const addedItem = cartStore.items.find(
+    item => item.product_id === product.value.id
+  )
   if (addedItem) {
     // 取消所有商品选中
-    cartStore.items.forEach((item) => {
+    cartStore.items.forEach(item => {
       item.selected = false
     })
     // 只选中当前商品
@@ -840,23 +909,23 @@ const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
   showToastNotification(
     isFavorite.value ? '已添加到收藏' : '已取消收藏',
-    isFavorite.value ? 'success' : 'info',
+    isFavorite.value ? 'success' : 'info'
   )
 }
 
 // Review interactions
-const likeReview = (reviewId) => {
+const likeReview = reviewId => {
   console.log('Like review:', reviewId)
   // TODO: Implement like review API call
 }
 
-const dislikeReview = (reviewId) => {
+const dislikeReview = reviewId => {
   console.log('Dislike review:', reviewId)
   // TODO: Implement dislike review API call
 }
 
 // Load reviews - 已经从API一起返回，不需要单独加载
-const loadReviews = (reviewsData) => {
+const loadReviews = reviewsData => {
   if (Array.isArray(reviewsData)) {
     reviews.value = reviewsData
     console.log(`✅ 加载了 ${reviewsData.length} 条评价`)
@@ -866,7 +935,7 @@ const loadReviews = (reviewsData) => {
 }
 
 // Navigate to product
-const goToProduct = (id) => {
+const goToProduct = id => {
   router.push(`/product/${id}`)
   // Scroll to top when navigating to a new product
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -878,7 +947,6 @@ const loadProduct = async () => {
   error.value = null
 
   try {
-    console.log('🔍 加载商品详情 ID:', route.params.id)
 
     // Fetch product details (包含product、reviews、related_products)
     const responseData = await productStore.fetchProductById(route.params.id)
@@ -886,14 +954,7 @@ const loadProduct = async () => {
     // API返回的数据结构: { product: {...}, reviews: [...], related_products: [...] }
     if (responseData.product) {
       product.value = responseData.product
-      console.log('📦 商品信息:', {
-        id: responseData.product.id,
-        name: responseData.product.name,
-        price: responseData.product.price,
-        stock: responseData.product.stock,
-        rating: responseData.product.rating,
-        is_favorite: responseData.product.is_favorite,
-      })
+
 
       // 设置收藏状态
       isFavorite.value = responseData.product.is_favorite === 1
@@ -907,22 +968,18 @@ const loadProduct = async () => {
       // Load related products from API response
       if (Array.isArray(responseData.related_products)) {
         relatedProducts.value = responseData.related_products
-        console.log(`🔗 相关商品: ${relatedProducts.value.length} 个`)
       } else {
         relatedProducts.value = []
       }
 
-      console.log('✅ 商品详情加载成功')
     } else {
       // 兼容旧的数据格式
       product.value = responseData
       resetImageState()
       loadReviews([])
       relatedProducts.value = []
-      console.warn('⚠️ API返回格式不符合预期，使用兼容模式')
     }
   } catch (err) {
-    console.error('❌ 加载商品详情失败:', err)
     error.value = err.message || '加载失败，请稍后重试'
   } finally {
     loading.value = false
@@ -932,13 +989,13 @@ const loadProduct = async () => {
 // Watch for route changes
 watch(
   () => route.params.id,
-  (newId) => {
+  newId => {
     if (newId) {
       quantity.value = 1
       isFavorite.value = false
       loadProduct()
     }
-  },
+  }
 )
 
 // Initial load
@@ -952,7 +1009,8 @@ onMounted(() => {
   min-height: 100vh;
   background-color: #f8f9fa;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
+    Arial, sans-serif;
   padding-bottom: 40px;
 }
 

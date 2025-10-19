@@ -158,13 +158,11 @@ const cartStore = useCartStore()
 
 // 组件挂载时加载购物车数据
 onMounted(async () => {
-  console.log('🛒 购物车页面初始化')
-  console.log('cartStore.items before fetch:', cartStore.items)
+
 
   await cartStore.fetchCartList()
 
-  console.log('cartStore.items after fetch:', cartStore.items)
-  console.log('cartItems computed:', cartItems.value)
+
 })
 
 // 购物车商品列表（格式化显示）

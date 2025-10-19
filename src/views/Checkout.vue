@@ -322,7 +322,6 @@ const submitOrder = async () => {
       remark: '',
     }
 
-    console.log('提交订单数据:', orderData)
 
     // 创建订单
     const result = await orderStore.createOrder(orderData)
@@ -330,12 +329,10 @@ const submitOrder = async () => {
     // 获取订单ID
     const orderId = result.order_id || result.id
     if (!orderId) {
-      console.error('订单创建失败或没有返回订单ID:', result)
       ElMessage.error('订单创建失败，请重试')
       return
     }
 
-    console.log('订单创建成功，订单ID:', orderId)
 
     // 显示支付确认对话框
     try {
@@ -356,7 +353,6 @@ const submitOrder = async () => {
       // 模拟支付处理
       setTimeout(async () => {
         try {
-          console.log('开始模拟支付处理，订单ID:', orderId)
 
           // 模拟支付成功，更新订单状态为待发货
           await orderStore.updateOrderStatus(orderId, 'processing')

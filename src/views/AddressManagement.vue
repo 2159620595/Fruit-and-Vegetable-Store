@@ -117,10 +117,9 @@
       </el-form-item>
 
       <el-form-item label="所在地区" prop="region">
-        <el-cascader
+        <RegionSelector
+          ref="regionSelectorRef"
           v-model="addressForm.region"
-          :options="regions"
-          placeholder="请选择省市区"
           @change="handleRegionChange"
         />
       </el-form-item>
@@ -134,12 +133,20 @@
         />
       </el-form-item>
 
-      <el-form-item label="地址标签">
-        <el-input
+      <el-form-item label="地址标签" prop="label">
+        <el-select
           v-model="addressForm.label"
-          placeholder="如：家、公司、学校等"
-          maxlength="10"
-        />
+          placeholder="请选择地址标签"
+          clearable
+          style="width: 100%"
+        >
+          <el-option
+            v-for="option in labelOptions"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+          />
+        </el-select>
       </el-form-item>
 
       <el-form-item label="设为默认">
@@ -167,14 +174,23 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Check } from '@element-plus/icons-vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
-import { regions } from '../data/regions.js'
+import RegionSelector from '../components/RegionSelector.vue'
 import {
   getAddressList,
   createAddress,
   updateAddress,
   deleteAddress as deleteAddressAPI,
-  setDefaultAddress,
 } from '../api/address.js'
+
+// 地址标签选项
+const labelOptions = [
+  { value: '家', label: '家' },
+  { value: '公司', label: '公司' },
+  { value: '学校', label: '学校' },
+  { value: '父母家', label: '父母家' },
+  { value: '朋友家', label: '朋友家' },
+  { value: '其他', label: '其他' },
+]
 
 // 响应式数据
 const addresses = ref([])
@@ -184,6 +200,7 @@ const saving = ref(false)
 const loading = ref(false)
 
 const addressFormRef = ref(null)
+const regionSelectorRef = ref(null)
 const addressForm = ref({
   recipient_name: '',
   phone: '',
@@ -215,6 +232,18 @@ const addressRules = {
       max: 100,
       message: '地址长度在 5 到 100 个字符',
       trigger: 'blur',
+    },
+  ],
+  label: [
+    {
+      validator: (rule, value, callback) => {
+        if (value && !labelOptions.some(option => option.value === value)) {
+          callback(new Error('请选择有效的地址标签'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'change',
     },
   ],
 }
@@ -270,35 +299,25 @@ const loadAddresses = async () => {
   }
 }
 
-const handleRegionChange = value => {
-  if (value && value.length === 3) {
-    // 将选择的省市区组合成region字符串
-    const province = regions.find(p => p.code === value[0])
-    const city = province?.cities.find(c => c.code === value[1])
-    const district = city?.districts.find(d => d.code === value[2])
-
-    if (province && city && district) {
-      addressForm.value.regionString = `${province.name} ${city.name} ${district.name}`
-    }
+const handleRegionChange = regionData => {
+  if (regionData && regionData.string) {
+    addressForm.value.regionString = regionData.string
   }
 }
 
 const editAddress = address => {
   editingAddress.value = address
 
-  // 解析region字符串为省市区数组
-  const regionParts = address.region.split(' ')
-  const province = regions.find(p => p.name === regionParts[0])
-  const city = province?.cities.find(c => c.name === regionParts[1])
-  const district = city?.districts.find(d => d.name === regionParts[2])
+  // 使用 RegionSelector 组件的解析方法
+  let regionArray = []
+  if (regionSelectorRef.value && address.region) {
+    regionArray = regionSelectorRef.value.parseRegionString(address.region)
+  }
 
   addressForm.value = {
     recipient_name: address.recipient_name,
     phone: address.phone,
-    region:
-      province && city && district
-        ? [province.code, city.code, district.code]
-        : [],
+    region: regionArray,
     regionString: address.region, // 直接使用字符串格式
     detailed_address: address.detailed_address,
     label: address.label || '',
@@ -457,8 +476,25 @@ const setDefault = async addressId => {
       type: 'info',
     })
 
-    // 调用设置默认地址的API
-    await setDefaultAddress(addressId)
+    // 找到要设置为默认的地址
+    const targetAddress = addresses.value.find(addr => addr.id === addressId)
+    if (!targetAddress) {
+      ElMessage.error('地址不存在')
+      return
+    }
+
+    // 使用updateAddress接口来设置默认地址
+    const addressData = {
+      recipient_name: targetAddress.recipient_name,
+      phone: targetAddress.phone,
+      region: targetAddress.region,
+      detailed_address: targetAddress.detailed_address,
+      label: targetAddress.label,
+      is_default: 1, // 设置为默认地址
+    }
+
+    // 调用更新地址的API
+    await updateAddress(addressId, addressData)
 
     // 更新本地状态
     addresses.value.forEach(addr => {
@@ -502,9 +538,18 @@ const deleteAddress = async addressId => {
       addresses.value.length > 0
     ) {
       // 自动设置第一个地址为默认地址
-      addresses.value[0].is_default = 1
+      const firstAddress = addresses.value[0]
+      firstAddress.is_default = 1
       try {
-        await setDefaultAddress(addresses.value[0].id)
+        const addressData = {
+          recipient_name: firstAddress.recipient_name,
+          phone: firstAddress.phone,
+          region: firstAddress.region,
+          detailed_address: firstAddress.detailed_address,
+          label: firstAddress.label,
+          is_default: 1,
+        }
+        await updateAddress(firstAddress.id, addressData)
         ElMessage.success('删除成功，已自动设置新的默认地址')
       } catch {
         ElMessage.success('删除成功')

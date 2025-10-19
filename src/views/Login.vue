@@ -284,14 +284,11 @@ const validateSignup = () => {
 
 // 处理注册
 const handleSignup = async () => {
-  console.log('📝 注册表单数据:', signupForm.value)
 
   if (!validateSignup()) {
-    console.log('❌ 表单验证失败')
     return
   }
 
-  console.log('✅ 表单验证通过，准备提交')
   signupError.value = ''
 
   // 显示加载提示
@@ -304,7 +301,6 @@ const handleSignup = async () => {
 
   try {
     await userStore.register(signupForm.value)
-    console.log('✅ 注册成功')
 
     loading.close()
 
@@ -334,7 +330,6 @@ const handleSignup = async () => {
     }
   } catch (error) {
     loading.close()
-    console.error('❌ 注册失败:', error)
     const errorMsg = error.message || userStore.error || '注册失败，请稍后重试'
     signupError.value = errorMsg
 
@@ -366,7 +361,6 @@ const handleLogin = async () => {
 
   try {
     await userStore.login(loginForm.value)
-    console.log('✅ 登录成功')
 
     loading.close()
 
@@ -381,7 +375,6 @@ const handleLogin = async () => {
     // 获取重定向地址（从query参数）
     const redirect = route.query.redirect || '/'
 
-    console.log('🔄 准备跳转到:', redirect)
 
     // 跳转到目标页面或首页
     setTimeout(() => {
