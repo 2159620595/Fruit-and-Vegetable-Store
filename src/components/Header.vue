@@ -21,9 +21,19 @@
       <div class="right">
         <nav class="nav-links" v-if="isHomePage">
           <a href="#" class="nav-link" @click="router.push('/')">首页</a>
-          <a href="#" class="nav-link" @click="router.push('/shop')">所有产品</a>
-          <a href="#" class="nav-link" @click="router.push('/shop?filter=new')">新到商品</a>
-          <a href="#" class="nav-link" @click="router.push('/shop?filter=sale')">促销活动</a>
+          <a href="#" class="nav-link" @click="router.push('/shop')">
+            所有产品
+          </a>
+          <a href="#" class="nav-link" @click="router.push('/shop?filter=new')">
+            新到商品
+          </a>
+          <a
+            href="#"
+            class="nav-link"
+            @click="router.push('/shop?filter=sale')"
+          >
+            促销活动
+          </a>
           <a href="#" class="nav-link" @click="scrollToContact">联系我们</a>
         </nav>
         <div class="header-actions">
@@ -50,7 +60,12 @@
                 @focus="showSuggestions = true"
                 @blur="handleBlur"
               />
-              <button v-if="searchKeyword" class="clear-btn" @click="clearSearch" type="button">
+              <button
+                v-if="searchKeyword"
+                class="clear-btn"
+                @click="clearSearch"
+                type="button"
+              >
                 ×
               </button>
             </div>
@@ -64,7 +79,9 @@
               >
                 <div class="suggestion-header">
                   <span>搜索历史</span>
-                  <button @click="clearHistory" class="clear-history-btn">清空</button>
+                  <button @click="clearHistory" class="clear-history-btn">
+                    清空
+                  </button>
                 </div>
                 <div
                   v-for="(item, index) in searchStore.searchHistory"
@@ -150,10 +167,16 @@
               <div v-if="userStore.isLoggedIn" class="user-info-section">
                 <div class="user-greeting">
                   <span class="greeting-text">你好，</span>
-                  <span class="username">{{ userStore.user?.username || '用户' }}</span>
+                  <span class="username">
+                    {{ userStore.user?.username || '用户' }}
+                  </span>
                 </div>
                 <div class="user-menu-items">
-                  <a href="#" @click.prevent="goToProfile" class="user-menu-item">
+                  <a
+                    href="#"
+                    @click.prevent="goToProfile"
+                    class="user-menu-item"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -167,7 +190,11 @@
                     </svg>
                     我的资料
                   </a>
-                  <a href="#" @click.prevent="goToOrders" class="user-menu-item">
+                  <a
+                    href="#"
+                    @click.prevent="goToOrders"
+                    class="user-menu-item"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -181,8 +208,33 @@
                     </svg>
                     我的订单
                   </a>
+                  <a
+                    href="#"
+                    @click.prevent="goToFavorites"
+                    class="user-menu-item"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M178,32c-20.65,0-35.73,11.15-42,21.89C129.73,43.15,114.65,32,94,32A60.07,60.07,0,0,0,34,92c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C154.21,218.66,258,162,258,92A60.07,60.07,0,0,0,178,32ZM128,206.8C109.74,196.16,50,149.72,50,92a44,44,0,0,1,44-44c19.45,0,35.78,10.36,42.92,25.32a8,8,0,0,0,14.16,0C150.22,58.36,166.55,48,186,48a44,44,0,0,1,44,44C230,149.72,170.26,196.16,152,206.8Z"
+                      ></path>
+                    </svg>
+                    我的收藏
+                    <span v-if="favoritesCount > 0" class="favorites-count">
+                      {{ favoritesCount }}
+                    </span>
+                  </a>
                   <div class="menu-divider"></div>
-                  <a href="#" @click.prevent="handleLogout" class="user-menu-item logout">
+                  <a
+                    href="#"
+                    @click.prevent="handleLogout"
+                    class="user-menu-item logout"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -200,7 +252,9 @@
               </div>
               <div v-else class="user-login-section">
                 <p class="login-prompt">登录以查看更多功能</p>
-                <button @click="goToLogin" class="login-btn">登录 / 注册</button>
+                <button @click="goToLogin" class="login-btn">
+                  登录 / 注册
+                </button>
               </div>
             </div>
           </div>
@@ -216,6 +270,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
 import { useSearchStore } from '@/stores/searchStore'
+import { getFavoritesCount } from '@/api/favorites'
 
 const router = useRouter()
 const route = useRoute()
@@ -230,6 +285,7 @@ const isHomePage = computed(() => {
 // 搜索相关状态
 const searchKeyword = ref('')
 const showSuggestions = ref(false)
+const favoritesCount = ref(0)
 
 // 用户菜单状态
 const showUserMenu = ref(false)
@@ -253,7 +309,7 @@ const handleSearch = () => {
 }
 
 // 选择搜索建议
-const selectSuggestion = (keyword) => {
+const selectSuggestion = keyword => {
   searchKeyword.value = keyword
   handleSearch()
 }
@@ -299,6 +355,26 @@ const goToOrders = () => {
   router.push('/orders')
 }
 
+const goToFavorites = () => {
+  showUserMenu.value = false
+  router.push('/favorites')
+}
+
+// 获取收藏数量
+const loadFavoritesCount = async () => {
+  if (!userStore.isLoggedIn) {
+    favoritesCount.value = 0
+    return
+  }
+
+  try {
+    const response = await getFavoritesCount()
+    favoritesCount.value = response.data?.count || 0
+  } catch {
+    favoritesCount.value = 0
+  }
+}
+
 // 滚动到联系我们部分
 const scrollToContact = () => {
   // 如果当前在首页，滚动到联系我们部分
@@ -318,7 +394,10 @@ const scrollToContact = () => {
         if (contactSection) {
           contactSection.scrollIntoView({ behavior: 'smooth' })
         } else {
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth',
+          })
         }
       }, 100)
     })
@@ -345,6 +424,7 @@ const handleLogout = async () => {
 // 初始化用户状态
 onMounted(() => {
   userStore.initFromStorage()
+  loadFavoritesCount()
 })
 </script>
 
@@ -640,10 +720,17 @@ onMounted(() => {
   background-color: #ffebee;
 }
 
-.menu-divider {
-  height: 1px;
-  background-color: #f0f0f0;
-  margin: 8px 0;
+.favorites-count {
+  background-color: #ff4757;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .user-login-section {

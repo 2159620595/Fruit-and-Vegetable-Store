@@ -14,8 +14,12 @@ export const searchProducts = (keyword, params = {}) => {
 }
 
 // 获取商品详情
-export const getProductDetail = (id) => {
-  return request.get(`/products/${id}`)
+export const getProductDetail = id => {
+  return request.get(`/products/${id}`, {
+    params: {
+      include_favorite_status: true,
+    },
+  })
 }
 
 // 评价列表
@@ -29,3 +33,6 @@ export * from './order'
 
 // 导出地址相关 API
 export * from './address'
+
+// 导出收藏相关 API
+export * from './favorites'

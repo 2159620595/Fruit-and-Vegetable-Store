@@ -230,29 +230,6 @@
           <!-- Action Buttons -->
           <div class="action-buttons">
             <button
-              class="btn btn-outline"
-              :class="{ active: isFavorite }"
-              @click="toggleFavorite"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 256 256"
-              >
-                <path
-                  v-if="!isFavorite"
-                  d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32ZM128,206.8C109.74,196.16,32,147.69,32,94A46.06,46.06,0,0,1,78,48c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,147.61,146.24,196.15,128,206.8Z"
-                ></path>
-                <path
-                  v-else
-                  d="M240,94c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,220.66,16,164,16,94A62.07,62.07,0,0,1,78,32c20.65,0,38.73,8.88,50,23.89C139.27,40.88,157.35,32,178,32A62.07,62.07,0,0,1,240,94Z"
-                ></path>
-              </svg>
-              <span>{{ isFavorite ? '已收藏' : '收藏' }}</span>
-            </button>
-            <button
               class="btn btn-secondary"
               :disabled="!canAddToCart"
               @click="addToCart"
@@ -270,6 +247,57 @@
               </svg>
               <span>加入购物车</span>
             </button>
+
+            <!-- 收藏按钮 -->
+            <button
+              class="btn btn-favorite"
+              :class="{
+                'is-favorite': isFavorite,
+                'is-loading': favoriteLoading,
+              }"
+              :disabled="favoriteLoading"
+              @click="toggleFavorite"
+            >
+              <div class="favorite-icon">
+                <svg
+                  v-if="!isFavorite"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="heart-outline"
+                >
+                  <path
+                    d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.50903 2.9987 7.05 2.9987C5.59096 2.9987 4.19169 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.04097 1.5487 8.5C1.5487 9.95903 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61Z"
+                  />
+                </svg>
+                <svg
+                  v-else
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="heart-filled"
+                >
+                  <path
+                    d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.50903 2.9987 7.05 2.9987C5.59096 2.9987 4.19169 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.04097 1.5487 8.5C1.5487 9.95903 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61Z"
+                  />
+                </svg>
+              </div>
+              <span class="favorite-text">
+                {{ isFavorite ? '已收藏' : '收藏' }}
+              </span>
+              <div v-if="favoriteLoading" class="loading-spinner"></div>
+            </button>
+
             <button
               class="btn btn-primary"
               :disabled="!canAddToCart"
@@ -675,10 +703,15 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
 import { useUserStore } from '@/stores/userStore'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import {
+  toggleFavorite as toggleFavoriteAPI,
+  getFavoritesList,
+} from '@/api/favorites'
 
 const route = useRoute()
 const router = useRouter()
@@ -694,6 +727,7 @@ const relatedProducts = ref([])
 const loading = ref(false)
 const error = ref(null)
 const isFavorite = ref(false)
+const favoriteLoading = ref(false)
 
 // Image state
 const isImageZoomed = ref(false)
@@ -811,7 +845,6 @@ const onImageLoad = () => {
 const onImageError = () => {
   imageLoaded.value = false
   imageError.value = true
-  console.error('图片加载失败')
 }
 
 const resetImageState = () => {
@@ -898,29 +931,12 @@ const buyNow = async () => {
   router.push('/checkout')
 }
 
-// Favorite toggle
-const toggleFavorite = () => {
-  if (!userStore.isAuthenticated) {
-    showToastNotification('请先登录', 'info')
-    router.push({ path: '/login', query: { redirect: route.fullPath } })
-    return
-  }
-
-  isFavorite.value = !isFavorite.value
-  showToastNotification(
-    isFavorite.value ? '已添加到收藏' : '已取消收藏',
-    isFavorite.value ? 'success' : 'info'
-  )
-}
-
 // Review interactions
-const likeReview = reviewId => {
-  console.log('Like review:', reviewId)
+const likeReview = () => {
   // TODO: Implement like review API call
 }
 
-const dislikeReview = reviewId => {
-  console.log('Dislike review:', reviewId)
+const dislikeReview = () => {
   // TODO: Implement dislike review API call
 }
 
@@ -928,7 +944,6 @@ const dislikeReview = reviewId => {
 const loadReviews = reviewsData => {
   if (Array.isArray(reviewsData)) {
     reviews.value = reviewsData
-    console.log(`✅ 加载了 ${reviewsData.length} 条评价`)
   } else {
     reviews.value = []
   }
@@ -947,7 +962,6 @@ const loadProduct = async () => {
   error.value = null
 
   try {
-
     // Fetch product details (包含product、reviews、related_products)
     const responseData = await productStore.fetchProductById(route.params.id)
 
@@ -955,9 +969,11 @@ const loadProduct = async () => {
     if (responseData.product) {
       product.value = responseData.product
 
+      // 设置收藏状态 - 通过收藏列表检查
+      const productId = responseData.product.id
 
-      // 设置收藏状态
-      isFavorite.value = responseData.product.is_favorite === 1
+      // 通过收藏列表检查收藏状态
+      await checkProductInFavorites(productId)
 
       // Reset image state
       resetImageState()
@@ -971,7 +987,6 @@ const loadProduct = async () => {
       } else {
         relatedProducts.value = []
       }
-
     } else {
       // 兼容旧的数据格式
       product.value = responseData
@@ -997,6 +1012,105 @@ watch(
     }
   }
 )
+
+// 检查商品是否在收藏列表中
+const checkProductInFavorites = async productId => {
+  if (!userStore.isLoggedIn) {
+    isFavorite.value = false
+    return false
+  }
+
+  try {
+    const response = await getFavoritesList()
+
+    // 提取收藏列表数据 - 处理多种可能的数据结构
+    let favoritesData = []
+
+    // 尝试多种可能的数据结构
+    if (response.data?.data?.products) {
+      favoritesData = response.data.data.products
+    } else if (response.data?.data) {
+      favoritesData = Array.isArray(response.data.data)
+        ? response.data.data
+        : []
+    } else if (response.data?.favorites) {
+      favoritesData = response.data.favorites
+    } else if (response.data?.list) {
+      favoritesData = response.data.list
+    } else if (response.data?.items) {
+      favoritesData = response.data.items
+    } else if (response.data?.results) {
+      favoritesData = response.data.results
+    } else if (Array.isArray(response.data)) {
+      favoritesData = response.data
+    }
+
+    // 检查当前商品是否在收藏列表中
+    const isInFavorites = favoritesData.some(item => {
+      const itemId = item.id || item.product_id
+      return itemId === productId
+    })
+
+    isFavorite.value = isInFavorites
+    return isInFavorites
+  } catch {
+    isFavorite.value = false
+    return false
+  }
+}
+
+// 收藏相关方法
+const toggleFavorite = async () => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+
+  if (!product.value) return
+
+  favoriteLoading.value = true
+  try {
+    // 使用统一的切换收藏接口
+    const response = await toggleFavoriteAPI(product.value.id)
+
+    // 优先使用API返回的收藏状态
+    if (response.data?.data?.is_favorite !== undefined) {
+      isFavorite.value =
+        response.data.data.is_favorite === true ||
+        response.data.data.is_favorite === 1 ||
+        response.data.data.is_favorite === '1'
+    } else {
+      // 根据API返回的消息判断操作结果
+      const message = response.data?.message || ''
+
+      if (message.includes('收藏成功') || message.includes('已添加到收藏')) {
+        isFavorite.value = true
+      } else if (
+        message.includes('已取消收藏') ||
+        message.includes('取消收藏')
+      ) {
+        isFavorite.value = false
+      } else {
+        // 如果消息不明确，根据当前状态切换
+        isFavorite.value = !isFavorite.value
+      }
+    }
+
+    // 显示成功消息
+    ElMessage.success(isFavorite.value ? '已添加到收藏' : '已取消收藏')
+
+    // 操作成功后，重新检查收藏状态
+    // 操作成功后，重新检查收藏状态
+    setTimeout(async () => {
+      await checkProductInFavorites(product.value.id)
+    }, 1000)
+  } catch (error) {
+    ElMessage.error(`操作失败: ${error.message || '请重试'}`)
+  } finally {
+    favoriteLoading.value = false
+  }
+}
 
 // Initial load
 onMounted(() => {
@@ -2002,11 +2116,13 @@ onMounted(() => {
   font-weight: 600;
   outline: none;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .quantity-input::-webkit-outer-spin-button,
 .quantity-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 
@@ -2069,6 +2185,115 @@ onMounted(() => {
   background-color: #4a6d4a;
   box-shadow: 0 4px 12px rgba(97, 137, 97, 0.4);
   transform: translateY(-1px);
+}
+
+/* 收藏按钮样式 */
+.btn-favorite {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-favorite:hover:not(:disabled) {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-favorite.is-favorite {
+  background-color: #ff6b6b;
+  color: #ffffff;
+  border-color: #ff6b6b;
+  animation: favoritePulse 0.6s ease-out;
+}
+
+.btn-favorite.is-favorite:hover:not(:disabled) {
+  background-color: #ff5252;
+  border-color: #ff5252;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-favorite.is-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.favorite-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart-outline {
+  transition: all 0.3s ease;
+}
+
+.heart-filled {
+  transition: all 0.3s ease;
+  animation: heartBeat 0.6s ease-out;
+}
+
+.favorite-text {
+  margin-left: 8px;
+  transition: all 0.3s ease;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes favoritePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 .btn-secondary {
