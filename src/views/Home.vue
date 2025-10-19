@@ -8,25 +8,53 @@
       <div class="test-nav-content" :class="{ open: testNavOpen }">
         <div class="nav-section">
           <h4>主要页面</h4>
-          <a href="#" @click.prevent="router.push('/')" class="nav-link">首页</a>
-          <a href="#" @click.prevent="router.push('/shop')" class="nav-link">商品列表</a>
-          <a href="#" @click.prevent="router.push('/cart')" class="nav-link">购物车</a>
-          <a href="#" @click.prevent="router.push('/checkout')" class="nav-link">结账</a>
+          <a href="#" @click.prevent="router.push('/')" class="nav-link">
+            首页
+          </a>
+          <a href="#" @click.prevent="router.push('/shop')" class="nav-link">
+            商品列表
+          </a>
+          <a href="#" @click.prevent="router.push('/cart')" class="nav-link">
+            购物车
+          </a>
+          <a
+            href="#"
+            @click.prevent="router.push('/checkout')"
+            class="nav-link"
+          >
+            结账
+          </a>
         </div>
         <div class="nav-section">
           <h4>用户相关</h4>
-          <a href="#" @click.prevent="router.push('/login')" class="nav-link">登录</a>
-          <a href="#" @click.prevent="router.push('/signup')" class="nav-link">注册</a>
-          <a href="#" @click.prevent="router.push('/profile')" class="nav-link">个人中心</a>
+          <a href="#" @click.prevent="router.push('/login')" class="nav-link">
+            登录
+          </a>
+          <a href="#" @click.prevent="router.push('/signup')" class="nav-link">
+            注册
+          </a>
+          <a href="#" @click.prevent="router.push('/profile')" class="nav-link">
+            个人中心
+          </a>
         </div>
         <div class="nav-section">
           <h4>订单相关</h4>
-          <a href="#" @click.prevent="router.push('/orders')" class="nav-link">我的订单</a>
-          <a href="#" @click.prevent="router.push('/order/1')" class="nav-link">订单详情</a>
+          <a href="#" @click.prevent="router.push('/orders')" class="nav-link">
+            我的订单
+          </a>
+          <a href="#" @click.prevent="router.push('/order/1')" class="nav-link">
+            订单详情
+          </a>
         </div>
         <div class="nav-section">
           <h4>商品相关</h4>
-          <a href="#" @click.prevent="router.push('/product/1')" class="nav-link">商品详情</a>
+          <a
+            href="#"
+            @click.prevent="router.push('/product/1')"
+            class="nav-link"
+          >
+            商品详情
+          </a>
         </div>
       </div>
     </div>
@@ -53,16 +81,23 @@
                     :class="{ loaded: bannerImagesLoaded }"
                     :style="{
                       backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url(${
-                        bannerList.length > 0 ? bannerList[currentBannerIndex].image_url : ''
+                        bannerList.length > 0
+                          ? bannerList[currentBannerIndex].image_url
+                          : ''
                       })`,
                     }"
                   >
                     <!-- 轮播图内容 -->
                     <div
                       class="banner-content"
-                      v-if="bannerList.length > 0 && bannerList[currentBannerIndex].title"
+                      v-if="
+                        bannerList.length > 0 &&
+                        bannerList[currentBannerIndex].title
+                      "
                     >
-                      <h3 class="banner-title">{{ bannerList[currentBannerIndex].title }}</h3>
+                      <h3 class="banner-title">
+                        {{ bannerList[currentBannerIndex].title }}
+                      </h3>
                       <p
                         class="banner-description"
                         v-if="bannerList[currentBannerIndex].description"
@@ -108,7 +143,10 @@
                     </button>
 
                     <!-- 小圆点 -->
-                    <div class="banner-icons" v-if="bannerList.length > 1 && bannerImagesLoaded">
+                    <div
+                      class="banner-icons"
+                      v-if="bannerList.length > 1 && bannerImagesLoaded"
+                    >
                       <div
                         v-for="(item, index) in bannerList"
                         :key="index"
@@ -197,12 +235,18 @@
                   :key="item.id"
                   @click="click(item.id)"
                 >
-                  <div class="product-list-item-img lazy-image" :data-bg="item.image_url" v-lazy-bg>
+                  <div
+                    class="product-list-item-img lazy-image"
+                    :data-bg="item.image_url"
+                    v-lazy-bg
+                  >
                     <div class="image-skeleton" v-if="!item.imageLoaded"></div>
                   </div>
                   <div>
                     <p class="product-name">{{ item.name }}</p>
-                    <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                    <p class="product-price">
+                      ¥{{ item.price }}{{ item.unit }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -218,7 +262,11 @@
                 :key="item.id"
                 @click="click(item.id)"
               >
-                <div class="grid-item-img lazy-image" :data-bg="item.image_url" v-lazy-bg>
+                <div
+                  class="grid-item-img lazy-image"
+                  :data-bg="item.image_url"
+                  v-lazy-bg
+                >
                   <div class="image-skeleton" v-if="!item.imageLoaded"></div>
                 </div>
                 <div>
@@ -227,7 +275,9 @@
                 </div>
               </div>
               <!-- 如果没有数据显示提示 -->
-              <div v-if="customerFavorites.length === 0" class="empty-tip">暂无客户最爱商品</div>
+              <div v-if="customerFavorites.length === 0" class="empty-tip">
+                暂无客户最爱商品
+              </div>
             </div>
             <!-- 客户最爱结束 -->
 
@@ -240,7 +290,11 @@
                 :key="item.id"
                 @click="click(item.id)"
               >
-                <div class="grid-item-img lazy-image" :data-bg="item.image_url" v-lazy-bg>
+                <div
+                  class="grid-item-img lazy-image"
+                  :data-bg="item.image_url"
+                  v-lazy-bg
+                >
                   <div class="image-skeleton" v-if="!item.imageLoaded"></div>
                   <!-- 新品标签 -->
                   <span class="new-badge" v-if="item.is_new">新品</span>
@@ -262,17 +316,26 @@
                 :key="item.id"
                 @click="click(item.id)"
               >
-                <div class="grid-item-img lazy-image" :data-bg="item.image_url" v-lazy-bg>
+                <div
+                  class="grid-item-img lazy-image"
+                  :data-bg="item.image_url"
+                  v-lazy-bg
+                >
                   <div class="image-skeleton" v-if="!item.imageLoaded"></div>
                   <!-- 显示折扣标签 -->
-                  <span class="discount-badge" v-if="item.is_discount && item.discount_rate">{{
-                    item.discount_rate
-                  }}</span>
+                  <span
+                    class="discount-badge"
+                    v-if="item.is_discount && item.discount_rate"
+                  >
+                    {{ item.discount_rate }}
+                  </span>
                 </div>
                 <div>
                   <p class="product-name">{{ item.name }}</p>
                   <div class="price-wrapper">
-                    <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                    <p class="product-price">
+                      ¥{{ item.price }}{{ item.unit }}
+                    </p>
                     <p class="original-price" v-if="item.original_price">
                       ¥{{ item.original_price }}
                     </p>
@@ -280,24 +343,35 @@
                 </div>
               </div>
               <!-- 如果没有优惠商品 -->
-              <div v-if="limitedOffers.length === 0" class="empty-tip">暂无优惠商品</div>
+              <div v-if="limitedOffers.length === 0" class="empty-tip">
+                暂无优惠商品
+              </div>
             </div>
             <!-- 限时优惠结束 -->
 
             <!-- 客户评价开始 -->
             <h2 class="title">客户评价</h2>
             <div class="comment-list">
-              <div class="comment-list-item" v-for="review in reviews" :key="review.id">
+              <div
+                class="comment-list-item"
+                v-for="review in reviews"
+                :key="review.id"
+              >
                 <div class="comment-list-item-user">
                   <div
                     class="comment-list-item-user-avatar lazy-image"
                     :data-bg="review.user_avatar"
                     v-lazy-bg
                   >
-                    <div class="image-skeleton" v-if="!review.avatarLoaded"></div>
+                    <div
+                      class="image-skeleton"
+                      v-if="!review.avatarLoaded"
+                    ></div>
                   </div>
                   <div class="comment-list-item-user-info">
-                    <p class="comment-list-item-user-info-name">{{ review.user_name }}</p>
+                    <p class="comment-list-item-user-info-name">
+                      {{ review.user_name }}
+                    </p>
                     <p class="comment-list-item-user-info-date">
                       {{ formatDate(review.created_at) }}
                     </p>
@@ -341,7 +415,9 @@
                 </div>
               </div>
               <!-- 如果没有评价 -->
-              <div v-if="reviews.length === 0" class="empty-tip">暂无客户评价</div>
+              <div v-if="reviews.length === 0" class="empty-tip">
+                暂无客户评价
+              </div>
             </div>
             <!-- 客户评价结束 -->
 
@@ -556,31 +632,34 @@ const stopBannerAutoPlay = () => {
 // 下一张
 const nextBanner = () => {
   if (bannerList.value.length === 0) return
-  currentBannerIndex.value = (currentBannerIndex.value + 1) % bannerList.value.length
+  currentBannerIndex.value =
+    (currentBannerIndex.value + 1) % bannerList.value.length
 }
 
 // 上一张
 const prevBanner = () => {
   if (bannerList.value.length === 0) return
   currentBannerIndex.value =
-    currentBannerIndex.value === 0 ? bannerList.value.length - 1 : currentBannerIndex.value - 1
+    currentBannerIndex.value === 0
+      ? bannerList.value.length - 1
+      : currentBannerIndex.value - 1
 }
 
 // 跳转到指定图片
-const goToBanner = (index) => {
+const goToBanner = index => {
   currentBannerIndex.value = index
   // 点击圆点后重新开始自动播放
   startBannerAutoPlay()
 }
 
 // 点击商品跳转到详情页
-const click = (id) => {
+const click = id => {
   console.log('点击商品ID:', id)
   router.push(`/product/${id}`)
 }
 
 // 格式化日期
-const formatDate = (dateString) => {
+const formatDate = dateString => {
   const date = new Date(dateString)
   return date.toLocaleDateString('zh-CN')
 }
@@ -602,8 +681,8 @@ const vLazyBg = {
 
     // 创建 Intersection Observer
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             // 元素进入可视区域，开始加载图片
             const img = new Image()
@@ -640,7 +719,7 @@ const vLazyBg = {
       {
         rootMargin: '50px', // 提前50px开始加载
         threshold: 0.01,
-      },
+      }
     )
 
     observer.observe(el)
