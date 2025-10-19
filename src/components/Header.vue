@@ -265,6 +265,10 @@
 </template>
 
 <script setup>
+// 组件名称
+defineOptions({
+  name: 'HeaderComponent',
+})
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'

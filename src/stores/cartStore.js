@@ -27,35 +27,40 @@ export const useCartStore = defineStore('cart', {
 
   getters: {
     // 购物车商品总数量
-    cartCount: (state) => state.items.reduce((sum, item) => sum + item.quantity, 0),
+    cartCount: state =>
+      state.items.reduce((sum, item) => sum + item.quantity, 0),
 
     // 购物车商品总价（所有商品）
-    cartTotal: (state) => state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    cartTotal: state =>
+      state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
 
     // 小计（所有商品）
-    subtotal: (state) => state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    subtotal: state =>
+      state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
 
     // 已选中商品总数量
-    selectedCount: (state) =>
-      state.items.filter((item) => item.selected).reduce((sum, item) => sum + item.quantity, 0),
+    selectedCount: state =>
+      state.items
+        .filter(item => item.selected)
+        .reduce((sum, item) => sum + item.quantity, 0),
 
     // 已选中商品总价
-    selectedTotal: (state) =>
+    selectedTotal: state =>
       state.items
-        .filter((item) => item.selected)
+        .filter(item => item.selected)
         .reduce((sum, item) => sum + item.price * item.quantity, 0),
 
     // 已选中商品列表
-    selectedItems: (state) => state.items.filter((item) => item.selected),
+    selectedItems: state => state.items.filter(item => item.selected),
 
     // 是否全选
-    isAllSelected: (state) => {
+    isAllSelected: state => {
       if (state.items.length === 0) return false
-      return state.items.every((item) => item.selected)
+      return state.items.every(item => item.selected)
     },
 
     // 是否有选中商品
-    hasSelected: (state) => state.items.some((item) => item.selected),
+    hasSelected: state => state.items.some(item => item.selected),
   },
 
   actions: {
@@ -64,8 +69,6 @@ export const useCartStore = defineStore('cart', {
      */
     async fetchCartList() {
       const userStore = useUserStore()
-
-
 
       // 如果用户未登录，直接返回（Pinia持久化插件会自动加载数据）
       if (!userStore.token) {
@@ -90,7 +93,7 @@ export const useCartStore = defineStore('cart', {
         }
 
         // 确保每个商品都有 selected 属性，并映射字段
-        this.items = items.map((item) => ({
+        this.items = items.map(item => ({
           id: item.id,
           product_id: item.product_id,
           name: item.name,
@@ -103,10 +106,9 @@ export const useCartStore = defineStore('cart', {
           selected: item.selected !== undefined ? item.selected : false,
         }))
 
-
         // Pinia持久化插件会自动保存
-      } catch (error) {
-        this.error = error.message || '获取购物车失败'
+      } catch {
+        this.error = '获取购物车失败'
         // 如果请求失败，保持本地数据（Pinia持久化插件会自动处理）
       } finally {
         this.loading = false
@@ -120,7 +122,7 @@ export const useCartStore = defineStore('cart', {
       const userStore = useUserStore()
 
       // 本地购物车逻辑
-      const existingItem = this.items.find((item) => item.id === product.id)
+      const existingItem = this.items.find(item => item.id === product.id)
 
       if (existingItem) {
         existingItem.quantity += quantity
@@ -146,8 +148,7 @@ export const useCartStore = defineStore('cart', {
             product_id: product.id,
             quantity: quantity,
           })
-        } catch (error) {
-          console.error('❌ 同步购物车到后端失败:', error)
+        } catch {
           // 即使后端失败，也保持本地状态
         }
       }
@@ -162,7 +163,7 @@ export const useCartStore = defineStore('cart', {
       const userStore = useUserStore()
 
       // 本地更新（使用购物车项ID）
-      const item = this.items.find((item) => item.id === cartItemId)
+      const item = this.items.find(item => item.id === cartItemId)
       if (item) {
         const validQuantity = Math.max(1, Math.min(item.stock || 999, quantity))
         item.quantity = validQuantity
@@ -172,8 +173,7 @@ export const useCartStore = defineStore('cart', {
         if (userStore.token) {
           try {
             await updateCartItem(cartItemId, { quantity: validQuantity })
-          } catch (error) {
-            console.error('❌ 同步数量更新失败:', error)
+          } catch {
             // 如果后端失败，可以选择回滚或保持本地状态
           }
         }
@@ -188,15 +188,15 @@ export const useCartStore = defineStore('cart', {
       const userStore = useUserStore()
 
       // 本地删除
-      this.items = this.items.filter((item) => item.id !== cartItemId)
+      this.items = this.items.filter(item => item.id !== cartItemId)
       // Pinia持久化插件会自动保存
 
       // 同步到后端
       if (userStore.token) {
         try {
           await deleteCartItem(cartItemId)
-        } catch (error) {
-          console.error('❌ 同步删除失败:', error)
+        } catch {
+          // 同步失败，保持本地状态
         }
       }
     },
@@ -207,11 +207,10 @@ export const useCartStore = defineStore('cart', {
     async batchRemove(productIds) {
       const userStore = useUserStore()
 
-
-
       // 本地删除 - 使用id或product_id进行匹配
       this.items = this.items.filter(
-        (item) => !productIds.includes(item.id) && !productIds.includes(item.product_id),
+        item =>
+          !productIds.includes(item.id) && !productIds.includes(item.product_id)
       )
 
       // Pinia持久化插件会自动保存
@@ -220,8 +219,8 @@ export const useCartStore = defineStore('cart', {
       if (userStore.token) {
         try {
           await batchDeleteCart(productIds)
-        } catch (error) {
-          console.error('❌ 批量删除同步失败:', error)
+        } catch {
+          // 同步失败，保持本地状态
         }
       }
     },
@@ -230,8 +229,9 @@ export const useCartStore = defineStore('cart', {
      * 删除已选中的商品
      */
     async removeSelectedItems() {
-
-      const selectedIds = this.selectedItems.map((item) => item.id || item.product_id)
+      const selectedIds = this.selectedItems.map(
+        item => item.id || item.product_id
+      )
 
       if (selectedIds.length > 0) {
         await this.batchRemove(selectedIds)
@@ -252,8 +252,8 @@ export const useCartStore = defineStore('cart', {
       if (userStore.token) {
         try {
           await clearCartAPI()
-        } catch (error) {
-          console.error('❌ 清空购物车同步失败:', error)
+        } catch {
+          // 同步失败，保持本地状态
         }
       }
     },
@@ -262,7 +262,7 @@ export const useCartStore = defineStore('cart', {
      * 切换商品选中状态
      */
     async toggleItemSelected(productId) {
-      const item = this.items.find((item) => item.id === productId)
+      const item = this.items.find(item => item.id === productId)
       if (item) {
         item.selected = !item.selected
         // Pinia持久化插件会自动保存
@@ -272,8 +272,8 @@ export const useCartStore = defineStore('cart', {
         if (userStore.token) {
           try {
             await toggleCartItemSelected(productId, item.selected)
-          } catch (error) {
-            console.error('❌ 选中状态同步失败:', error)
+          } catch {
+            // 同步失败，保持本地状态
           }
         }
       }
@@ -286,7 +286,7 @@ export const useCartStore = defineStore('cart', {
       const newSelectedState = !this.isAllSelected
 
       // 本地更新
-      this.items.forEach((item) => {
+      this.items.forEach(item => {
         item.selected = newSelectedState
       })
       // Pinia持久化插件会自动保存
@@ -296,8 +296,8 @@ export const useCartStore = defineStore('cart', {
       if (userStore.token) {
         try {
           await toggleAllCartItems(newSelectedState)
-        } catch (error) {
-          console.error('❌ 全选状态同步失败:', error)
+        } catch {
+          // 同步失败，保持本地状态
         }
       }
     },
@@ -316,8 +316,7 @@ export const useCartStore = defineStore('cart', {
         const response = await getCartCount()
         const count = response.data.data?.count || response.data.count || 0
         return count
-      } catch (error) {
-        console.error('获取购物车数量失败:', error)
+      } catch {
         return this.cartCount
       }
     },
@@ -343,8 +342,8 @@ export const useCartStore = defineStore('cart', {
 
         // 同步后重新获取购物车数据
         await this.fetchCartList()
-      } catch (error) {
-        console.error('❌ 同步本地购物车失败:', error)
+      } catch {
+        // 同步失败，保持本地状态
       }
     },
   },

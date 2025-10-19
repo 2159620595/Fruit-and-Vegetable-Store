@@ -105,14 +105,19 @@
 
               <!-- 注册按钮 -->
               <div class="form-submit">
-                <button class="submit-btn" @click="handleSignup" :disabled="signupLoading">
+                <button
+                  class="submit-btn"
+                  @click="handleSignup"
+                  :disabled="signupLoading"
+                >
                   {{ signupLoading ? '注册中...' : '注册' }}
                 </button>
               </div>
 
               <!-- 切换到登录 -->
               <p class="switch-text">
-                已有账号？<a href="#" @click.prevent="activeTab = 'login'">立即登录</a>
+                已有账号？
+                <a href="#" @click.prevent="activeTab = 'login'">立即登录</a>
               </p>
 
               <!-- 第三方登录 -->
@@ -155,14 +160,19 @@
 
               <!-- 登录按钮 -->
               <div class="form-submit">
-                <button class="submit-btn" @click="handleLogin" :disabled="loginLoading">
+                <button
+                  class="submit-btn"
+                  @click="handleLogin"
+                  :disabled="loginLoading"
+                >
                   {{ loginLoading ? '登录中...' : '登录' }}
                 </button>
               </div>
 
               <!-- 切换到注册 -->
               <p class="switch-text">
-                还没有账号？<a href="#" @click.prevent="activeTab = 'signup'">立即注册</a>
+                还没有账号？
+                <a href="#" @click.prevent="activeTab = 'signup'">立即注册</a>
               </p>
 
               <!-- 第三方登录 -->
@@ -181,6 +191,10 @@
 </template>
 
 <script setup>
+// 组件名称
+defineOptions({
+  name: 'LoginPage',
+})
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -206,8 +220,12 @@ const loginForm = ref({
 })
 
 // 使用store的loading状态
-const loginLoading = computed(() => userStore.loading && activeTab.value === 'login')
-const signupLoading = computed(() => userStore.loading && activeTab.value === 'signup')
+const loginLoading = computed(
+  () => userStore.loading && activeTab.value === 'login'
+)
+const signupLoading = computed(
+  () => userStore.loading && activeTab.value === 'signup'
+)
 
 // 错误消息
 const loginError = ref('')
@@ -284,7 +302,6 @@ const validateSignup = () => {
 
 // 处理注册
 const handleSignup = async () => {
-
   if (!validateSignup()) {
     return
   }
@@ -375,16 +392,16 @@ const handleLogin = async () => {
     // 获取重定向地址（从query参数）
     const redirect = route.query.redirect || '/'
 
-
     // 跳转到目标页面或首页
     setTimeout(() => {
       router.push(redirect)
     }, 800)
   } catch (error) {
     loading.close()
-    console.error('❌ 登录失败:', error)
     const errorMsg =
-      userStore.error || error.response?.data?.message || '登录失败，请检查用户名和密码'
+      userStore.error ||
+      error.response?.data?.message ||
+      '登录失败，请检查用户名和密码'
     loginError.value = errorMsg
 
     ElMessage({

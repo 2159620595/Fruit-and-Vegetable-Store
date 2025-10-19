@@ -8,7 +8,7 @@ import {
   confirmOrder as confirmOrderAPI,
   deleteOrder as deleteOrderAPI,
   updateOrderStatus as updateOrderStatusAPI,
-  payOrder as payOrderAPI,
+  // payOrder as payOrderAPI, // 暂时未使用
   reviewOrder as reviewOrderAPI,
   buyAgain as buyAgainAPI,
 } from '@/api/order'
@@ -34,17 +34,22 @@ export const useOrderStore = defineStore('order', {
 
   getters: {
     // 获取待支付订单
-    pendingOrders: (state) => state.orders.filter((order) => order.status === 'pending'),
+    pendingOrders: state =>
+      state.orders.filter(order => order.status === 'pending'),
 
     // 获取待发货订单
-    processingOrders: (state) => state.orders.filter((order) => order.status === 'processing'),
+    processingOrders: state =>
+      state.orders.filter(order => order.status === 'processing'),
 
     // 获取已发货订单
-    shippedOrders: (state) =>
-      state.orders.filter((order) => ['shipped', 'in_transit'].includes(order.status)),
+    shippedOrders: state =>
+      state.orders.filter(order =>
+        ['shipped', 'in_transit'].includes(order.status)
+      ),
 
     // 获取已完成订单
-    completedOrders: (state) => state.orders.filter((order) => order.status === 'delivered'),
+    completedOrders: state =>
+      state.orders.filter(order => order.status === 'delivered'),
   },
 
   actions: {
@@ -64,7 +69,7 @@ export const useOrderStore = defineStore('order', {
       try {
         // 格式化订单数据以适配后端
         const formattedData = {
-          items: orderData.items.map((item) => ({
+          items: orderData.items.map(item => ({
             product_id: item.productId || item.product_id,
             quantity: item.quantity,
           })),
@@ -74,10 +79,8 @@ export const useOrderStore = defineStore('order', {
           remark: orderData.remark || '',
         }
 
-
         const response = await createOrderAPI(formattedData)
         const result = response.data.data || response.data
-
 
         return result
       } catch (error) {
@@ -106,7 +109,6 @@ export const useOrderStore = defineStore('order', {
         this.orders = result.orders || []
         this.orderCounts = result.counts || this.orderCounts
 
-
         return result
       } catch (error) {
         this.error = error.message || '获取订单列表失败'
@@ -134,7 +136,6 @@ export const useOrderStore = defineStore('order', {
 
         this.currentOrder = result
 
-
         return result
       } catch (error) {
         this.error = error.message || '获取订单详情失败'
@@ -156,7 +157,7 @@ export const useOrderStore = defineStore('order', {
         await cancelOrderAPI(id)
 
         // 更新本地订单状态
-        const order = this.orders.find((o) => o.id === id)
+        const order = this.orders.find(o => o.id === id)
         if (order) {
           order.status = 'cancelled'
         }
@@ -164,7 +165,6 @@ export const useOrderStore = defineStore('order', {
         if (this.currentOrder && this.currentOrder.order.id === id) {
           this.currentOrder.order.status = 'cancelled'
         }
-
 
         return true
       } catch (error) {
@@ -187,7 +187,7 @@ export const useOrderStore = defineStore('order', {
         await confirmOrderAPI(id)
 
         // 更新本地订单状态
-        const order = this.orders.find((o) => o.id === id)
+        const order = this.orders.find(o => o.id === id)
         if (order) {
           order.status = 'delivered'
         }
@@ -195,7 +195,6 @@ export const useOrderStore = defineStore('order', {
         if (this.currentOrder && this.currentOrder.order.id === id) {
           this.currentOrder.order.status = 'delivered'
         }
-
 
         return true
       } catch (error) {
@@ -218,8 +217,7 @@ export const useOrderStore = defineStore('order', {
         await deleteOrderAPI(id)
 
         // 从列表中移除
-        this.orders = this.orders.filter((o) => o.id !== id)
-
+        this.orders = this.orders.filter(o => o.id !== id)
 
         return true
       } catch (error) {
@@ -240,12 +238,11 @@ export const useOrderStore = defineStore('order', {
       this.error = null
 
       try {
- 
         // 调用后端API更新订单状态
         await updateOrderStatusAPI(id, status)
 
         // 更新本地状态
-        const order = this.orders.find((o) => o.id === id) // 使用 == 进行类型转换比较
+        const order = this.orders.find(o => o.id === id) // 使用 === 进行严格比较
         if (order) {
           order.status = status
           // 同时更新 updated_at 时间
@@ -255,21 +252,18 @@ export const useOrderStore = defineStore('order', {
           await this.fetchOrders()
 
           // 再次尝试更新
-          const updatedOrder = this.orders.find((o) => o.id == id)
+          const updatedOrder = this.orders.find(o => o.id === id)
           if (updatedOrder) {
-
             updatedOrder.status = status
             updatedOrder.updated_at = new Date().toISOString()
           } else {
-            console.error('刷新后仍未找到订单，ID:', id)
+            // 订单未找到
           }
         }
 
-        if (this.currentOrder && this.currentOrder.order.id == id) {
+        if (this.currentOrder && this.currentOrder.order.id === id) {
           this.currentOrder.order.status = status
         }
-
-
 
         return true
       } catch (error) {
@@ -290,14 +284,13 @@ export const useOrderStore = defineStore('order', {
         this.loading = true
 
         // 模拟支付处理（实际项目中这里应该调用真实的支付接口）
-        await new Promise((resolve) => setTimeout(resolve, 1500)) // 模拟1.5秒支付处理时间
+        await new Promise(resolve => setTimeout(resolve, 1500)) // 模拟1.5秒支付处理时间
 
         // 模拟支付成功，更新订单状态
         await this.updateOrderStatus(orderId, 'processing')
 
-
         // 更新本地订单状态
-        const order = this.orders.find((o) => o.id == orderId)
+        const order = this.orders.find(o => o.id === orderId)
         if (order) {
           order.status = 'processing'
           order.payment_method = paymentMethod

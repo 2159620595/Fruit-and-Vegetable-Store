@@ -18,7 +18,9 @@
                 >
                   删除选中
                 </button>
-                <button class="batch-btn" @click="handleClearCart">清空购物车</button>
+                <button class="batch-btn" @click="handleClearCart">
+                  清空购物车
+                </button>
               </div>
             </div>
 
@@ -56,7 +58,10 @@
                   </thead>
                   <tbody>
                     <tr v-if="cartItems.length === 0">
-                      <td colspan="6" style="text-align: center; padding: 40px; color: #999">
+                      <td
+                        colspan="6"
+                        style="text-align: center; padding: 40px; color: #999"
+                      >
                         购物车为空，快去添加商品吧~
                       </td>
                     </tr>
@@ -98,12 +103,18 @@
                             min="1"
                             max="999"
                           />
-                          <button @click="updateQuantity(item.id, item.quantity + 1)">+</button>
+                          <button
+                            @click="updateQuantity(item.id, item.quantity + 1)"
+                          >
+                            +
+                          </button>
                         </div>
                       </td>
                       <td class="col-subtotal">{{ item.subtotal }}</td>
                       <td class="col-actions">
-                        <button class="remove-btn" @click="removeItem(item.id)">删除</button>
+                        <button class="remove-btn" @click="removeItem(item.id)">
+                          删除
+                        </button>
                       </td>
                     </tr>
                   </tbody>
@@ -116,7 +127,9 @@
               <h3 class="summary-title">订单汇总</h3>
               <div class="summary-content">
                 <div class="summary-row">
-                  <p class="summary-label">小计 ({{ cartStore.selectedCount }} 件已选商品)</p>
+                  <p class="summary-label">
+                    小计 ({{ cartStore.selectedCount }} 件已选商品)
+                  </p>
                   <p class="summary-value">{{ orderSummary.subtotal }}</p>
                 </div>
                 <div class="summary-row">
@@ -125,15 +138,23 @@
                 </div>
                 <div class="summary-row total-row">
                   <p class="summary-label">总计</p>
-                  <p class="summary-value total-value">{{ orderSummary.total }}</p>
+                  <p class="summary-value total-value">
+                    {{ orderSummary.total }}
+                  </p>
                 </div>
               </div>
 
               <!-- 按钮组 -->
               <div class="action-buttons">
                 <div class="button-container">
-                  <button class="continue-btn" @click="continueShopping">继续购物</button>
-                  <button class="checkout-btn" @click="checkout" :disabled="!cartStore.hasSelected">
+                  <button class="continue-btn" @click="continueShopping">
+                    继续购物
+                  </button>
+                  <button
+                    class="checkout-btn"
+                    @click="checkout"
+                    :disabled="!cartStore.hasSelected"
+                  >
                     结账 ({{ cartStore.selectedCount }})
                   </button>
                 </div>
@@ -148,6 +169,10 @@
 </template>
 
 <script setup>
+// 组件名称
+defineOptions({
+  name: 'CartPage',
+})
 import router from '@/router'
 import { computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -158,16 +183,12 @@ const cartStore = useCartStore()
 
 // 组件挂载时加载购物车数据
 onMounted(async () => {
-
-
   await cartStore.fetchCartList()
-
-
 })
 
 // 购物车商品列表（格式化显示）
 const cartItems = computed(() => {
-  return cartStore.items.map((item) => ({
+  return cartStore.items.map(item => ({
     ...item,
     price: `$${item.price}`,
     subtotal: `$${(item.price * item.quantity).toFixed(2)}`,
@@ -207,7 +228,7 @@ const checkout = () => {
 }
 
 // 删除单个商品
-const removeItem = async (id) => {
+const removeItem = async id => {
   try {
     await ElMessageBox.confirm('确定要删除这个商品吗？', '提示', {
       confirmButtonText: '确定',
@@ -229,7 +250,7 @@ const updateQuantity = async (id, quantity) => {
 }
 
 // 切换商品选中状态
-const toggleItemSelected = async (id) => {
+const toggleItemSelected = async id => {
   await cartStore.toggleItemSelected(id)
 }
 
@@ -247,11 +268,15 @@ const handleBatchDelete = async () => {
 
   const selectedCount = cartStore.selectedCount
   try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${selectedCount} 件商品吗？`, '批量删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedCount} 件商品吗？`,
+      '批量删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
     await cartStore.removeSelectedItems()
     ElMessage.success('删除成功')
   } catch {
@@ -262,11 +287,15 @@ const handleBatchDelete = async () => {
 // 清空购物车
 const handleClearCart = async () => {
   try {
-    await ElMessageBox.confirm('确定要清空购物车吗？此操作不可恢复！', '清空购物车', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'error',
-    })
+    await ElMessageBox.confirm(
+      '确定要清空购物车吗？此操作不可恢复！',
+      '清空购物车',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'error',
+      }
+    )
     await cartStore.clearCart()
     ElMessage.success('购物车已清空')
   } catch {

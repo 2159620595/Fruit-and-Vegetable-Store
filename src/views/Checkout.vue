@@ -5,11 +5,16 @@
       <Breadcrumb current-page="结账" />
 
       <!-- 空购物车提示 -->
-      <div v-if="cartStore.selectedItems.length === 0" class="empty-cart-message">
+      <div
+        v-if="cartStore.selectedItems.length === 0"
+        class="empty-cart-message"
+      >
         <div class="empty-icon">🛒</div>
         <h2>没有要结账的商品</h2>
         <p>请先在购物车中选择要购买的商品</p>
-        <button class="back-to-cart-btn" @click="router.push('/cart')">返回购物车</button>
+        <button class="back-to-cart-btn" @click="router.push('/cart')">
+          返回购物车
+        </button>
       </div>
 
       <!-- Main Content -->
@@ -19,22 +24,43 @@
           <h1 class="checkout-title">结账</h1>
 
           <!-- Shipping Address -->
-          <AddressSelector v-model="selectedAddressId" @change="onAddressChange" />
-          <div v-if="errors.address" class="error-message">{{ errors.address }}</div>
+          <AddressSelector
+            v-model="selectedAddressId"
+            @change="onAddressChange"
+          />
+          <div v-if="errors.address" class="error-message">
+            {{ errors.address }}
+          </div>
 
           <!-- Delivery Method -->
           <div class="form-section">
             <h2 class="section-title">配送时效</h2>
             <div class="radio-group">
-              <label class="radio-option" :class="{ selected: deliveryMethod === 'standard' }">
-                <input v-model="deliveryMethod" type="radio" name="delivery" value="standard" />
+              <label
+                class="radio-option"
+                :class="{ selected: deliveryMethod === 'standard' }"
+              >
+                <input
+                  v-model="deliveryMethod"
+                  type="radio"
+                  name="delivery"
+                  value="standard"
+                />
                 <div class="radio-content">
                   <div class="radio-title">标准配送 - ¥5.00</div>
                   <div class="radio-description">3-5个工作日内送达</div>
                 </div>
               </label>
-              <label class="radio-option" :class="{ selected: deliveryMethod === 'express' }">
-                <input v-model="deliveryMethod" type="radio" name="delivery" value="express" />
+              <label
+                class="radio-option"
+                :class="{ selected: deliveryMethod === 'express' }"
+              >
+                <input
+                  v-model="deliveryMethod"
+                  type="radio"
+                  name="delivery"
+                  value="express"
+                />
                 <div class="radio-content">
                   <div class="radio-title">特快配送 - ¥10.00</div>
                   <div class="radio-description">1-2 个工作日内送达</div>
@@ -47,20 +73,44 @@
           <div class="form-section">
             <h2 class="section-title">付款方式</h2>
             <div class="radio-group">
-              <label class="radio-option" :class="{ selected: paymentMethod === 'credit-card' }">
-                <input v-model="paymentMethod" type="radio" name="payment" value="credit-card" />
+              <label
+                class="radio-option"
+                :class="{ selected: paymentMethod === 'credit-card' }"
+              >
+                <input
+                  v-model="paymentMethod"
+                  type="radio"
+                  name="payment"
+                  value="credit-card"
+                />
                 <div class="radio-content">
                   <div class="radio-title">💳 信用卡/借记卡</div>
                 </div>
               </label>
-              <label class="radio-option" :class="{ selected: paymentMethod === 'wechat' }">
-                <input v-model="paymentMethod" type="radio" name="payment" value="wechat" />
+              <label
+                class="radio-option"
+                :class="{ selected: paymentMethod === 'wechat' }"
+              >
+                <input
+                  v-model="paymentMethod"
+                  type="radio"
+                  name="payment"
+                  value="wechat"
+                />
                 <div class="radio-content">
                   <div class="radio-title">💚 微信支付</div>
                 </div>
               </label>
-              <label class="radio-option" :class="{ selected: paymentMethod === 'alipay' }">
-                <input v-model="paymentMethod" type="radio" name="payment" value="alipay" />
+              <label
+                class="radio-option"
+                :class="{ selected: paymentMethod === 'alipay' }"
+              >
+                <input
+                  v-model="paymentMethod"
+                  type="radio"
+                  name="payment"
+                  value="alipay"
+                />
                 <div class="radio-content">
                   <div class="radio-title">💙 支付宝</div>
                 </div>
@@ -79,7 +129,9 @@
                   maxlength="19"
                 />
               </div>
-              <div v-if="errors.cardNumber" class="error-message">{{ errors.cardNumber }}</div>
+              <div v-if="errors.cardNumber" class="error-message">
+                {{ errors.cardNumber }}
+              </div>
 
               <div class="form-row">
                 <input
@@ -103,7 +155,11 @@
           </div>
 
           <!-- Submit Button -->
-          <button class="submit-btn" @click="submitOrder" :disabled="submitting">
+          <button
+            class="submit-btn"
+            @click="submitOrder"
+            :disabled="submitting"
+          >
             {{ submitting ? '提交中...' : '提交订单' }}
           </button>
         </div>
@@ -114,7 +170,11 @@
 
           <!-- Product Items -->
           <div class="product-items">
-            <div v-for="item in cartStore.selectedItems" :key="item.id" class="product-item">
+            <div
+              v-for="item in cartStore.selectedItems"
+              :key="item.id"
+              class="product-item"
+            >
               <div class="product-image">
                 <img
                   v-if="item.image_url || item.image"
@@ -129,25 +189,35 @@
                   {{ item.quantity }} × ¥{{ formatPrice(item.price) }}
                 </div>
               </div>
-              <div class="product-price">¥{{ formatPrice(item.price * item.quantity) }}</div>
+              <div class="product-price">
+                ¥{{ formatPrice(item.price * item.quantity) }}
+              </div>
             </div>
           </div>
 
           <!-- Cost Breakdown -->
           <div class="cost-breakdown">
             <div class="cost-row">
-              <span class="cost-label">小计 ({{ cartStore.selectedCount }} 件商品)</span>
-              <span class="cost-value">¥{{ cartStore.selectedTotal.toFixed(2) }}</span>
+              <span class="cost-label">
+                小计 ({{ cartStore.selectedCount }} 件商品)
+              </span>
+              <span class="cost-value">
+                ¥{{ cartStore.selectedTotal.toFixed(2) }}
+              </span>
             </div>
             <div class="cost-row">
               <span class="cost-label">运费</span>
               <span class="cost-value">
-                {{ shippingCost === 0 ? '免费' : `¥${shippingCost.toFixed(2)}` }}
+                {{
+                  shippingCost === 0 ? '免费' : `¥${shippingCost.toFixed(2)}`
+                }}
               </span>
             </div>
             <div v-if="discount > 0" class="cost-row">
               <span class="cost-label">优惠</span>
-              <span class="cost-value discount">-¥{{ discount.toFixed(2) }}</span>
+              <span class="cost-value discount">
+                -¥{{ discount.toFixed(2) }}
+              </span>
             </div>
             <div class="cost-row total">
               <span class="cost-label">总计</span>
@@ -168,21 +238,25 @@
 </template>
 
 <script setup>
+// 组件名称
+defineOptions({
+  name: 'CheckoutPage',
+})
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCartStore } from '../stores/cartStore'
 import { useOrderStore } from '../stores/orderStore'
-import { useUserStore } from '../stores/userStore'
-import { useAddressStore } from '../stores/addressStore'
+// import { useUserStore } from '../stores/userStore' // 暂时未使用
+// import { useAddressStore } from '../stores/addressStore' // 暂时未使用
 import AddressSelector from '../components/AddressSelector.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const orderStore = useOrderStore()
-const userStore = useUserStore()
-const addressStore = useAddressStore()
+// const userStore = useUserStore() // 暂时未使用
+// const addressStore = useAddressStore() // 暂时未使用
 
 // 选中的地址ID
 const selectedAddressId = ref(null)
@@ -230,12 +304,13 @@ const totalAmount = computed(() => {
 // 页面加载时检查购物车
 onMounted(() => {
   if (cartStore.selectedItems.length === 0) {
-    console.warn('没有选中的商品')
+    ElMessage.warning('购物车中没有选中的商品')
+    router.push('/cart')
   }
 })
 
 // 地址选择变化
-const onAddressChange = (address) => {
+const onAddressChange = address => {
   selectedAddress.value = address
   // 清空地址错误
   errors.value.address = ''
@@ -244,7 +319,7 @@ const onAddressChange = (address) => {
 // 表单验证
 const validateForm = () => {
   // 清空之前的错误
-  Object.keys(errors.value).forEach((key) => {
+  Object.keys(errors.value).forEach(key => {
     errors.value[key] = ''
   })
 
@@ -307,7 +382,7 @@ const submitOrder = async () => {
   try {
     // 构建订单数据
     const orderData = {
-      items: cartStore.selectedItems.map((item) => ({
+      items: cartStore.selectedItems.map(item => ({
         productId: item.product_id || item.id,
         quantity: item.quantity,
       })),
@@ -322,7 +397,6 @@ const submitOrder = async () => {
       remark: '',
     }
 
-
     // 创建订单
     const result = await orderStore.createOrder(orderData)
 
@@ -332,7 +406,6 @@ const submitOrder = async () => {
       ElMessage.error('订单创建失败，请重试')
       return
     }
-
 
     // 显示支付确认对话框
     try {
@@ -344,7 +417,7 @@ const submitOrder = async () => {
           cancelButtonText: '取消',
           type: 'warning',
           customClass: 'payment-confirm-dialog',
-        },
+        }
       )
 
       // 用户确认支付，更新订单状态为待发货
@@ -353,7 +426,6 @@ const submitOrder = async () => {
       // 模拟支付处理
       setTimeout(async () => {
         try {
-
           // 模拟支付成功，更新订单状态为待发货
           await orderStore.updateOrderStatus(orderId, 'processing')
 
@@ -364,8 +436,7 @@ const submitOrder = async () => {
 
           // 跳转到订单列表页
           router.push('/orders')
-        } catch (error) {
-          console.error('支付处理失败:', error)
+        } catch {
           ElMessage.error('支付处理失败，请重试')
         } finally {
           submitting.value = false
@@ -377,8 +448,7 @@ const submitOrder = async () => {
         try {
           await orderStore.updateOrderStatus(orderId, 'pending')
           ElMessage.info('已取消支付，订单状态已更新为待支付')
-        } catch (updateError) {
-          console.error('更新订单状态失败:', updateError)
+        } catch {
           ElMessage.error('更新订单状态失败')
         }
         submitting.value = false
@@ -387,15 +457,14 @@ const submitOrder = async () => {
         throw error
       }
     }
-  } catch (error) {
-    console.error('提交订单失败:', error)
+  } catch {
     ElMessage.error('提交订单失败，请重试')
     submitting.value = false
   }
 }
 
 // 格式化价格函数
-const formatPrice = (price) => {
+const formatPrice = price => {
   const numPrice = typeof price === 'number' ? price : parseFloat(price) || 0
   return numPrice.toFixed(2)
 }
@@ -434,7 +503,8 @@ const formatPrice = (price) => {
 .checkout-page {
   min-height: 100vh;
   background-color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .container {

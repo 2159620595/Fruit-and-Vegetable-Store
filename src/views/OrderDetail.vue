@@ -375,7 +375,7 @@ import { ref, computed, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useOrderStore } from '@/stores/orderStore'
-import { useUserStore } from '@/stores/userStore'
+// import { useUserStore } from '@/stores/userStore' // 暂时未使用
 import { useLogisticsStore } from '@/stores/logisticsStore'
 import LogisticsTracker from '@/components/LogisticsTracker.vue'
 import LogisticsDialog from '@/components/LogisticsDialog.vue'
@@ -384,7 +384,7 @@ import Breadcrumb from '@/components/Breadcrumb.vue'
 const route = useRoute()
 const router = useRouter()
 const orderStore = useOrderStore()
-const userStore = useUserStore()
+// const userStore = useUserStore() // 暂时未使用
 const logisticsStore = useLogisticsStore()
 
 // State
@@ -397,7 +397,7 @@ const orderSteps = computed(() => {
   if (!order.value) return []
 
   const currentStatus = order.value.status
-  const statusInfo = getStatusInfo(currentStatus)
+  // const statusInfo = getStatusInfo(currentStatus) // 暂时未使用
 
   // 定义标准订单流程步骤（与后端状态保持一致）
   const standardSteps = [
@@ -734,13 +734,13 @@ const orderStatusConfig = {
   },
 }
 
-const getStatusText = status => {
-  return orderStatusConfig[status]?.text || status || '未知状态'
-}
+// const getStatusText = status => {
+//   return orderStatusConfig[status]?.text || status || '未知状态'
+// }
 
-const getStatusClass = status => {
-  return orderStatusConfig[status]?.class || 'status-default'
-}
+// const getStatusClass = status => {
+//   return orderStatusConfig[status]?.class || 'status-default'
+// }
 
 const getStatusInfo = status => {
   return (
@@ -891,7 +891,6 @@ const handlePayOrder = async () => {
     await loadOrderDetail()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
-      console.error('支付失败:', error)
       ElMessage.error('支付失败，请重试')
     }
   }
@@ -939,8 +938,7 @@ const handleTrackOrder = async () => {
         borderRadius: '12px',
       },
     })
-  } catch (error) {
-    console.error('获取物流信息失败:', error)
+  } catch {
     ElMessage.error('获取物流信息失败，请重试')
   }
 }
@@ -950,8 +948,7 @@ const handleBuyAgain = async () => {
     await orderStore.buyAgain(order.value.id)
     ElMessage.success('商品已添加到购物车！')
     router.push('/cart')
-  } catch (error) {
-    console.error('再次购买失败:', error)
+  } catch {
     ElMessage.error('操作失败，请重试')
   }
 }

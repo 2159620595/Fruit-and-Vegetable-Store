@@ -635,6 +635,10 @@
 </template>
 
 <script setup>
+// 组件名称
+defineOptions({
+  name: 'ShopPage',
+})
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -651,7 +655,7 @@ const cartStore = useCartStore()
 const userStore = useUserStore()
 
 // 筛选状态
-const minPrice = ref(0)
+// const minPrice = ref(0) // 暂时未使用
 const maxPrice = ref(1000)
 const priceRangeMax = ref(1000)
 const sortBy = ref('name')
@@ -698,15 +702,15 @@ const toast = ref({
 })
 
 // 从商品数据中提取分类
-const categories = computed(() => {
-  const cats = new Set()
-  productStore.productList.forEach(p => {
-    if (p.category) {
-      cats.add(p.category)
-    }
-  })
-  return Array.from(cats)
-})
+// const categories = computed(() => {
+//   const cats = new Set()
+//   productStore.productList.forEach(p => {
+//     if (p.category) {
+//       cats.add(p.category)
+//     }
+//   })
+//   return Array.from(cats)
+// })
 
 // 从商品数据中提取品牌
 const brands = computed(() => {
@@ -762,7 +766,6 @@ const filteredProducts = computed(() => {
 
   // 额外的安全检查
   if (!Array.isArray(products)) {
-    console.warn('products 不是数组，使用空数组代替:', products)
     return []
   }
 
@@ -845,8 +848,7 @@ const filteredProducts = computed(() => {
     }
 
     return products
-  } catch (error) {
-    console.error('过滤商品时出错:', error)
+  } catch {
     return []
   }
 })
@@ -980,8 +982,7 @@ const sortedProducts = computed(() => {
     }
 
     return sortedResult
-  } catch (error) {
-    console.error('排序商品时出错:', error)
+  } catch {
     return products
   }
 })
@@ -1063,7 +1064,7 @@ const applyPricePreset = preset => {
     if (priceSlider.value) {
       priceSlider.value.value = newValue
     } else {
-      console.log('滑块元素未找到')
+      // 滑块元素未找到，忽略
     }
   })
 }
@@ -1107,7 +1108,7 @@ const toggleFavorite = async product => {
       product.is_favorite = !product.is_favorite
       showToast(product.is_favorite ? '已添加到收藏' : '已取消收藏', 'success')
     }
-  } catch (error) {
+  } catch {
     showToast('操作失败，请重试', 'error')
   }
 }
@@ -1172,8 +1173,7 @@ const calculatePriceRange = () => {
       priceRangeMax.value = 1000
       maxPrice.value = 1000
     }
-  } catch (error) {
-    console.error('计算价格范围时出错:', error)
+  } catch {
     priceRangeMax.value = 1000
     maxPrice.value = 1000
   }
@@ -1215,8 +1215,8 @@ onMounted(async () => {
     setTimeout(() => {
       setupLazyLoading()
     }, 100)
-  } catch (error) {
-    console.error('加载商品数据失败:', error)
+  } catch {
+    // 加载失败，忽略
   }
 })
 
