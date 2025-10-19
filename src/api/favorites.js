@@ -32,26 +32,47 @@ export const removeFromFavorites = productId => {
   })
 }
 
-// 批量删除收藏
-export const batchRemoveFavorites = productIds => {
-  return request.delete('/favorites/batch', {
-    data: {
-      product_ids: productIds,
-    },
-  })
+// ⚠️ 注意：以下接口后端暂未实现，使用前端逻辑处理
+
+// 批量删除收藏（通过多次调用toggleFavorite实现）
+export const batchRemoveFavorites = async productIds => {
+  const promises = productIds.map(id => toggleFavorite(id))
+  await Promise.all(promises)
+  return { data: { message: '批量删除成功' } }
 }
 
-// 清空所有收藏
-export const clearAllFavorites = () => {
-  return request.delete('/favorites/clear')
+// 清空所有收藏（通过获取列表后批量删除实现）
+export const clearAllFavorites = async () => {
+  const response = await getFavoritesList()
+  const items = response.data.data?.items || []
+  const productIds = items.map(item => item.product_id || item.id)
+  if (productIds.length > 0) {
+    await batchRemoveFavorites(productIds)
+  }
+  return { data: { message: '已清空所有收藏' } }
 }
 
-// 检查商品是否已收藏
-export const checkFavoriteStatus = productId => {
-  return request.get(`/favorites/check/${productId}`)
+// 检查商品是否已收藏（通过获取列表判断）
+export const checkFavoriteStatus = async productId => {
+  try {
+    const response = await getFavoritesList()
+    const items = response.data.data?.items || []
+    const isFavorited = items.some(
+      item => (item.product_id || item.id) === productId
+    )
+    return { data: { is_favorited: isFavorited } }
+  } catch {
+    return { data: { is_favorited: false } }
+  }
 }
 
-// 获取收藏数量
-export const getFavoritesCount = () => {
-  return request.get('/favorites/count')
+// 获取收藏数量（通过获取列表计算）
+export const getFavoritesCount = async () => {
+  try {
+    const response = await getFavoritesList()
+    const count = response.data.data?.total || 0
+    return { data: { count } }
+  } catch {
+    return { data: { count: 0 } }
+  }
 }

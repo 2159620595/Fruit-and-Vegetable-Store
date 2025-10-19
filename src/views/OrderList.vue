@@ -7,14 +7,15 @@
       <div class="page-header">
         <h1 class="page-title">我的订单</h1>
         <div class="header-actions">
-          <!-- 🆕 搜索框 -->
+          <!-- 🆕 搜索框（支持模糊搜索和拼音搜索） -->
           <el-input
             v-model="searchKeyword"
-            placeholder="搜索订单号或商品名称"
+            placeholder="搜索订单号/商品名称/收货人（支持拼音）"
             class="search-input"
             clearable
             @clear="handleSearchClear"
             @keyup.enter="handleSearch"
+            @input="handleSearchInput"
           >
             <template #prefix>
               <el-icon><Search /></el-icon>
@@ -27,6 +28,14 @@
               />
             </template>
           </el-input>
+          <el-text
+            v-if="searchKeyword && !isSearching"
+            type="info"
+            size="small"
+            style="margin-left: 8px"
+          >
+            {{ searchTipText }}
+          </el-text>
           <el-button
             type="primary"
             :icon="loading ? 'Loading' : 'Refresh'"
@@ -50,8 +59,7 @@
               <span class="tab-label">
                 全部订单
                 <el-badge
-                  v-if="allOrdersCount > 0"
-                  :value="allOrdersCount"
+                  :value="allOrdersCount || 0"
                   :max="99"
                   class="tab-badge"
                 />
@@ -63,8 +71,7 @@
               <span class="tab-label">
                 待支付
                 <el-badge
-                  v-if="orderCounts.to_pay > 0"
-                  :value="orderCounts.to_pay"
+                  :value="orderCounts.to_pay || 0"
                   :max="99"
                   class="tab-badge"
                 />
@@ -76,8 +83,7 @@
               <span class="tab-label">
                 待发货
                 <el-badge
-                  v-if="orderCounts.to_ship > 0"
-                  :value="orderCounts.to_ship"
+                  :value="orderCounts.to_ship || 0"
                   :max="99"
                   class="tab-badge"
                 />
@@ -89,8 +95,7 @@
               <span class="tab-label">
                 已发货
                 <el-badge
-                  v-if="orderCounts.to_receive > 0"
-                  :value="orderCounts.to_receive"
+                  :value="orderCounts.shipped || 0"
                   :max="99"
                   class="tab-badge"
                 />
@@ -102,8 +107,7 @@
               <span class="tab-label">
                 运输中
                 <el-badge
-                  v-if="orderCounts.in_transit > 0"
-                  :value="orderCounts.in_transit"
+                  :value="orderCounts.in_transit || 0"
                   :max="99"
                   class="tab-badge"
                 />
@@ -115,8 +119,7 @@
               <span class="tab-label">
                 已完成
                 <el-badge
-                  v-if="orderCounts.to_review > 0"
-                  :value="orderCounts.to_review"
+                  :value="orderCounts.to_review || 0"
                   :max="99"
                   class="tab-badge"
                 />
@@ -128,8 +131,7 @@
               <span class="tab-label">
                 已取消
                 <el-badge
-                  v-if="orderCounts.cancelled > 0"
-                  :value="orderCounts.cancelled"
+                  :value="orderCounts.cancelled || 0"
                   :max="99"
                   class="tab-badge"
                 />
@@ -493,6 +495,17 @@ const totalCount = ref(0)
 const actionLoading = ref(false) // 操作加载状态
 const searchKeyword = ref('') // 🆕 搜索关键词
 const isSearching = ref(false) // 🆕 是否处于搜索模式
+const searchTipText = computed(() => {
+  if (!searchKeyword.value) return ''
+  const keyword = searchKeyword.value.trim()
+  if (/^[a-zA-Z]+$/.test(keyword)) {
+    return '💡 检测到拼音输入，将自动匹配中文商品名'
+  }
+  if (/^\d+$/.test(keyword)) {
+    return '💡 搜索订单号'
+  }
+  return '💡 按 Enter 搜索'
+})
 
 // 评价对话框状态
 const reviewDialogVisible = ref(false)
@@ -505,18 +518,19 @@ const currentReviewOrderId = ref(null)
 // 自动状态流转相关
 const autoStatusTimers = ref(new Map()) // 存储每个订单的定时器
 
-// 计算属性
-const loading = computed(() => orderStore.loading)
-const orders = computed(() => orderStore.orders)
+// 直接使用组合式 store 的 ref
+const loading = orderStore.loading
+const orders = orderStore.orders
 
 // 计算"全部订单"徽章数量
-// 始终使用各状态 counts 的总和，确保数据准确
+// 从后端 counts 累加所有状态订单数（无论当前在哪个标签）
 const allOrdersCount = computed(() => {
   const counts = orderCounts.value
+  // 累加所有状态的订单数量（每个状态独立统计，不重复）
   return (
     counts.to_pay +
     counts.to_ship +
-    counts.to_receive +
+    counts.shipped +
     counts.in_transit +
     counts.to_review +
     counts.cancelled
@@ -531,7 +545,7 @@ const orderCounts = computed(() => {
   // 后端返回的 counts 映射：
   // to_pay → pending (待支付)
   // to_ship → processing (待发货)
-  // to_receive → shipped (已发货)
+  // shipped → shipped (已发货)
   // in_transit → in_transit (运输中)
   // to_review → delivered (待评价)
   // cancelled → cancelled (已取消)
@@ -539,7 +553,7 @@ const orderCounts = computed(() => {
   return {
     to_pay: backendCounts.to_pay || 0,
     to_ship: backendCounts.to_ship || 0,
-    to_receive: backendCounts.to_receive || 0,
+    shipped: backendCounts.shipped || 0,
     in_transit: backendCounts.in_transit || 0,
     to_review: backendCounts.to_review || 0,
     cancelled: backendCounts.cancelled || 0,
@@ -596,6 +610,11 @@ const getPaymentMethodText = method => {
 // 后端返回的就是筛选后的订单，前端再做一次防御性筛选确保数据准确
 const filteredOrders = computed(() => {
   const allOrders = orders.value || []
+
+  // 🆕 如果处于搜索模式，显示所有搜索结果，不进行状态筛选
+  if (isSearching.value) {
+    return allOrders
+  }
 
   // 如果是"全部订单"标签，显示所有订单
   if (activeTab.value === 'all') {
@@ -761,16 +780,9 @@ const debounce = (func, delay) => {
   }
 }
 
-// 切换标签
-const handleTabChange = tabName => {
-  // 防止重复切换
-  if (tabName === activeTab.value) return
-
-  // 立即清空旧数据（避免显示缓存数据）
-  orderStore.clearOrders()
+// 切换标签（每次切换必定触发一次请求，保留现有列表避免抖动）
+const handleTabChange = () => {
   currentPage.value = 1
-  totalCount.value = 0
-
   // 使用防抖加载数据
   debouncedLoadOrders()
 }
@@ -794,7 +806,23 @@ const handleSizeChange = size => {
   loadOrders()
 }
 
-// 🆕 搜索订单
+// 保存搜索前的标签状态
+const previousTab = ref('all')
+
+// 🆕 搜索输入防抖
+let searchDebounceTimer = null
+const handleSearchInput = () => {
+  clearTimeout(searchDebounceTimer)
+  if (!searchKeyword.value.trim()) {
+    return
+  }
+  // 输入停止 800ms 后自动搜索
+  searchDebounceTimer = setTimeout(() => {
+    handleSearch()
+  }, 800)
+}
+
+// 🆕 搜索订单（支持模糊搜索和拼音搜索）
 const handleSearch = async () => {
   if (!searchKeyword.value.trim()) {
     ElMessage.warning('请输入搜索关键词')
@@ -802,6 +830,12 @@ const handleSearch = async () => {
   }
 
   try {
+    // 保存当前标签，切换到"全部订单"以显示所有搜索结果
+    if (!isSearching.value) {
+      previousTab.value = activeTab.value
+      activeTab.value = 'all'
+    }
+
     isSearching.value = true
     const params = {
       keyword: searchKeyword.value.trim(),
@@ -819,9 +853,17 @@ const handleSearch = async () => {
     }
 
     if (orders.value.length === 0) {
-      ElMessage.info('未找到相关订单')
+      ElMessage.info({
+        message: '未找到相关订单，请尝试其他关键词或使用拼音搜索',
+        duration: 3000,
+      })
     } else {
-      ElMessage.success(`找到 ${totalCount.value} 条相关订单`)
+      const keyword = searchKeyword.value.trim()
+      const isPinyin = /^[a-zA-Z]+$/.test(keyword)
+      ElMessage.success({
+        message: `找到 ${totalCount.value} 条相关订单${isPinyin ? '（拼音匹配）' : ''}`,
+        duration: 2000,
+      })
     }
   } catch (error) {
     ElMessage.error(error.message || '搜索失败')
@@ -833,6 +875,8 @@ const handleSearchClear = () => {
   searchKeyword.value = ''
   if (isSearching.value) {
     isSearching.value = false
+    // 恢复到搜索前的标签
+    activeTab.value = previousTab.value
     currentPage.value = 1
     loadOrders()
   }
@@ -1116,7 +1160,7 @@ const handleViewReview = async (orderId, event) => {
 
   try {
     // 找到对应的订单
-    const order = orderStore.orders.find(o => o.id === orderId)
+    const order = orders.value.find(o => o.id === orderId)
     if (!order) {
       ElMessage.error('订单不存在')
       return
@@ -1401,8 +1445,18 @@ const handleImageError = event => {
 
 // 获取订单商品信息
 const getOrderItems = order => {
-  // 直接返回订单的商品信息（后端API现在会返回items字段）
-  return order.items || []
+  // 🔧 修复：确保返回有效的商品数组
+  if (!order || !order.items) {
+    return []
+  }
+
+  // 确保items是数组
+  if (!Array.isArray(order.items)) {
+    return []
+  }
+
+  // 过滤掉无效的商品数据
+  return order.items.filter(item => item && (item.product_name || item.name))
 }
 
 // 监听路由查询参数变化（支持通过 URL 参数筛选）
@@ -1502,9 +1556,6 @@ const clearAllAutoStatusTimers = () => {
 
 // 初始化
 onMounted(() => {
-  // 清理旧的持久化数据（移除 orders 字段）
-  orderStore.initCleanupPersist()
-
   // 如果 URL 有状态参数，使用它
   const statusFromQuery = route.query.status
   if (statusFromQuery) {
@@ -1625,6 +1676,10 @@ onUnmounted(() => {
   margin-left: 6px;
   font-size: 12px;
   font-weight: 500;
+  /* 固定徽章占位，避免数字变化引起标签抖动 */
+  width: 34px;
+  display: inline-block;
+  text-align: center;
 }
 
 .tab-badge :deep(.el-badge__content) {
@@ -1632,6 +1687,17 @@ onUnmounted(() => {
   border: 2px solid #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-weight: 600;
+  /* 固定内容尺寸，数字切换不改变布局 */
+  min-width: 28px; /* 适配到 99+ */
+  height: 18px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 使用等宽数字，进一步减少抖动 */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  transition: none;
 }
 
 /* 不同状态的徽章颜色 */

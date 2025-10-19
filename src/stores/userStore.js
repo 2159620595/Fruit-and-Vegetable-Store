@@ -1,6 +1,10 @@
 // src/stores/userStore.js
 import { defineStore } from 'pinia'
-import { userLoginService, userRegisterService, getUserProfileService } from '@/api/user.js'
+import {
+  userLoginService,
+  userRegisterService,
+  getUserProfileService,
+} from '@/api/user.js'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -18,9 +22,9 @@ export const useUserStore = defineStore('user', {
 
   getters: {
     // 获取用户信息
-    userInfo: (state) => state.user,
+    userInfo: state => state.user,
     // 是否已登录
-    isLoggedIn: (state) => state.isAuthenticated && !!state.token,
+    isLoggedIn: state => state.isAuthenticated && !!state.token,
   },
 
   actions: {
@@ -66,7 +70,6 @@ export const useUserStore = defineStore('user', {
         this.isAuthenticated = true
 
         // Pinia持久化插件会自动保存
-
 
         // 登录成功后同步购物车
         try {
@@ -118,7 +121,6 @@ export const useUserStore = defineStore('user', {
 
       this.loading = true
       try {
-
         // 调用用户信息API
         const response = await getUserProfileService()
 
@@ -144,7 +146,6 @@ export const useUserStore = defineStore('user', {
 
     // 登出
     async logout() {
-
       // 清除用户数据
       this.user = null
       this.token = null
@@ -179,7 +180,6 @@ export const useUserStore = defineStore('user', {
         const { useLogisticsStore } = await import('./logisticsStore')
         const logisticsStore = useLogisticsStore()
         logisticsStore.clearLogisticsData()
-
       } catch (error) {
         console.error('❌ 清除数据时出错:', error)
         // 即使清除其他数据失败，也要确保用户数据被清除

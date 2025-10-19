@@ -31,7 +31,14 @@ const pool = mysql.createPool({
 // ============================================
 // 中间件配置
 // ============================================
-app.use(cors())
+app.use(
+  cors({
+    origin: '*', // 允许所有来源访问
+    credentials: false, // 允许所有来源时需要设置为 false
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  })
+)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use('/images', express.static('images'))
@@ -979,13 +986,13 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
       })
     )
 
-    // 统计各状态订单数量
+    // 统计各状态订单数量（修复：单独统计每个状态）
     const [[counts]] = await pool.query(
       `
       SELECT 
         COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) as to_pay,
         COALESCE(SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END), 0) as to_ship,
-        COALESCE(SUM(CASE WHEN status = 'shipped' THEN 1 ELSE 0 END), 0) as to_receive,
+        COALESCE(SUM(CASE WHEN status = 'shipped' THEN 1 ELSE 0 END), 0) as shipped,
         COALESCE(SUM(CASE WHEN status = 'in_transit' THEN 1 ELSE 0 END), 0) as in_transit,
         COALESCE(SUM(CASE WHEN status = 'delivered' THEN 1 ELSE 0 END), 0) as to_review,
         COALESCE(SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END), 0) as cancelled
@@ -997,7 +1004,7 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
     const countsWithNumbers = {
       to_pay: parseInt(counts.to_pay) || 0,
       to_ship: parseInt(counts.to_ship) || 0,
-      to_receive: parseInt(counts.to_receive + counts.in_transit) || 0,
+      shipped: parseInt(counts.shipped) || 0,
       in_transit: parseInt(counts.in_transit) || 0,
       to_review: parseInt(counts.to_review) || 0,
       cancelled: parseInt(counts.cancelled) || 0,
@@ -1572,8 +1579,10 @@ app.get('/api/logistics/:orderId', authenticateToken, async (req, res) => {
 })
 
 // ============================================
-// 7. 新增：订单搜索
+// 7. 新增：订单搜索（支持模糊搜索和拼音搜索）
 // ============================================
+
+const pinyinMatch = require('pinyin-match')
 
 app.get('/api/orders/search', authenticateToken, async (req, res) => {
   try {
@@ -1581,12 +1590,13 @@ app.get('/api/orders/search', authenticateToken, async (req, res) => {
     const offset = (page - 1) * page_size
     const userId = req.user.userId
 
-    if (!keyword) {
+    if (!keyword || !keyword.trim()) {
       return sendResponse(res, 400, '请输入搜索关键词')
     }
 
-    const searchTerm = `%${keyword}%`
+    const searchTerm = `%${keyword.trim()}%`
 
+    // 模糊搜索：订单号、商品名称、收货人姓名、手机号
     const query = `
       SELECT DISTINCT o.* 
       FROM orders o
@@ -1595,6 +1605,7 @@ app.get('/api/orders/search', authenticateToken, async (req, res) => {
         AND (
           o.order_number LIKE ?
           OR oi.product_name LIKE ?
+          OR o.shipping_address LIKE ?
         )
       ORDER BY o.created_at DESC
       LIMIT ? OFFSET ?
@@ -1602,6 +1613,7 @@ app.get('/api/orders/search', authenticateToken, async (req, res) => {
 
     const [orders] = await pool.query(query, [
       userId,
+      searchTerm,
       searchTerm,
       searchTerm,
       parseInt(page_size),
@@ -1616,15 +1628,11 @@ app.get('/api/orders/search', authenticateToken, async (req, res) => {
         AND (
           o.order_number LIKE ?
           OR oi.product_name LIKE ?
+          OR o.shipping_address LIKE ?
         )
     `
 
-    const [[{ total }]] = await pool.query(countQuery, [
-      userId,
-      searchTerm,
-      searchTerm,
-    ])
-
+    // 获取订单商品信息
     const ordersWithItems = await Promise.all(
       orders.map(async order => {
         const [orderItems] = await pool.query(
@@ -1651,9 +1659,68 @@ app.get('/api/orders/search', authenticateToken, async (req, res) => {
       })
     )
 
+    // 🆕 拼音搜索增强：如果数据库搜索结果较少，尝试拼音匹配
+    const finalOrders = [...ordersWithItems]
+    if (ordersWithItems.length < 5 && /^[a-zA-Z]+$/.test(keyword.trim())) {
+      // 如果关键词是纯字母，可能是拼音搜索
+      const allOrdersQuery = `
+        SELECT DISTINCT o.* 
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        WHERE o.user_id = ?
+        ORDER BY o.created_at DESC
+        LIMIT 100
+      `
+      const [allOrders] = await pool.query(allOrdersQuery, [userId])
+
+      const pinyinMatched = []
+      for (const order of allOrders) {
+        const [items] = await pool.query(
+          'SELECT product_name FROM order_items WHERE order_id = ?',
+          [order.id]
+        )
+
+        // 检查商品名称是否匹配拼音
+        const hasMatch = items.some(item =>
+          pinyinMatch.match(item.product_name, keyword.trim())
+        )
+
+        if (hasMatch) {
+          const [orderItems] = await pool.query(
+            `
+            SELECT 
+              oi.id,
+              oi.order_id,
+              oi.product_id,
+              oi.quantity,
+              oi.price,
+              COALESCE(p.name, oi.product_name) as product_name,
+              COALESCE(p.image_url, oi.product_image) as product_image
+            FROM order_items oi
+            LEFT JOIN products p ON oi.product_id = p.id
+            WHERE oi.order_id = ?
+          `,
+            [order.id]
+          )
+          pinyinMatched.push({
+            ...order,
+            items: orderItems,
+          })
+        }
+      }
+
+      // 合并结果并去重
+      const existingIds = new Set(ordersWithItems.map(o => o.id))
+      pinyinMatched.forEach(order => {
+        if (!existingIds.has(order.id)) {
+          finalOrders.push(order)
+        }
+      })
+    }
+
     sendResponse(res, 200, '搜索成功', {
-      orders: ordersWithItems,
-      total: parseInt(total),
+      orders: finalOrders.slice(0, parseInt(page_size)),
+      total: finalOrders.length,
       page: parseInt(page),
       page_size: parseInt(page_size),
       keyword,
@@ -2363,7 +2430,7 @@ app.use((req, res) => {
 })
 
 // 全局错误处理
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.error('Unhandled error:', err)
   res.status(500).json({
     code: 500,
@@ -2398,16 +2465,16 @@ app.listen(PORT, () => {
 })
 
 // 优雅关闭
-process.on('SIGTERM', async () => {
-  console.log('收到 SIGTERM 信号，正在优雅关闭服务器...')
-  await pool.end()
-  process.exit(0)
-})
+// process.on('SIGTERM', async () => {
+//   console.log('收到 SIGTERM 信号，正在优雅关闭服务器...')
+//   await pool.end()
+//   process.exit(0)
+// })
 
-process.on('SIGINT', async () => {
-  console.log('\n收到 SIGINT 信号，正在优雅关闭服务器...')
-  await pool.end()
-  process.exit(0)
-})
+// process.on('SIGINT', async () => {
+//   console.log('\n收到 SIGINT 信号，正在优雅关闭服务器...')
+//   await pool.end()
+//   process.exit(0)
+// })
 
-module.exports = app
+// module.exports = app

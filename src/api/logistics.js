@@ -2,87 +2,19 @@ import request from '@/utils/request'
 
 /**
  * 物流跟踪API
+ * ⚠️ 注意：后端只实现了 GET /api/logistics/:orderId
+ * 其他接口暂未实现，建议使用模拟数据或前端逻辑
  */
 export const logisticsApi = {
   /**
-   * 获取物流跟踪信息
-   * @param {string} trackingNumber - 快递单号
-   * @param {string} carrier - 承运商
-   * @returns {Promise} 物流跟踪信息
-   */
-  async getLogisticsInfo(trackingNumber, carrier = '') {
-    try {
-      const response = await request.get('/api/logistics/track', {
-        params: {
-          tracking_number: trackingNumber,
-          carrier: carrier,
-        },
-      })
-      return response.data
-    } catch (error) {
-      console.error('获取物流信息失败:', error)
-      throw error
-    }
-  },
-
-  /**
-   * 获取支持的快递公司列表
-   * @returns {Promise} 快递公司列表
-   */
-  async getSupportedCarriers() {
-    try {
-      const response = await request.get('/api/logistics/carriers')
-      return response.data
-    } catch (error) {
-      console.error('获取快递公司列表失败:', error)
-      throw error
-    }
-  },
-
-  /**
-   * 订阅物流更新通知
-   * @param {string} trackingNumber - 快递单号
-   * @param {string} carrier - 承运商
-   * @param {string} callbackUrl - 回调URL
-   * @returns {Promise} 订阅结果
-   */
-  async subscribeLogisticsUpdates(trackingNumber, carrier, callbackUrl) {
-    try {
-      const response = await request.post('/api/logistics/subscribe', {
-        tracking_number: trackingNumber,
-        carrier: carrier,
-        callback_url: callbackUrl,
-      })
-      return response.data
-    } catch (error) {
-      console.error('订阅物流更新失败:', error)
-      throw error
-    }
-  },
-
-  /**
-   * 取消物流更新订阅
-   * @param {string} subscriptionId - 订阅ID
-   * @returns {Promise} 取消结果
-   */
-  async unsubscribeLogisticsUpdates(subscriptionId) {
-    try {
-      const response = await request.delete(`/api/logistics/subscribe/${subscriptionId}`)
-      return response.data
-    } catch (error) {
-      console.error('取消物流订阅失败:', error)
-      throw error
-    }
-  },
-
-  /**
-   * 获取订单的物流信息
+   * 获取订单的物流信息（后端已实现）
    * @param {string|number} orderId - 订单ID
    * @returns {Promise} 订单物流信息
    */
   async getOrderLogistics(orderId) {
     try {
-      const response = await request.get(`/api/orders/${orderId}/logistics`)
+      // ✅ 使用 order.js 中的 getLogistics 接口
+      const response = await request.get(`/logistics/${orderId}`)
       return response.data
     } catch (error) {
       console.error('获取订单物流信息失败:', error)
@@ -91,19 +23,71 @@ export const logisticsApi = {
   },
 
   /**
-   * 更新订单物流信息
-   * @param {string|number} orderId - 订单ID
-   * @param {Object} logisticsData - 物流数据
-   * @returns {Promise} 更新结果
+   * ⚠️ 以下接口后端暂未实现，返回模拟数据
+   */
+
+  /**
+   * 获取物流跟踪信息（暂未实现）
+   */
+  async getLogisticsInfo(trackingNumber, carrier = '') {
+    console.warn('⚠️ 后端暂未实现此接口，请使用 getOrderLogistics')
+    return Promise.resolve({
+      code: 200,
+      message: '请使用订单ID获取物流信息',
+      data: null,
+    })
+  },
+
+  /**
+   * 获取支持的快递公司列表（暂未实现）
+   */
+  async getSupportedCarriers() {
+    console.warn('⚠️ 后端暂未实现此接口')
+    return Promise.resolve({
+      code: 200,
+      data: [
+        '顺丰速运',
+        '圆通速递',
+        '中通快递',
+        '申通快递',
+        '韵达速递',
+        '京东物流',
+        '邮政EMS',
+      ],
+    })
+  },
+
+  /**
+   * 订阅物流更新通知（暂未实现）
+   */
+  async subscribeLogisticsUpdates(trackingNumber, carrier, callbackUrl) {
+    console.warn('⚠️ 后端暂未实现此接口')
+    return Promise.resolve({
+      code: 200,
+      message: '暂不支持订阅功能',
+    })
+  },
+
+  /**
+   * 取消物流更新订阅（暂未实现）
+   */
+  async unsubscribeLogisticsUpdates(subscriptionId) {
+    console.warn('⚠️ 后端暂未实现此接口')
+    return Promise.resolve({
+      code: 200,
+      message: '暂不支持取消订阅',
+    })
+  },
+
+  /**
+   * 更新订单物流信息（暂未实现）
    */
   async updateOrderLogistics(orderId, logisticsData) {
-    try {
-      const response = await request.put(`/api/orders/${orderId}/logistics`, logisticsData)
-      return response.data
-    } catch (error) {
-      console.error('更新订单物流信息失败:', error)
-      throw error
-    }
+    console.warn('⚠️ 后端暂未实现此接口，物流信息由后端自动更新')
+    return Promise.resolve({
+      code: 200,
+      message: '物流信息由系统自动更新',
+    })
   },
 }
 
@@ -211,7 +195,9 @@ export const logisticsUtils = {
     }
 
     const days = carrierDays[carrier] || 2
-    const estimatedDate = new Date(shippedDate.getTime() + days * 24 * 60 * 60 * 1000)
+    const estimatedDate = new Date(
+      shippedDate.getTime() + days * 24 * 60 * 60 * 1000
+    )
 
     return estimatedDate.toLocaleString('zh-CN', {
       month: '2-digit',

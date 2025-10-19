@@ -10,10 +10,11 @@ export const useProductStore = defineStore('product', {
     error: null,
   }),
 
-  persist: {
-    key: 'product',
-    storage: localStorage,
-  },
+  // 🔧 移除持久化：商品数据应该实时从后端获取
+  // persist: {
+  //   key: 'product',
+  //   storage: localStorage,
+  // },
 
   getters: {
     // 确保总是返回数组

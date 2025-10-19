@@ -15,10 +15,11 @@ export const useAddressStore = defineStore('address', {
     error: null,
   }),
 
-  persist: {
-    key: 'address',
-    storage: localStorage,
-  },
+  // 🔧 移除持久化：地址数据应该实时从后端获取
+  // persist: {
+  //   key: 'address',
+  //   storage: localStorage,
+  // },
 
   getters: {
     // 获取默认地址
@@ -42,7 +43,6 @@ export const useAddressStore = defineStore('address', {
 
         this.addresses = Array.isArray(result) ? result : []
 
-
         return this.addresses
       } catch (error) {
         this.error = error.message || '获取地址列表失败'
@@ -63,7 +63,6 @@ export const useAddressStore = defineStore('address', {
       try {
         const response = await addAddressAPI(addressData)
         const result = response.data.data || response.data
-
 
         // 重新获取地址列表
         await this.fetchAddresses()
@@ -88,7 +87,6 @@ export const useAddressStore = defineStore('address', {
 
       try {
         await updateAddressAPI(id, addressData)
-
 
         // 重新获取地址列表
         await this.fetchAddresses()
@@ -116,7 +114,6 @@ export const useAddressStore = defineStore('address', {
         // 从本地列表中删除
         this.addresses = this.addresses.filter(addr => addr.id !== id)
 
-
         return true
       } catch (error) {
         this.error = error.message || '删除地址失败'
@@ -141,7 +138,6 @@ export const useAddressStore = defineStore('address', {
         this.addresses.forEach(addr => {
           addr.is_default = addr.id === id
         })
-
 
         return true
       } catch (error) {

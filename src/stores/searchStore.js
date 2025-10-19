@@ -13,10 +13,10 @@ export const useSearchStore = defineStore('search', {
 
   getters: {
     // 获取搜索历史
-    getSearchHistory: (state) => state.searchHistory,
-    
+    getSearchHistory: state => state.searchHistory,
+
     // 获取热门搜索
-    getHotSearches: (state) => state.hotSearches,
+    getHotSearches: state => state.hotSearches,
   },
 
   actions: {
@@ -26,11 +26,13 @@ export const useSearchStore = defineStore('search', {
      */
     addToHistory(keyword) {
       if (!keyword || !keyword.trim()) return
-      
+
       const trimmedKeyword = keyword.trim()
-      
+
       // 移除重复项
-      const filtered = this.searchHistory.filter((item) => item !== trimmedKeyword)
+      const filtered = this.searchHistory.filter(
+        item => item !== trimmedKeyword
+      )
       // 添加到开头
       filtered.unshift(trimmedKeyword)
       // 只保留最近10条
@@ -49,7 +51,7 @@ export const useSearchStore = defineStore('search', {
      * @param {string} keyword - 要移除的关键词
      */
     removeFromHistory(keyword) {
-      this.searchHistory = this.searchHistory.filter((item) => item !== keyword)
+      this.searchHistory = this.searchHistory.filter(item => item !== keyword)
     },
 
     /**
