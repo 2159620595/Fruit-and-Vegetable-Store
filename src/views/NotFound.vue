@@ -18,8 +18,10 @@
       <p class="subtitle">页面未找到</p>
       <p class="description">抱歉，您访问的页面不存在或已被删除。</p>
       <div class="actions">
-        <button class="btn btn-primary" @click="goHome">返回首页</button>
-        <button class="btn btn-secondary" @click="goBack">返回上一页</button>
+        <el-button type="success" size="large" @click="goHome">
+          返回首页
+        </el-button>
+        <el-button size="large" @click="goBack">返回上一页</el-button>
       </div>
     </div>
   </div>
@@ -107,38 +109,6 @@ const goBack = () => {
   flex-wrap: wrap;
 }
 
-.btn {
-  padding: 14px 32px;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-  color: white;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-}
-
-.btn-secondary {
-  background: #f5f5f5;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background: #e0e0e0;
-  transform: translateY(-2px);
-}
-
 @media (max-width: 640px) {
   .content {
     padding: 40px 20px;
@@ -160,7 +130,7 @@ const goBack = () => {
     flex-direction: column;
   }
 
-  .btn {
+  .actions .el-button {
     width: 100%;
   }
 }

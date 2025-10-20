@@ -470,6 +470,19 @@ app.get('/api/products/:id', async (req, res) => {
     const { id } = req.params
     const userId = req.query.user_id || null
 
+    // 从请求头获取当前登录用户ID（用于点赞状态）
+    const token = req.headers.authorization?.split(' ')[1]
+    let currentUserId = null
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET)
+        currentUserId = decoded.userId
+      } catch (err) {
+        // Token无效或过期，继续作为未登录用户
+      }
+    }
+
     const [[product]] = await pool.query(
       `
       SELECT p.*,
@@ -478,7 +491,7 @@ app.get('/api/products/:id', async (req, res) => {
       LEFT JOIN favorites f ON p.id = f.product_id AND f.user_id = ?
       WHERE p.id = ?
     `,
-      [userId, id]
+      [userId || currentUserId, id]
     )
 
     if (!product) {
@@ -495,6 +508,32 @@ app.get('/api/products/:id', async (req, res) => {
     `,
       [id]
     )
+
+    // 如果用户已登录，获取用户对这些评论的点赞/踩状态
+    if (currentUserId && reviews.length > 0) {
+      const reviewIds = reviews.map(r => r.id)
+      const [userLikes] = await pool.query(
+        `SELECT review_id, type FROM review_likes 
+         WHERE user_id = ? AND review_id IN (?)`,
+        [currentUserId, reviewIds]
+      )
+
+      // 创建一个映射
+      const likesMap = {}
+      userLikes.forEach(like => {
+        likesMap[like.review_id] = like.type
+      })
+
+      // 为每条评论添加用户的操作状态
+      reviews.forEach(review => {
+        review.userAction = likesMap[review.id] || null
+      })
+    } else {
+      // 未登录用户，所有评论的userAction都为null
+      reviews.forEach(review => {
+        review.userAction = null
+      })
+    }
 
     const [relatedProducts] = await pool.query(
       `
@@ -2190,11 +2229,13 @@ app.post('/api/reviews', authenticateToken, async (req, res) => {
   }
 })
 
-// 评价点赞
+// 评价点赞/取消点赞
 app.post('/api/reviews/:id/like', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
+    const userId = req.user.userId
 
+    // 检查评价是否存在
     const [[review]] = await pool.query('SELECT * FROM reviews WHERE id = ?', [
       id,
     ])
@@ -2203,11 +2244,154 @@ app.post('/api/reviews/:id/like', authenticateToken, async (req, res) => {
       return sendResponse(res, 404, '评价不存在')
     }
 
-    await pool.query('UPDATE reviews SET likes = likes + 1 WHERE id = ?', [id])
+    // 检查用户是否已经对该评价有操作
+    const [[existingLike]] = await pool.query(
+      'SELECT * FROM review_likes WHERE review_id = ? AND user_id = ?',
+      [id, userId]
+    )
 
-    sendResponse(res, 200, '点赞成功')
+    let action = ''
+    let likesChange = 0
+    let dislikesChange = 0
+
+    if (existingLike) {
+      if (existingLike.type === 1) {
+        // 已经点赞，取消点赞
+        await pool.query(
+          'DELETE FROM review_likes WHERE review_id = ? AND user_id = ?',
+          [id, userId]
+        )
+        likesChange = -1
+        action = 'cancel_like'
+      } else {
+        // 已经踩，改为点赞
+        await pool.query(
+          'UPDATE review_likes SET type = 1 WHERE review_id = ? AND user_id = ?',
+          [id, userId]
+        )
+        likesChange = 1
+        dislikesChange = -1
+        action = 'like'
+      }
+    } else {
+      // 新增点赞
+      await pool.query(
+        'INSERT INTO review_likes (review_id, user_id, type) VALUES (?, ?, 1)',
+        [id, userId]
+      )
+      likesChange = 1
+      action = 'like'
+    }
+
+    // 更新评价表的统计数据
+    await pool.query(
+      'UPDATE reviews SET likes = likes + ?, dislikes = dislikes + ? WHERE id = ?',
+      [likesChange, dislikesChange, id]
+    )
+
+    // 获取更新后的数据
+    const [[updatedReview]] = await pool.query(
+      'SELECT likes, dislikes FROM reviews WHERE id = ?',
+      [id]
+    )
+
+    const message =
+      action === 'cancel_like'
+        ? '已取消点赞'
+        : action === 'like'
+          ? '点赞成功'
+          : '操作成功'
+
+    sendResponse(res, 200, message, {
+      likes: updatedReview.likes,
+      dislikes: updatedReview.dislikes,
+      userAction: action === 'cancel_like' ? null : 1, // 1=点赞, -1=踩, null=无操作
+    })
   } catch (error) {
     handleError(res, error, '点赞失败')
+  }
+})
+
+// 评价踩/取消踩
+app.post('/api/reviews/:id/dislike', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.userId
+
+    // 检查评价是否存在
+    const [[review]] = await pool.query('SELECT * FROM reviews WHERE id = ?', [
+      id,
+    ])
+
+    if (!review) {
+      return sendResponse(res, 404, '评价不存在')
+    }
+
+    // 检查用户是否已经对该评价有操作
+    const [[existingLike]] = await pool.query(
+      'SELECT * FROM review_likes WHERE review_id = ? AND user_id = ?',
+      [id, userId]
+    )
+
+    let action = ''
+    let likesChange = 0
+    let dislikesChange = 0
+
+    if (existingLike) {
+      if (existingLike.type === -1) {
+        // 已经踩，取消踩
+        await pool.query(
+          'DELETE FROM review_likes WHERE review_id = ? AND user_id = ?',
+          [id, userId]
+        )
+        dislikesChange = -1
+        action = 'cancel_dislike'
+      } else {
+        // 已经点赞，改为踩
+        await pool.query(
+          'UPDATE review_likes SET type = -1 WHERE review_id = ? AND user_id = ?',
+          [id, userId]
+        )
+        likesChange = -1
+        dislikesChange = 1
+        action = 'dislike'
+      }
+    } else {
+      // 新增踩
+      await pool.query(
+        'INSERT INTO review_likes (review_id, user_id, type) VALUES (?, ?, -1)',
+        [id, userId]
+      )
+      dislikesChange = 1
+      action = 'dislike'
+    }
+
+    // 更新评价表的统计数据
+    await pool.query(
+      'UPDATE reviews SET likes = likes + ?, dislikes = dislikes + ? WHERE id = ?',
+      [likesChange, dislikesChange, id]
+    )
+
+    // 获取更新后的数据
+    const [[updatedReview]] = await pool.query(
+      'SELECT likes, dislikes FROM reviews WHERE id = ?',
+      [id]
+    )
+
+    const message =
+      action === 'cancel_dislike'
+        ? '已取消'
+        : action === 'dislike'
+          ? '操作成功'
+          : '操作成功'
+
+    sendResponse(res, 200, message, {
+      likes: updatedReview.likes,
+      dislikes: updatedReview.dislikes,
+      userAction: action === 'cancel_dislike' ? null : -1, // 1=点赞, -1=踩, null=无操作
+    })
+  } catch (error) {
+    handleError(res, error, '操作失败')
   }
 })
 
@@ -2217,6 +2401,19 @@ app.get('/api/products/:id/reviews', async (req, res) => {
     const { id } = req.params
     const { page = 1, page_size = 20, rating_filter } = req.query
     const offset = (page - 1) * page_size
+
+    // 从请求头获取用户ID（如果已登录）
+    const token = req.headers.authorization?.split(' ')[1]
+    let currentUserId = null
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET)
+        currentUserId = decoded.userId
+      } catch (err) {
+        // Token无效或过期，继续作为未登录用户
+      }
+    }
 
     let query = `
       SELECT r.*, u.username as user_name, u.avatar as user_avatar
@@ -2235,6 +2432,32 @@ app.get('/api/products/:id/reviews', async (req, res) => {
     params.push(parseInt(page_size), offset)
 
     const [reviews] = await pool.query(query, params)
+
+    // 如果用户已登录，获取用户对这些评论的点赞/踩状态
+    if (currentUserId && reviews.length > 0) {
+      const reviewIds = reviews.map(r => r.id)
+      const [userLikes] = await pool.query(
+        `SELECT review_id, type FROM review_likes 
+         WHERE user_id = ? AND review_id IN (?)`,
+        [currentUserId, reviewIds]
+      )
+
+      // 创建一个映射
+      const likesMap = {}
+      userLikes.forEach(like => {
+        likesMap[like.review_id] = like.type
+      })
+
+      // 为每条评论添加用户的操作状态
+      reviews.forEach(review => {
+        review.userAction = likesMap[review.id] || null
+      })
+    } else {
+      // 未登录用户，所有评论的userAction都为null
+      reviews.forEach(review => {
+        review.userAction = null
+      })
+    }
 
     const [[stats]] = await pool.query(
       `

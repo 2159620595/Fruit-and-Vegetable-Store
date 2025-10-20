@@ -48,12 +48,13 @@ const router = createRouter({
       },
     },
 
-    // 购物车
+    // 购物车（需要登录）
     {
       path: '/cart',
       name: 'Cart',
       component: Cart,
       meta: {
+        requiresAuth: true,
         title: '购物车 - 果蔬商城',
       },
     },

@@ -15,11 +15,17 @@
               alt="用户头像"
               @error="handleAvatarError"
             />
-            <button class="avatar-edit-btn" @click="showAvatarDialog = true">
+            <el-button
+              circle
+              size="small"
+              type="success"
+              class="avatar-edit-btn"
+              @click="showAvatarDialog = true"
+            >
               <el-icon :size="14">
                 <Edit />
               </el-icon>
-            </button>
+            </el-button>
           </div>
           <div class="user-info">
             <h2 class="user-name">
@@ -122,7 +128,7 @@
       <div class="account-section">
         <h3 class="section-title">账户管理</h3>
         <div class="account-actions">
-          <button class="account-btn" @click="showPasswordDialog = true">
+          <el-button class="account-btn" @click="showPasswordDialog = true">
             <div class="btn-icon">
               <el-icon :size="20">
                 <Lock />
@@ -132,9 +138,9 @@
               <span class="btn-title">修改密码</span>
               <span class="btn-desc">更改登录密码</span>
             </div>
-          </button>
+          </el-button>
 
-          <button class="account-btn" @click="handleLogout">
+          <el-button class="account-btn" @click="handleLogout">
             <div class="btn-icon logout">
               <el-icon :size="20">
                 <SwitchButton />
@@ -144,7 +150,7 @@
               <span class="btn-title">退出登录</span>
               <span class="btn-desc">安全退出账户</span>
             </div>
-          </button>
+          </el-button>
         </div>
       </div>
     </div>
@@ -453,11 +459,12 @@ const handleAvatarChange = async file => {
     // 压缩图片（更小的尺寸和质量以适应数据库限制）
     const compressedBlob = await compressImage(file.raw, 200, 0.6)
 
-    // 检查压缩后的大小
+    // 检查压缩后的大小（确保不超过限制）
     const compressedSize = compressedBlob.size / 1024 / 1024
-    console.log(
-      `原始大小: ${(file.raw.size / 1024 / 1024).toFixed(2)}MB, 压缩后: ${compressedSize.toFixed(2)}MB`
-    )
+    if (compressedSize > 0.1) {
+      // 超过100KB，提示用户
+      console.warn('压缩后图片仍较大:', compressedSize.toFixed(2), 'MB')
+    }
 
     // 将 blob 转换为 File 对象
     newAvatarFile.value = new File([compressedBlob], file.raw.name, {
@@ -691,22 +698,6 @@ onMounted(async () => {
   position: absolute;
   bottom: -2px;
   right: -2px;
-  width: 24px;
-  height: 24px;
-  background-color: #67c23a;
-  border: 2px solid white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: white;
-  transition: all 0.2s;
-}
-
-.avatar-edit-btn:hover {
-  background-color: #5daf34;
-  transform: scale(1.1);
 }
 
 .user-info {
@@ -836,22 +827,9 @@ onMounted(async () => {
 }
 
 .account-btn {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
   width: 100%;
-}
-
-.account-btn:hover {
-  border-color: #67c23a;
-  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.1);
+  height: auto;
+  padding: 16px 20px;
 }
 
 .btn-icon {

@@ -12,40 +12,26 @@
           <p class="subtitle">发现新鲜美味的果蔬</p>
         </div>
         <div class="view-toggle">
-          <button
-            :class="['view-btn', { active: viewMode === 'grid' }]"
-            @click="viewMode = 'grid'"
-            title="网格视图"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="currentColor"
-              viewBox="0 0 256 256"
+          <el-button-group>
+            <el-button
+              :type="viewMode === 'grid' ? 'primary' : 'default'"
+              @click="viewMode = 'grid'"
+              title="网格视图"
             >
-              <path
-                d="M104,40H56A16,16,0,0,0,40,56v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,104,40Zm0,96H56a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,104,136Zm96-96H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,96H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,200,136Z"
-              ></path>
-            </svg>
-          </button>
-          <button
-            :class="['view-btn', { active: viewMode === 'list' }]"
-            @click="viewMode = 'list'"
-            title="列表视图"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="currentColor"
-              viewBox="0 0 256 256"
+              <el-icon>
+                <Grid />
+              </el-icon>
+            </el-button>
+            <el-button
+              :type="viewMode === 'list' ? 'primary' : 'default'"
+              @click="viewMode = 'list'"
+              title="列表视图"
             >
-              <path
-                d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"
-              ></path>
-            </svg>
-          </button>
+              <el-icon>
+                <List />
+              </el-icon>
+            </el-button>
+          </el-button-group>
         </div>
       </div>
 
@@ -66,7 +52,9 @@
           搜索 "
           <strong>{{ searchKeyword }}</strong>
           " 的结果
-          <button @click="clearSearch" class="clear-search-btn">×</button>
+          <el-button text @click="clearSearch" style="margin-left: 8px">
+            ×
+          </el-button>
         </p>
       </div>
 
@@ -89,13 +77,14 @@
               </svg>
               筛选条件
             </h2>
-            <button
+            <el-button
               v-if="hasActiveFilters"
-              class="clear-all-btn"
+              text
+              type="primary"
               @click="resetFilters"
             >
               清除全部
-            </button>
+            </el-button>
           </div>
 
           <!-- 价格区间 -->
@@ -141,15 +130,15 @@
             <div class="price-presets">
               <h4>快速选择</h4>
               <div class="preset-buttons">
-                <button
+                <el-button
                   v-for="preset in pricePresets"
                   :key="preset.label"
-                  class="preset-btn"
-                  :class="{ active: isPricePresetActive(preset) }"
+                  size="small"
+                  :type="isPricePresetActive(preset) ? 'primary' : 'default'"
                   @click="applyPricePreset(preset)"
                 >
                   {{ preset.label }}
-                </button>
+                </el-button>
               </div>
             </div>
           </div>
@@ -299,24 +288,17 @@
 
           <!-- 重置按钮 -->
           <div class="filter-actions">
-            <button
-              class="reset-btn"
+            <el-button
+              type="info"
               @click="resetFilters"
               :disabled="!hasActiveFilters"
+              style="width: 100%"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                viewBox="0 0 256 256"
-              >
-                <path
-                  d="M240,56v48a8,8,0,0,1-8,8H184a8,8,0,0,1,0-16H211.4L184.81,71.64l-.25-.24a80,80,0,1,0-1.67,114.78,8,8,0,0,1,11,11.63A95.44,95.44,0,0,1,128,224h-1.32A96,96,0,1,1,195.75,60L224,85.8V56a8,8,0,1,1,16,0Z"
-                ></path>
-              </svg>
+              <el-icon style="margin-right: 6px">
+                <RefreshLeft />
+              </el-icon>
               重置筛选
-            </button>
+            </el-button>
           </div>
         </aside>
 
@@ -492,47 +474,40 @@
                 </p>
 
                 <div class="product-actions">
-                  <button
-                    class="add-to-cart-btn"
+                  <el-button
+                    type="success"
                     @click.stop="addToCart(product)"
                     :disabled="product.stock === 0"
+                    style="flex: 1"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      viewBox="0 0 256 256"
-                    >
-                      <path
-                        d="M222.14,58.87A8,8,0,0,0,216,56H54.68L49.79,29.14A16,16,0,0,0,34.05,16H16a8,8,0,0,0,0,16h18L59.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,152,204a28,28,0,1,0,28-28H83.17a8,8,0,0,1-7.87-6.57L72.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,222.14,58.87Z"
-                      ></path>
-                    </svg>
+                    <el-icon style="margin-right: 6px">
+                      <ShoppingCart />
+                    </el-icon>
                     {{ product.stock === 0 ? '已售罄' : '加入购物车' }}
-                  </button>
+                  </el-button>
                 </div>
               </div>
             </div>
 
             <!-- 分页 -->
             <div v-if="sortedProducts.length > itemsPerPage" class="pagination">
-              <button
-                class="page-btn"
+              <el-button
+                type="primary"
                 @click="currentPage--"
                 :disabled="currentPage === 1"
               >
                 上一页
-              </button>
+              </el-button>
               <span class="page-info">
                 第 {{ currentPage }} 页 / 共 {{ totalPages }} 页
               </span>
-              <button
-                class="page-btn"
+              <el-button
+                type="primary"
                 @click="currentPage++"
                 :disabled="currentPage === totalPages"
               >
                 下一页
-              </button>
+              </el-button>
             </div>
 
             <!-- 空状态 - 只在有筛选条件时显示 -->
@@ -604,6 +579,7 @@ defineOptions({
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Grid, List, RefreshLeft, ShoppingCart } from '@element-plus/icons-vue'
 import { useProductStore } from '../stores/productStore'
 import { useCartStore } from '../stores/cartStore'
 import { useUserStore } from '../stores/userStore'
@@ -1219,26 +1195,6 @@ h1 {
   color: #2d5a27;
 }
 
-.clear-search-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #999;
-  cursor: pointer;
-  padding: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  transition: color 0.2s;
-}
-
-.clear-search-btn:hover {
-  color: #333;
-}
-
 .shop-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -1274,21 +1230,6 @@ h1 {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.clear-all-btn {
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.clear-all-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
 }
 
 .filter-group {
@@ -1415,24 +1356,6 @@ h1 {
   font-size: 14px;
   text-align: center;
   margin-top: 8px;
-}
-
-.reset-btn {
-  width: 100%;
-  padding: 10px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #666;
-  transition: all 0.2s;
-}
-
-.reset-btn:hover {
-  background: #618961;
-  color: white;
-  border-color: #618961;
 }
 
 .products-area {
@@ -1597,50 +1520,24 @@ h1 {
 }
 
 .description {
-  color: #666;
-  font-size: 13px;
-  margin: 0;
+  color: #666 !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  margin: 8px 0 !important;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
+  display: -webkit-box !important;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
   -webkit-box-orient: vertical;
-  height: 36px;
+  word-break: break-word;
+  height: auto !important;
+  min-height: 40px !important;
 }
 
 .product-actions {
   margin-top: auto;
   display: flex;
   gap: 8px;
-}
-
-.add-to-cart-btn {
-  flex: 1;
-  padding: 10px;
-  background: #618961;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.add-to-cart-btn:hover:not(:disabled) {
-  background: #2d5a27;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(97, 137, 97, 0.3);
-}
-
-.add-to-cart-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  opacity: 0.6;
 }
 
 /* 加载状态 */
@@ -1799,27 +1696,13 @@ h1 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.view-btn {
-  background: none;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #999;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.view-btn:hover {
-  background: #f5f5f5;
-  color: #618961;
-}
-
-.view-btn.active {
-  background: #618961;
-  color: white;
+/* 网格视图样式（默认） */
+.products-grid.grid .description {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: auto !important;
 }
 
 /* 列表视图样式 */
@@ -1869,21 +1752,16 @@ h1 {
 }
 
 .products-grid.list .description {
-  display: -webkit-box;
+  display: -webkit-box !important;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
-  min-height: auto;
+  -webkit-box-orient: vertical;
+  height: auto !important;
+  min-height: 40px !important;
   flex: 0;
 }
 
 .products-grid.list .product-actions {
   margin-top: 0;
-}
-
-.products-grid.list .add-to-cart-btn {
-  width: auto;
-  padding: 10px 24px;
-  align-self: flex-start;
 }
 
 /* 商品标签 */
@@ -2011,29 +1889,6 @@ h1 {
   gap: 20px;
   margin: 40px 0;
   padding: 20px;
-}
-
-.page-btn {
-  padding: 10px 20px;
-  background: #618961;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.page-btn:hover:not(:disabled) {
-  background: #2d5a27;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(97, 137, 97, 0.3);
-}
-
-.page-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  opacity: 0.6;
 }
 
 .page-info {
@@ -2254,28 +2109,6 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.preset-btn {
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.preset-btn:hover {
-  border-color: #4a6b4a;
-  color: #4a6b4a;
-}
-
-.preset-btn.active {
-  background: #4a6b4a;
-  border-color: #4a6b4a;
-  color: white;
 }
 
 /* 分类搜索样式 */

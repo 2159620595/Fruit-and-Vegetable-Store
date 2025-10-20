@@ -20,10 +20,8 @@
       <h2 class="error-title">加载失败</h2>
       <p class="error-message">{{ error }}</p>
       <div class="error-actions">
-        <button class="btn btn-primary" @click="loadProduct">重试</button>
-        <button class="btn btn-secondary" @click="router.push('/shop')">
-          返回商城
-        </button>
+        <el-button type="primary" @click="loadProduct">重试</el-button>
+        <el-button @click="router.push('/shop')">返回商城</el-button>
       </div>
     </div>
 
@@ -273,60 +271,33 @@
       <!-- Product Details Tabs (横向全宽) -->
       <div class="product-details-tabs-fullwidth">
         <div class="tabs-header">
-          <button
-            class="tab-btn"
-            :class="{ active: activeTab === 'description' }"
+          <el-button
+            :type="activeTab === 'description' ? 'primary' : 'default'"
             @click="activeTab = 'description'"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 256 256"
-            >
-              <path
-                d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM176,152H80a8,8,0,0,1,0-16h96a8,8,0,0,1,0,16Zm0-32H80a8,8,0,0,1,0-16h96a8,8,0,0,1,0,16Zm0-32H80a8,8,0,0,1,0-16h96a8,8,0,0,1,0,16Z"
-              ></path>
-            </svg>
+            <el-icon style="margin-right: 6px">
+              <Document />
+            </el-icon>
             商品描述
-          </button>
-          <button
-            class="tab-btn"
-            :class="{ active: activeTab === 'specs' }"
+          </el-button>
+          <el-button
+            :type="activeTab === 'specs' ? 'primary' : 'default'"
             @click="activeTab = 'specs'"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 256 256"
-            >
-              <path
-                d="M200,24H72A16,16,0,0,0,56,40V64H40A16,16,0,0,0,24,80v96a16,16,0,0,0,16,16H56v24a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V40A16,16,0,0,0,200,24ZM72,176H40V80H72Zm128,40H72V192h48a16,16,0,0,0,16-16V80a16,16,0,0,0-16-16H72V40H200Z"
-              ></path>
-            </svg>
+            <el-icon style="margin-right: 6px">
+              <List />
+            </el-icon>
             规格参数
-          </button>
-          <button
-            class="tab-btn"
-            :class="{ active: activeTab === 'nutrition' }"
+          </el-button>
+          <el-button
+            :type="activeTab === 'nutrition' ? 'primary' : 'default'"
             @click="activeTab = 'nutrition'"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 256 256"
-            >
-              <path
-                d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm40-68a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,148Zm0-32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,116Z"
-              ></path>
-            </svg>
+            <el-icon style="margin-right: 6px">
+              <DataAnalysis />
+            </el-icon>
             营养成分
-          </button>
+          </el-button>
         </div>
 
         <div class="tabs-content">
@@ -614,36 +585,26 @@
               <p class="review-text">{{ review.comment }}</p>
             </div>
             <div class="review-engagement">
-              <button class="engagement-btn" @click="likeReview(review.id)">
-                <svg
-                  viewBox="0 0 1024 1024"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="currentColor"
-                  class="like-icon"
-                >
-                  <path
-                    d="M885.9 533.7c16.8-22.2 26.1-49.4 26.1-77.7 0-44.9-25.1-87.4-65.5-111.1a67.67 67.67 0 0 0-34.3-9.3H572.4l6-122.9c1.4-29.7-9.1-57.9-29.5-79.4A106.62 106.62 0 0 0 471 99.9c-52 0-98 35-111.8 85.1l-85.9 311h-.3v428h472.3c9.2 0 18.2-1.8 26.5-5.4 47.6-20.3 78.3-66.8 78.3-118.4 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7-.2-12.6-2-25.1-5.6-37.1zM112 528v364c0 17.7 14.3 32 32 32h65V496h-65c-17.7 0-32 14.3-32 32z"
-                  />
-                </svg>
+              <el-button
+                :type="review.userAction === 1 ? 'warning' : ''"
+                :text="review.userAction !== 1"
+                @click="likeReview(review.id)"
+              >
+                <el-icon style="margin-right: 4px">
+                  <Star />
+                </el-icon>
                 <span class="count">{{ review.likes || 0 }}</span>
-              </button>
-              <button class="engagement-btn" @click="dislikeReview(review.id)">
-                <svg
-                  viewBox="0 0 1024 1024"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="currentColor"
-                  class="dislike-icon"
-                >
-                  <path
-                    d="M885.9 490.3c3.6-12 5.4-24.4 5.4-37 0-28.3-9.3-55.5-26.1-77.7 3.6-12 5.4-24.4 5.4-37 0-28.3-9.3-55.5-26.1-77.7 3.6-12 5.4-24.4 5.4-37 0-51.6-30.7-98.1-78.3-118.4a66.1 66.1 0 0 0-26.5-5.4H273.3c-17.7 0-32 14.3-32 32v364c0 17.7 14.3 32 32 32h.3l85.8 310.8C373.4 889 419.4 924 471.4 924c29.7 0 58.4-11.5 79.9-32.1 21.5-20.7 32.1-48.9 29.7-79.4l-6-122.9h239.9c12.1 0 23.9-3.2 34.3-9.3 40.4-23.5 65.5-66.1 65.5-111 0-28.3-9.3-55.5-26.1-77.7zM112 132v364c0 17.7 14.3 32 32 32h65V100h-65c-17.7 0-32 14.3-32 32z"
-                  />
-                </svg>
+              </el-button>
+              <el-button
+                :type="review.userAction === -1 ? 'info' : ''"
+                :text="review.userAction !== -1"
+                @click="dislikeReview(review.id)"
+              >
+                <el-icon style="margin-right: 4px">
+                  <CircleClose />
+                </el-icon>
                 <span class="count">{{ review.dislikes || 0 }}</span>
-              </button>
+              </el-button>
             </div>
           </div>
         </div>
@@ -715,9 +676,9 @@
       <h2 class="error-title">商品不存在</h2>
       <p class="error-message">该商品可能已下架或不存在</p>
       <div class="error-actions">
-        <button class="btn btn-primary" @click="router.push('/shop')">
+        <el-button type="primary" @click="router.push('/shop')">
           返回商城
-        </button>
+        </el-button>
       </div>
     </div>
 
@@ -751,6 +712,11 @@ import {
   CircleCheck,
   Apple,
   Box,
+  Document,
+  List,
+  DataAnalysis,
+  Star,
+  CircleClose,
 } from '@element-plus/icons-vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { Plus, Minus, ShoppingCart } from '@element-plus/icons-vue'
@@ -762,6 +728,10 @@ import {
   toggleFavorite as toggleFavoriteAPI,
   getFavoritesList,
 } from '@/api/favorites'
+import {
+  likeReview as likeReviewAPI,
+  dislikeReview as dislikeReviewAPI,
+} from '@/api/review'
 
 const route = useRoute()
 const router = useRouter()
@@ -1009,12 +979,54 @@ const buyNow = async () => {
 }
 
 // Review interactions
-const likeReview = () => {
-  // TODO: Implement like review API call
+const likeReview = async reviewId => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录后再点赞')
+    router.push('/login')
+    return
+  }
+
+  try {
+    const response = await likeReviewAPI(reviewId)
+
+    // 更新本地评论数据
+    const review = reviews.value.find(r => r.id === reviewId)
+    if (review && response.data && response.data.data) {
+      review.likes = response.data.data.likes
+      review.dislikes = response.data.data.dislikes
+      review.userAction = response.data.data.userAction
+    }
+
+    ElMessage.success(response.data.message || '操作成功')
+  } catch (error) {
+    console.error('点赞失败:', error)
+    ElMessage.error(error.response?.data?.message || '点赞失败')
+  }
 }
 
-const dislikeReview = () => {
-  // TODO: Implement dislike review API call
+const dislikeReview = async reviewId => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+
+  try {
+    const response = await dislikeReviewAPI(reviewId)
+
+    // 更新本地评论数据
+    const review = reviews.value.find(r => r.id === reviewId)
+    if (review && response.data && response.data.data) {
+      review.likes = response.data.data.likes
+      review.dislikes = response.data.data.dislikes
+      review.userAction = response.data.data.userAction
+    }
+
+    ElMessage.success(response.data.message || '操作成功')
+  } catch (error) {
+    console.error('操作失败:', error)
+    ElMessage.error(error.response?.data?.message || '操作失败')
+  }
 }
 
 // Load reviews - 已经从API一起返回，不需要单独加载

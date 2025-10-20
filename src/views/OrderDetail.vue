@@ -15,10 +15,8 @@
       <h2 class="error-title">加载失败</h2>
       <p class="error-message">{{ error }}</p>
       <div class="error-actions">
-        <button class="btn btn-primary" @click="loadOrderDetail">重试</button>
-        <button class="btn btn-secondary" @click="router.push('/orders')">
-          返回订单列表
-        </button>
+        <el-button type="primary" @click="loadOrderDetail">重试</el-button>
+        <el-button @click="router.push('/orders')">返回订单列表</el-button>
       </div>
     </div>
 
@@ -50,45 +48,45 @@
           </div>
         </div>
         <div class="order-actions">
-          <button
+          <el-button
             v-if="orderStatusInfo?.canPay"
-            class="btn btn-primary"
+            type="primary"
             @click="handlePayOrder"
           >
             立即支付
-          </button>
-          <button
+          </el-button>
+          <el-button
             v-if="order.status === 'delivered'"
-            class="btn btn-secondary"
+            type="success"
             @click="handleReview"
           >
             评价订单
-          </button>
-          <button
+          </el-button>
+          <el-button
             v-if="
               ['processing', 'shipped', 'in_transit', 'delivered'].includes(
                 order.status
               )
             "
-            class="btn btn-outline"
+            plain
             @click="handleTrackOrder"
           >
             查看物流
-          </button>
-          <button
+          </el-button>
+          <el-button
             v-if="order.status === 'delivered'"
-            class="btn btn-outline"
+            plain
             @click="handleBuyAgain"
           >
             再次购买
-          </button>
-          <button
+          </el-button>
+          <el-button
             v-if="orderStatusInfo?.canCancel"
-            class="btn btn-danger"
+            type="danger"
             @click="handleCancelOrder"
           >
             取消订单
-          </button>
+          </el-button>
         </div>
       </div>
 
@@ -1891,71 +1889,6 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.btn {
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-  min-width: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.btn .el-icon {
-  font-size: 16px;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background-color: #618961;
-  color: #ffffff;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #4a6d4a;
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: #ffffff;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #5a6268;
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background-color: #ffffff;
-  color: #618961;
-  border: 2px solid #618961;
-}
-
-.btn-outline:hover:not(:disabled) {
-  background-color: #f0f8f0;
-  transform: translateY(-1px);
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: #ffffff;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background-color: #c82333;
-  transform: translateY(-1px);
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
@@ -1998,7 +1931,7 @@ onMounted(() => {
     align-items: stretch;
   }
 
-  .btn {
+  .order-actions .el-button {
     width: 100%;
   }
 }

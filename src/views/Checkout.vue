@@ -16,9 +16,9 @@
         </div>
         <h2>没有要结账的商品</h2>
         <p>请先在购物车中选择要购买的商品</p>
-        <button class="back-to-cart-btn" @click="router.push('/cart')">
+        <el-button type="primary" @click="router.push('/cart')">
           返回购物车
-        </button>
+        </el-button>
       </div>
 
       <!-- Main Content -->
@@ -146,13 +146,16 @@
           </div>
 
           <!-- Submit Button -->
-          <button
-            class="submit-btn"
+          <el-button
+            type="success"
+            size="large"
             @click="submitOrder"
             :disabled="submitting"
+            :loading="submitting"
+            style="width: 100%"
           >
             {{ submitting ? '提交中...' : '提交订单' }}
-          </button>
+          </el-button>
         </div>
 
         <!-- Right Section - Order Summary -->
@@ -683,22 +686,6 @@ const formatPrice = price => {
   margin-bottom: 32px;
 }
 
-.back-to-cart-btn {
-  padding: 12px 32px;
-  background-color: #2d5a27;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.back-to-cart-btn:hover {
-  background-color: #1e3d1a;
-}
-
 /* Main Content */
 .main-content {
   padding: 24px 0;
@@ -902,33 +889,6 @@ const formatPrice = price => {
 
 :deep(.el-select-dropdown__item:hover) {
   background-color: #f8f9fa;
-}
-
-/* Submit Button */
-.submit-btn {
-  width: 100%;
-  padding: 16px;
-  background-color: #2d5a27;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 16px;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background-color: #1e3d1a;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(45, 90, 39, 0.2);
-}
-
-.submit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background-color: #999999;
 }
 
 /* Right Section - Order Summary */

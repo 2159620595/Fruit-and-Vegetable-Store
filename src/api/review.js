@@ -31,6 +31,16 @@ export const likeReview = id => {
 }
 
 /**
+ * 评价踩
+ * POST /api/reviews/{id}/dislike
+ * @param {number} id - 评价ID
+ * @returns {Promise}
+ */
+export const dislikeReview = id => {
+  return request.post(`/reviews/${id}/dislike`)
+}
+
+/**
  * 获取商品评价列表
  * GET /api/products/{id}/reviews
  * @param {number} productId - 商品ID

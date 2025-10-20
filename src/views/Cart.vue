@@ -10,16 +10,23 @@
           <div class="page-title">
             <p>您的购物车</p>
             <div class="batch-actions" v-if="cartItems.length > 0">
-              <button
-                class="batch-btn"
+              <el-button
+                type="danger"
+                plain
                 @click="handleBatchDelete"
                 :disabled="!cartStore.hasSelected"
+                :icon="Delete"
               >
                 删除选中
-              </button>
-              <button class="batch-btn" @click="handleClearCart">
+              </el-button>
+              <el-button
+                type="warning"
+                plain
+                @click="handleClearCart"
+                :icon="Delete"
+              >
                 清空购物车
-              </button>
+              </el-button>
             </div>
           </div>
 
@@ -31,7 +38,7 @@
           <!-- 错误提示 -->
           <div v-else-if="cartStore.error" class="error-state">
             <p>{{ cartStore.error }}</p>
-            <button @click="reloadCart" class="reload-btn">重新加载</button>
+            <el-button type="primary" @click="reloadCart">重新加载</el-button>
           </div>
 
           <!-- 购物车表格 -->
@@ -129,52 +136,58 @@
           </div>
 
           <!-- 订单汇总 -->
-          <div v-if="cartItems.length > 0">
-            <h3 class="summary-title">订单汇总</h3>
-            <div class="summary-content">
-              <div class="summary-row">
-                <p class="summary-label">
-                  小计 ({{ cartStore.selectedCount }} 件已选商品)
-                </p>
-                <p class="summary-value">{{ orderSummary.subtotal }}</p>
-              </div>
-              <div class="summary-row">
-                <p class="summary-label">运费</p>
-                <div class="shipping-info">
-                  <p class="summary-value">{{ orderSummary.shipping }}</p>
-                  <p v-if="orderSummary.shippingTip" class="shipping-tip">
-                    {{ orderSummary.shippingTip }}
+          <div v-if="cartItems.length > 0" class="summary-wrapper">
+            <el-card class="summary-card" shadow="hover">
+              <template #header>
+                <div class="summary-header">
+                  <span class="summary-title">订单汇总</span>
+                </div>
+              </template>
+              <div class="summary-content">
+                <div class="summary-row">
+                  <p class="summary-label">
+                    小计 ({{ cartStore.selectedCount }} 件已选商品)
+                  </p>
+                  <p class="summary-value">{{ orderSummary.subtotal }}</p>
+                </div>
+                <div class="summary-row">
+                  <p class="summary-label">运费</p>
+                  <div class="shipping-info">
+                    <p class="summary-value">{{ orderSummary.shipping }}</p>
+                    <p v-if="orderSummary.shippingTip" class="shipping-tip">
+                      {{ orderSummary.shippingTip }}
+                    </p>
+                  </div>
+                </div>
+                <el-divider />
+                <div class="summary-row total-row">
+                  <p class="summary-label">总计</p>
+                  <p class="summary-value total-value">
+                    {{ orderSummary.total }}
                   </p>
                 </div>
               </div>
-              <div class="summary-row total-row">
-                <p class="summary-label">总计</p>
-                <p class="summary-value total-value">
-                  {{ orderSummary.total }}
-                </p>
-              </div>
-            </div>
+            </el-card>
 
             <!-- 按钮组 -->
             <div class="action-buttons">
-              <div class="button-container">
-                <el-button
-                  @click="continueShopping"
-                  :icon="Back"
-                  class="continue-btn"
-                >
-                  继续购物
-                </el-button>
-                <el-button
-                  type="success"
-                  @click="checkout"
-                  :disabled="!cartStore.hasSelected"
-                  :icon="ShoppingCart"
-                  class="checkout-btn"
-                >
-                  结账 ({{ cartStore.selectedCount }})
-                </el-button>
-              </div>
+              <el-button
+                @click="continueShopping"
+                :icon="Back"
+                size="large"
+                plain
+              >
+                继续购物
+              </el-button>
+              <el-button
+                type="success"
+                @click="checkout"
+                :disabled="!cartStore.hasSelected"
+                :icon="ShoppingCart"
+                size="large"
+              >
+                结账 ({{ cartStore.selectedCount }})
+              </el-button>
             </div>
           </div>
         </div>
@@ -539,28 +552,6 @@ const reloadCart = async () => {
   gap: 8px;
 }
 
-.batch-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: 1px solid #dbe6db;
-  background-color: #f0f4f0;
-  color: #111811;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.batch-btn:hover:not(:disabled) {
-  background-color: #e5ebe5;
-  border-color: #c8d8c8;
-}
-
-.batch-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 /* 加载和错误状态 */
 .loading-state,
 .error-state {
@@ -577,21 +568,6 @@ const reloadCart = async () => {
   color: #dc3545;
   font-size: 16px;
   margin-bottom: 16px;
-}
-
-.reload-btn {
-  padding: 8px 24px;
-  border-radius: 6px;
-  border: none;
-  background-color: #11d411;
-  color: #111811;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.reload-btn:hover {
-  background-color: #0ec50e;
 }
 
 /* 购物车表格 */
@@ -795,17 +771,30 @@ const reloadCart = async () => {
 }
 
 /* 订单汇总 */
+.summary-wrapper {
+  margin-top: 24px;
+}
+
+.summary-card {
+  border-radius: 12px;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .summary-title {
   color: #111811;
   font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.015em;
-  padding: 16px 16px 8px;
 }
 
 .summary-content {
-  padding: 16px;
+  padding: 0;
 }
 
 .summary-row {
@@ -856,76 +845,31 @@ const reloadCart = async () => {
 }
 
 .total-row {
-  border-top: 1px solid #dbe6db;
-  padding-top: 12px;
+  padding-top: 16px;
   margin-top: 8px;
 }
 
 .total-row .summary-label {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #111811;
 }
 
 .total-row .total-value {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
-  color: #11d411;
+  color: #67c23a;
 }
 
 /* 按钮组 */
 .action-buttons {
   display: flex;
-  justify-content: stretch;
-}
-
-.button-container {
-  display: flex;
-  flex: 1;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding: 16px;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-}
-
-.continue-btn {
-  min-width: 120px;
-  height: 44px;
-  font-size: 15px;
-  font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-}
-
-.continue-btn .el-icon {
-  font-size: 18px;
-}
-
-.checkout-btn {
-  min-width: 200px;
-  height: 44px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
-  transition: all 0.3s ease;
-}
-
-.checkout-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.4);
-}
-
-.checkout-btn .el-icon {
-  font-size: 18px;
-}
-
-.checkout-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  gap: 16px;
+  padding: 20px 16px;
+  margin-top: 20px;
+  border-top: 2px solid #f0f0f0;
 }
 
 /* 面包屑导航样式 */
@@ -989,14 +933,13 @@ const reloadCart = async () => {
     min-width: 600px;
   }
 
-  .button-container {
+  .action-buttons {
     flex-direction: column;
+    gap: 12px;
   }
 
-  .continue-btn,
-  .checkout-btn {
+  .action-buttons .el-button {
     width: 100%;
-    max-width: 100%;
   }
 }
 

@@ -309,7 +309,7 @@ defineOptions({
   name: 'BreadcrumbComponent',
 })
 
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
@@ -364,6 +364,13 @@ onMounted(() => {
   }
   // 获取收藏数量
   loadFavoritesCount()
+  // 添加点击外部关闭用户菜单的事件监听
+  document.addEventListener('click', handleClickOutside)
+})
+
+// 组件卸载时移除事件监听
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 
 // 返回上一页
@@ -422,6 +429,14 @@ const handleBlur = () => {
 // 切换用户菜单
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
+}
+
+// 点击外部关闭用户菜单
+const handleClickOutside = event => {
+  const userMenuContainer = document.querySelector('.user-menu-container')
+  if (userMenuContainer && !userMenuContainer.contains(event.target)) {
+    showUserMenu.value = false
+  }
 }
 
 // 去登录页
