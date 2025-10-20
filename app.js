@@ -2865,39 +2865,240 @@ app.post('/api/recharge/confirm', authenticateToken, async (req, res) => {
 app.get('/api/recharge/records', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId
-    const { page = 1, limit = 10 } = req.query
+    const {
+      page = 1,
+      limit = 10,
+      status, // 筛选状态: success, pending, failed
+      start_date, // 开始日期
+      end_date, // 结束日期
+      sort = 'desc', // 排序: desc, asc
+    } = req.query
+
     const offset = (page - 1) * limit
 
+    // 构建WHERE条件
+    let whereClause = 'WHERE user_id = ?'
+    const params = [userId]
+
+    // 状态筛选
+    if (status) {
+      whereClause += ' AND payment_status = ?'
+      params.push(status)
+    }
+
+    // 日期范围筛选
+    if (start_date) {
+      whereClause += ' AND created_at >= ?'
+      params.push(start_date)
+    }
+    if (end_date) {
+      whereClause += ' AND created_at <= ?'
+      params.push(end_date)
+    }
+
+    // 排序方向
+    const orderDirection = sort.toLowerCase() === 'asc' ? 'ASC' : 'DESC'
+
+    // 查询记录
     const [rows] = await pool.query(
       `
       SELECT id, amount, bonus_amount, total_amount, payment_method, 
              payment_status, transaction_id, created_at, updated_at
       FROM recharge_records 
-      WHERE user_id = ? 
-      ORDER BY created_at DESC 
+      ${whereClause}
+      ORDER BY created_at ${orderDirection}
       LIMIT ? OFFSET ?
     `,
-      [userId, parseInt(limit), offset]
+      [...params, parseInt(limit), offset]
     )
 
+    // 查询总数
     const [countResult] = await pool.query(
       `
-      SELECT COUNT(*) as total FROM recharge_records WHERE user_id = ?
+      SELECT COUNT(*) as total FROM recharge_records ${whereClause}
+    `,
+      params
+    )
+
+    // 查询统计信息
+    const [statsResult] = await pool.query(
+      `
+      SELECT 
+        COUNT(*) as total_count,
+        SUM(CASE WHEN payment_status = 'success' THEN total_amount ELSE 0 END) as total_recharged,
+        SUM(CASE WHEN payment_status = 'success' THEN bonus_amount ELSE 0 END) as total_bonus,
+        SUM(CASE WHEN payment_status = 'success' THEN 1 ELSE 0 END) as success_count,
+        SUM(CASE WHEN payment_status = 'pending' THEN 1 ELSE 0 END) as pending_count,
+        SUM(CASE WHEN payment_status = 'failed' THEN 1 ELSE 0 END) as failed_count
+      FROM recharge_records 
+      WHERE user_id = ?
     `,
       [userId]
     )
 
+    const stats = statsResult[0]
+
     sendResponse(res, 200, '获取成功', {
       records: rows,
+      total: countResult[0].total,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
         total: countResult[0].total,
         pages: Math.ceil(countResult[0].total / limit),
       },
+      statistics: {
+        total_count: stats.total_count || 0,
+        total_recharged: parseFloat(stats.total_recharged) || 0,
+        total_bonus: parseFloat(stats.total_bonus) || 0,
+        success_count: stats.success_count || 0,
+        pending_count: stats.pending_count || 0,
+        failed_count: stats.failed_count || 0,
+      },
     })
   } catch (error) {
     handleError(res, error, '获取充值记录失败')
+  }
+})
+
+// 获取单个充值记录详情
+app.get('/api/recharge/records/:id', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId
+    const { id } = req.params
+
+    const [[record]] = await pool.query(
+      `
+      SELECT 
+        r.id,
+        r.user_id,
+        r.amount,
+        r.bonus_amount,
+        r.total_amount,
+        r.payment_method,
+        r.payment_status,
+        r.transaction_id,
+        r.created_at,
+        r.updated_at,
+        u.username,
+        u.balance as current_balance
+      FROM recharge_records r
+      LEFT JOIN users u ON r.user_id = u.id
+      WHERE r.id = ? AND r.user_id = ?
+    `,
+      [id, userId]
+    )
+
+    if (!record) {
+      return sendResponse(res, 404, '充值记录不存在')
+    }
+
+    // 如果是成功的充值，查找对应的余额变动记录
+    if (record.payment_status === 'success') {
+      const [[transaction]] = await pool.query(
+        `
+        SELECT id, amount, balance_before, balance_after, description, created_at
+        FROM balance_transactions
+        WHERE user_id = ? AND related_id = ? AND transaction_type = 'recharge'
+        ORDER BY created_at DESC
+        LIMIT 1
+      `,
+        [userId, id]
+      )
+
+      if (transaction) {
+        record.balance_transaction = transaction
+      }
+    }
+
+    sendResponse(res, 200, '获取成功', record)
+  } catch (error) {
+    handleError(res, error, '获取充值记录详情失败')
+  }
+})
+
+// 获取充值统计汇总
+app.get('/api/recharge/summary', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId
+    const { period = 'all' } = req.query // all, today, week, month, year
+
+    let dateCondition = ''
+    if (period === 'today') {
+      dateCondition = 'AND DATE(created_at) = CURDATE()'
+    } else if (period === 'week') {
+      dateCondition = 'AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)'
+    } else if (period === 'month') {
+      dateCondition = 'AND created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)'
+    } else if (period === 'year') {
+      dateCondition = 'AND created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)'
+    }
+
+    const [[summary]] = await pool.query(
+      `
+      SELECT 
+        COUNT(*) as total_records,
+        SUM(CASE WHEN payment_status = 'success' THEN 1 ELSE 0 END) as success_count,
+        SUM(CASE WHEN payment_status = 'pending' THEN 1 ELSE 0 END) as pending_count,
+        SUM(CASE WHEN payment_status = 'failed' THEN 1 ELSE 0 END) as failed_count,
+        SUM(CASE WHEN payment_status = 'success' THEN amount ELSE 0 END) as total_amount,
+        SUM(CASE WHEN payment_status = 'success' THEN bonus_amount ELSE 0 END) as total_bonus,
+        SUM(CASE WHEN payment_status = 'success' THEN total_amount ELSE 0 END) as total_received,
+        MAX(CASE WHEN payment_status = 'success' THEN total_amount ELSE 0 END) as max_recharge,
+        MIN(CASE WHEN payment_status = 'success' AND total_amount > 0 THEN total_amount ELSE NULL END) as min_recharge,
+        AVG(CASE WHEN payment_status = 'success' AND total_amount > 0 THEN total_amount ELSE NULL END) as avg_recharge
+      FROM recharge_records
+      WHERE user_id = ? ${dateCondition}
+    `,
+      [userId]
+    )
+
+    // 获取支付方式分布
+    const [paymentMethodStats] = await pool.query(
+      `
+      SELECT 
+        payment_method,
+        COUNT(*) as count,
+        SUM(CASE WHEN payment_status = 'success' THEN total_amount ELSE 0 END) as total_amount
+      FROM recharge_records
+      WHERE user_id = ? AND payment_status = 'success' ${dateCondition}
+      GROUP BY payment_method
+      ORDER BY total_amount DESC
+    `,
+      [userId]
+    )
+
+    // 获取最近的充值记录
+    const [recentRecords] = await pool.query(
+      `
+      SELECT id, amount, bonus_amount, total_amount, payment_method, payment_status, created_at
+      FROM recharge_records
+      WHERE user_id = ? ${dateCondition}
+      ORDER BY created_at DESC
+      LIMIT 5
+    `,
+      [userId]
+    )
+
+    sendResponse(res, 200, '获取成功', {
+      period,
+      summary: {
+        total_records: summary.total_records || 0,
+        success_count: summary.success_count || 0,
+        pending_count: summary.pending_count || 0,
+        failed_count: summary.failed_count || 0,
+        total_amount: parseFloat(summary.total_amount) || 0,
+        total_bonus: parseFloat(summary.total_bonus) || 0,
+        total_received: parseFloat(summary.total_received) || 0,
+        max_recharge: parseFloat(summary.max_recharge) || 0,
+        min_recharge: parseFloat(summary.min_recharge) || 0,
+        avg_recharge: parseFloat(summary.avg_recharge) || 0,
+      },
+      payment_methods: paymentMethodStats,
+      recent_records: recentRecords,
+    })
+  } catch (error) {
+    handleError(res, error, '获取充值统计失败')
   }
 })
 
@@ -3261,7 +3462,15 @@ app.listen(PORT, () => {
   console.log('  GET    /api/recharge/amounts           - 🆕 获取充值金额配置')
   console.log('  POST   /api/recharge/create            - 🆕 创建充值订单')
   console.log('  POST   /api/recharge/confirm           - 🆕 确认充值支付')
-  console.log('  GET    /api/recharge/records           - 🆕 获取充值记录')
+  console.log(
+    '  GET    /api/recharge/records           - 🆕 获取充值记录列表（支持筛选、排序、分页）'
+  )
+  console.log(
+    '  GET    /api/recharge/records/:id       - 🆕 获取单个充值记录详情'
+  )
+  console.log(
+    '  GET    /api/recharge/summary           - 🆕 获取充值统计汇总（支持时间段筛选）'
+  )
   console.log('  GET    /api/recharge/transactions      - 🆕 获取余额变动记录')
   console.log('  GET    /api/recharge/balance           - 🆕 获取用户余额信息')
   console.log('  GET    /api/recharge/membership-levels - 🆕 获取会员等级信息')

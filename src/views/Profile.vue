@@ -148,6 +148,23 @@
               </el-icon>
             </div>
           </div>
+
+          <div class="action-card" @click="showRechargeHistoryDialog = true">
+            <div class="action-icon">
+              <el-icon :size="24">
+                <Document />
+              </el-icon>
+            </div>
+            <div class="action-content">
+              <h4 class="action-title">充值记录</h4>
+              <p class="action-desc">查看充值历史订单</p>
+            </div>
+            <div class="action-arrow">
+              <el-icon :size="16">
+                <ArrowRight />
+              </el-icon>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -532,22 +549,37 @@
           <div class="preview-content">
             <div class="preview-item">
               <span class="preview-label">充值后余额：</span>
-              <span class="preview-value">
-                ¥{{ formatBalance(userBalance + selectedAmount) }}
+              <span class="preview-value highlight">
+                ¥{{ formatBalance(userBalance + getTotalRechargeAmount()) }}
               </span>
             </div>
             <div class="preview-item">
-              <span class="preview-label">会员等级：</span>
-              <span class="preview-value">
+              <span class="preview-label">当前等级：</span>
+              <span class="preview-value" :class="getMembershipClass()">
+                {{ userLevel }}
+              </span>
+            </div>
+            <div class="preview-item">
+              <span class="preview-label">充值后等级：</span>
+              <span class="preview-value" :class="getNewLevelClass()">
                 {{ getNewLevelAfterRecharge() }}
               </span>
             </div>
             <div
               v-if="getNewLevelAfterRecharge() !== userLevel"
-              class="upgrade-notice"
+              class="upgrade-notice success"
             >
               <el-icon><Trophy /></el-icon>
-              <span>恭喜！充值后将升级为 {{ getNewLevelAfterRecharge() }}</span>
+              <span>
+                恭喜！充值后将从
+                <strong>{{ userLevel }}</strong>
+                升级为
+                <strong>{{ getNewLevelAfterRecharge() }}</strong>
+              </span>
+            </div>
+            <div v-else class="upgrade-notice info">
+              <el-icon><Star /></el-icon>
+              <span>保持当前等级 {{ userLevel }}</span>
             </div>
           </div>
         </div>
@@ -586,6 +618,279 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 充值记录对话框 -->
+    <el-dialog
+      v-model="showRechargeHistoryDialog"
+      title="充值记录"
+      width="900px"
+      class="recharge-history-dialog"
+    >
+      <div class="recharge-history-content">
+        <!-- 筛选器 -->
+        <div class="history-filters">
+          <el-select
+            v-model="recordsFilter.status"
+            placeholder="全部状态"
+            clearable
+            size="default"
+            style="width: 150px"
+            @change="fetchRechargeHistory"
+          >
+            <el-option label="全部状态" value="" />
+            <el-option label="成功" value="success" />
+            <el-option label="处理中" value="pending" />
+            <el-option label="失败" value="failed" />
+          </el-select>
+
+          <el-date-picker
+            v-model="recordsFilter.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            size="default"
+            style="width: 280px"
+            @change="handleDateChange"
+          />
+
+          <el-button
+            :icon="Search"
+            type="primary"
+            @click="fetchRechargeHistory"
+          >
+            查询
+          </el-button>
+
+          <el-button :icon="Refresh" @click="resetFilters">重置</el-button>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="history-stats">
+          <div class="stat-card">
+            <div class="stat-label">累计充值</div>
+            <div class="stat-value">
+              ¥{{ formatBalance(recordsStatistics.total_recharged || 0) }}
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">成功次数</div>
+            <div class="stat-value">
+              {{ recordsStatistics.success_count || 0 }}
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">赠送金额</div>
+            <div class="stat-value bonus">
+              ¥{{ formatBalance(recordsStatistics.total_bonus || 0) }}
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">当前会员</div>
+            <div class="stat-value" :class="getMembershipClass()">
+              {{ userLevel }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 充值记录列表 -->
+        <div class="records-list">
+          <div v-if="loadingRecords" class="loading-state">
+            <el-icon class="is-loading"><Loading /></el-icon>
+            <span>加载中...</span>
+          </div>
+
+          <div v-else-if="rechargeRecords.length === 0" class="empty-state">
+            <el-icon :size="60" color="#909399"><Document /></el-icon>
+            <p>暂无充值记录</p>
+          </div>
+
+          <div v-else class="records-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>充值时间</th>
+                  <th>充值金额</th>
+                  <th>赠送金额</th>
+                  <th>实到金额</th>
+                  <th>支付方式</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="record in rechargeRecords"
+                  :key="record.id"
+                  class="record-row"
+                >
+                  <td>{{ formatDateTime(record.created_at) }}</td>
+                  <td class="amount-cell">
+                    <span class="amount-value">
+                      ¥{{ formatBalance(record.amount) }}
+                    </span>
+                  </td>
+                  <td class="bonus-cell">
+                    <span v-if="record.bonus_amount > 0" class="bonus-value">
+                      +¥{{ formatBalance(record.bonus_amount) }}
+                    </span>
+                    <span v-else class="no-bonus">-</span>
+                  </td>
+                  <td class="total-cell">
+                    <span class="total-value">
+                      ¥{{ formatBalance(record.total_amount) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="payment-method">
+                      {{ getPaymentMethodName(record.payment_method) }}
+                    </span>
+                  </td>
+                  <td>
+                    <el-tag
+                      :type="getStatusType(record.payment_status)"
+                      size="small"
+                    >
+                      {{ getStatusText(record.payment_status) }}
+                    </el-tag>
+                  </td>
+                  <td>
+                    <el-button
+                      size="small"
+                      type="primary"
+                      link
+                      @click="viewRecordDetail(record)"
+                    >
+                      详情
+                    </el-button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 分页 -->
+        <div v-if="rechargeRecords.length > 0" class="pagination">
+          <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :total="totalRecords"
+            :page-sizes="[10, 20, 50]"
+            layout="total, sizes, prev, pager, next, jumper"
+            @current-change="fetchRechargeHistory"
+            @size-change="fetchRechargeHistory"
+          />
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showRechargeHistoryDialog = false">关闭</el-button>
+          <el-button
+            type="primary"
+            @click="
+              ((showRechargeDialog = true), (showRechargeHistoryDialog = false))
+            "
+          >
+            去充值
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 充值记录详情对话框 -->
+    <el-dialog
+      v-model="showRecordDetailDialog"
+      title="充值详情"
+      width="600px"
+      class="record-detail-dialog"
+    >
+      <div v-if="selectedRecord" class="record-detail-content">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="订单号">
+            {{ selectedRecord.id }}
+          </el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag
+              :type="getStatusType(selectedRecord.payment_status)"
+              size="small"
+            >
+              {{ getStatusText(selectedRecord.payment_status) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="充值金额">
+            <span class="amount-highlight">
+              ¥{{ formatBalance(selectedRecord.amount) }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="赠送金额">
+            <span class="bonus-highlight">
+              +¥{{ formatBalance(selectedRecord.bonus_amount || 0) }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="实到金额">
+            <span class="total-highlight">
+              ¥{{ formatBalance(selectedRecord.total_amount) }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="支付方式">
+            {{ getPaymentMethodName(selectedRecord.payment_method) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="交易流水号" :span="2">
+            {{ selectedRecord.transaction_id || '暂无' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="创建时间" :span="2">
+            {{ formatDateTime(selectedRecord.created_at) }}
+          </el-descriptions-item>
+          <el-descriptions-item
+            v-if="selectedRecord.updated_at !== selectedRecord.created_at"
+            label="更新时间"
+            :span="2"
+          >
+            {{ formatDateTime(selectedRecord.updated_at) }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <!-- 余额变动信息（如果有） -->
+        <div
+          v-if="
+            selectedRecord.balance_transaction &&
+            selectedRecord.payment_status === 'success'
+          "
+          class="balance-change-info"
+        >
+          <el-divider content-position="left">余额变动</el-divider>
+          <div class="balance-flow">
+            <div class="balance-item">
+              <span class="label">变动前:</span>
+              <span class="value">
+                ¥{{
+                  formatBalance(
+                    selectedRecord.balance_transaction.balance_before
+                  )
+                }}
+              </span>
+            </div>
+            <div class="arrow">→</div>
+            <div class="balance-item">
+              <span class="label">变动后:</span>
+              <span class="value success">
+                ¥{{
+                  formatBalance(
+                    selectedRecord.balance_transaction.balance_after
+                  )
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <el-button @click="showRecordDetailDialog = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -611,6 +916,9 @@ import {
   CreditCard,
   Wallet,
   Money,
+  Loading,
+  Search,
+  Refresh,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '../stores/userStore'
 import Breadcrumb from '../components/Breadcrumb.vue'
@@ -629,14 +937,41 @@ const showAvatarPreview = ref(false)
 const showPasswordDialog = ref(false)
 const showMembershipDialog = ref(false)
 const showRechargeDialog = ref(false)
+const showRechargeHistoryDialog = ref(false)
 const uploading = ref(false)
 const changingPassword = ref(false)
 const recharging = ref(false)
+const loadingRecords = ref(false)
 
 // 充值相关数据
 const selectedAmount = ref(0)
 const customAmount = ref('')
 const selectedPayment = ref('')
+
+// 充值记录相关
+const rechargeRecords = ref([])
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalRecords = ref(0)
+const recordsStatistics = ref({
+  total_recharged: 0,
+  total_bonus: 0,
+  success_count: 0,
+  pending_count: 0,
+  failed_count: 0,
+})
+
+// 充值记录筛选
+const recordsFilter = ref({
+  status: '',
+  dateRange: null,
+  start_date: null,
+  end_date: null,
+})
+
+// 充值记录详情
+const showRecordDetailDialog = ref(false)
+const selectedRecord = ref(null)
 
 // 充值金额选项
 const rechargeAmounts = ref([
@@ -1052,17 +1387,50 @@ const handleCustomAmountInput = value => {
   }
 }
 
+// 获取充值总金额（包含赠送金额）
+const getTotalRechargeAmount = () => {
+  const baseAmount = selectedAmount.value
+  // 查找对应的赠送金额
+  const amountConfig = rechargeAmounts.value.find(a => a.value === baseAmount)
+  const bonusAmount = amountConfig?.bonus || 0
+  return baseAmount + bonusAmount
+}
+
 // 获取充值后的新等级
 const getNewLevelAfterRecharge = () => {
+  // 获取当前累计充值金额（从多个可能的来源）
   const totalRecharge =
-    userStore.totalRecharge || userStore.user?.total_recharge || 0
-  const currentRecharge = parseFloat(totalRecharge) || 0
-  const newTotal = currentRecharge + selectedAmount.value
+    parseFloat(userStore.totalRecharge) ||
+    parseFloat(userStore.user?.total_recharge) ||
+    0
+
+  console.log('当前累计充值:', totalRecharge)
+  console.log('本次充值金额:', selectedAmount.value)
+
+  // 累计充值需要加上本次充值金额（不包括赠送）
+  const newTotal = totalRecharge + selectedAmount.value
+
+  console.log('充值后累计充值:', newTotal)
 
   if (newTotal >= 5000) return '钻石会员'
   if (newTotal >= 2000) return '黄金会员'
   if (newTotal >= 500) return '白银会员'
   return '普通会员'
+}
+
+// 获取新等级的样式类
+const getNewLevelClass = () => {
+  const newLevel = getNewLevelAfterRecharge()
+  switch (newLevel) {
+    case '钻石会员':
+      return 'diamond'
+    case '黄金会员':
+      return 'gold'
+    case '白银会员':
+      return 'silver'
+    default:
+      return 'bronze'
+  }
 }
 
 // 处理充值
@@ -1148,6 +1516,115 @@ const handleRecharge = async () => {
   }
 }
 
+// 获取充值记录
+const fetchRechargeHistory = async () => {
+  try {
+    loadingRecords.value = true
+    const params = {
+      page: currentPage.value,
+      limit: pageSize.value,
+      status: recordsFilter.value.status || null,
+      start_date: recordsFilter.value.start_date || null,
+      end_date: recordsFilter.value.end_date || null,
+    }
+
+    const result = await userStore.fetchRechargeRecords(params)
+    if (result) {
+      rechargeRecords.value = result.records || []
+      totalRecords.value = result.total || 0
+      if (result.statistics) {
+        recordsStatistics.value = result.statistics
+      }
+    }
+  } catch (error) {
+    console.error('获取充值记录失败:', error)
+    ElMessage.error('获取充值记录失败')
+  } finally {
+    loadingRecords.value = false
+  }
+}
+
+// 处理日期范围变化
+const handleDateChange = value => {
+  if (value && value.length === 2) {
+    recordsFilter.value.start_date = value[0].toISOString().split('T')[0]
+    recordsFilter.value.end_date = value[1].toISOString().split('T')[0]
+  } else {
+    recordsFilter.value.start_date = null
+    recordsFilter.value.end_date = null
+  }
+}
+
+// 重置筛选器
+const resetFilters = () => {
+  recordsFilter.value = {
+    status: '',
+    dateRange: null,
+    start_date: null,
+    end_date: null,
+  }
+  currentPage.value = 1
+  fetchRechargeHistory()
+}
+
+// 查看充值记录详情
+const viewRecordDetail = async record => {
+  try {
+    const detail = await userStore.fetchRechargeRecordDetail(record.id)
+    if (detail) {
+      selectedRecord.value = detail
+      showRecordDetailDialog.value = true
+    }
+  } catch (error) {
+    console.error('获取充值记录详情失败:', error)
+    ElMessage.error('获取充值记录详情失败')
+  }
+}
+
+// 格式化日期时间
+const formatDateTime = datetime => {
+  if (!datetime) return '-'
+  const date = new Date(datetime)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+// 获取支付方式名称
+const getPaymentMethodName = method => {
+  const methods = {
+    alipay: '支付宝',
+    wechat: '微信支付',
+    bank: '银行卡',
+    balance: '余额支付',
+  }
+  return methods[method] || method || '-'
+}
+
+// 获取状态类型
+const getStatusType = status => {
+  const types = {
+    success: 'success',
+    pending: 'warning',
+    failed: 'danger',
+  }
+  return types[status] || 'info'
+}
+
+// 获取状态文本
+const getStatusText = status => {
+  const texts = {
+    success: '成功',
+    pending: '处理中',
+    failed: '失败',
+  }
+  return texts[status] || status || '未知'
+}
+
 // 生命周期
 onMounted(async () => {
   // 确保用户信息是最新的
@@ -1156,6 +1633,8 @@ onMounted(async () => {
       await userStore.fetchProfile()
       // 获取用户余额信息
       await userStore.fetchUserBalance()
+      // 获取充值记录
+      await fetchRechargeHistory()
     } catch {
       // 获取用户信息失败，使用默认信息
     }
@@ -1954,6 +2433,7 @@ onMounted(async () => {
 .preview-label {
   font-size: 14px;
   color: #666;
+  font-weight: 500;
 }
 
 .preview-value {
@@ -1962,18 +2442,52 @@ onMounted(async () => {
   color: #333;
 }
 
+.preview-value.highlight {
+  color: #2e7d32;
+  font-size: 16px;
+}
+
+.preview-value.bronze {
+  color: #cd7f32;
+}
+
+.preview-value.silver {
+  color: #c0c0c0;
+}
+
+.preview-value.gold {
+  color: #ffd700;
+}
+
+.preview-value.diamond {
+  color: #00bcd4;
+}
+
 .upgrade-notice {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border: 1px solid #ffeaa7;
   border-radius: 6px;
   padding: 8px 12px;
   margin-top: 8px;
-  color: #856404;
   font-size: 12px;
   font-weight: 500;
+}
+
+.upgrade-notice.success {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 1px solid #ffeaa7;
+  color: #856404;
+}
+
+.upgrade-notice.info {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 1px solid #bbdefb;
+  color: #1565c0;
+}
+
+.upgrade-notice strong {
+  font-weight: 700;
 }
 
 .payment-grid {
@@ -2118,6 +2632,268 @@ onMounted(async () => {
     box-shadow:
       0 0 20px rgba(185, 242, 255, 0.6),
       0 0 30px rgba(135, 206, 235, 0.4);
+  }
+}
+/* Recharge History Dialog */
+.recharge-history-content {
+  padding: 8px 0;
+}
+
+/* 筛选器 */
+.history-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #e5e5e5;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card .stat-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.stat-card .stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+.stat-card .stat-value.bonus {
+  color: #f56c6c;
+}
+
+.stat-card .stat-value.bronze {
+  color: #cd7f32;
+}
+
+.stat-card .stat-value.silver {
+  color: #c0c0c0;
+}
+
+.stat-card .stat-value.gold {
+  color: #ffd700;
+}
+
+.stat-card .stat-value.diamond {
+  color: #b9f2ff;
+}
+
+.records-list {
+  min-height: 300px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+  gap: 12px;
+}
+
+.loading-state .el-icon {
+  font-size: 32px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.empty-state p {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.records-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.records-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.records-table thead {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.records-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e5e5e5;
+}
+
+.records-table td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #666;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.record-row {
+  transition: background-color 0.2s;
+}
+
+.record-row:hover {
+  background-color: #f8f9fa;
+}
+
+.amount-cell,
+.bonus-cell,
+.total-cell {
+  font-weight: 600;
+}
+
+.amount-value {
+  color: #333;
+}
+
+.bonus-value {
+  color: #67c23a;
+  font-weight: 600;
+}
+
+.no-bonus {
+  color: #999;
+}
+
+.total-value {
+  color: #333;
+  font-size: 14px;
+}
+
+.payment-method {
+  color: #666;
+}
+
+.pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+/* 充值记录详情对话框 */
+.record-detail-dialog .record-detail-content {
+  padding: 20px 0;
+}
+
+.record-detail-dialog .amount-highlight {
+  color: #409eff;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.record-detail-dialog .bonus-highlight {
+  color: #f56c6c;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.record-detail-dialog .total-highlight {
+  color: #67c23a;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.record-detail-dialog .balance-change-info {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.record-detail-dialog .balance-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.record-detail-dialog .balance-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.record-detail-dialog .balance-item .label {
+  font-size: 13px;
+  color: #666;
+}
+
+.record-detail-dialog .balance-item .value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.record-detail-dialog .balance-item .value.success {
+  color: #67c23a;
+}
+
+.record-detail-dialog .arrow {
+  font-size: 24px;
+  color: #409eff;
+  font-weight: bold;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .history-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .records-table {
+    font-size: 12px;
+  }
+
+  .records-table th,
+  .records-table td {
+    padding: 8px 12px;
+  }
+
+  .stat-card .stat-value {
+    font-size: 20px;
   }
 }
 </style>

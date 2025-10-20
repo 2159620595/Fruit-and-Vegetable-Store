@@ -41,6 +41,25 @@
             <el-button type="primary" @click="reloadCart">重新加载</el-button>
           </div>
 
+          <!-- 空状态 -->
+          <div v-if="cartItems.length === 0" class="empty-cart-state">
+            <div class="empty-content">
+              <el-icon class="empty-icon" :size="120">
+                <ShoppingCartFull />
+              </el-icon>
+              <h3 class="empty-title">购物车空空如也</h3>
+              <p class="empty-description">
+                还没有添加商品，快去挑选心仪的商品吧~
+              </p>
+              <div class="empty-actions">
+                <el-button type="primary" size="large" @click="goToShop">
+                  <el-icon><Shop /></el-icon>
+                  去逛逛
+                </el-button>
+              </div>
+            </div>
+          </div>
+
           <!-- 购物车表格 -->
           <div v-else class="cart-table-wrapper">
             <div class="cart-table-container">
@@ -63,14 +82,6 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-if="cartItems.length === 0">
-                    <td
-                      colspan="6"
-                      style="text-align: center; padding: 40px; color: #999"
-                    >
-                      购物车为空，快去添加商品吧~
-                    </td>
-                  </tr>
                   <tr
                     v-for="item in cartItems"
                     :key="item.id"
@@ -211,6 +222,8 @@ import {
   Delete,
   Back,
   ShoppingCart,
+  ShoppingCartFull,
+  Shop,
 } from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cartStore'
 import Breadcrumb from '../components/Breadcrumb.vue'
@@ -256,6 +269,11 @@ const orderSummary = computed(() => {
 
 // 继续购物
 const continueShopping = () => {
+  router.push('/shop')
+}
+
+// 跳转到商店
+const goToShop = () => {
   router.push('/shop')
 }
 
@@ -570,9 +588,74 @@ const reloadCart = async () => {
   margin-bottom: 16px;
 }
 
+/* 空状态样式 */
+.empty-cart-state {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  padding: 60px 20px;
+  margin-bottom: 24px;
+}
+
+.empty-content {
+  text-align: center;
+  max-width: 500px;
+}
+
+.empty-icon {
+  color: #d3dce6;
+  margin-bottom: 24px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.empty-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 12px;
+}
+
+.empty-description {
+  font-size: 16px;
+  color: #909399;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.empty-actions .el-button {
+  padding: 12px 32px;
+  font-size: 16px;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.empty-actions .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
 /* 购物车表格 */
 .cart-table-wrapper {
-  /* padding已移除 */
+  margin-bottom: 24px;
 }
 
 .cart-table-container {

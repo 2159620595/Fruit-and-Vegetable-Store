@@ -283,12 +283,22 @@ export const useUserStore = defineStore('user', {
           const data = response.data.data
           this.balance = data.balance || 0
           this.membershipLevel = data.membership_level || '普通会员'
+          // 修复：正确获取total_recharge字段
+          this.totalRecharge =
+            data.total_recharge || data.user?.total_recharge || 0
 
           // 更新用户信息中的余额和会员等级
           if (this.user) {
             this.user.balance = data.balance
             this.user.membership_level = data.membership_level
+            this.user.total_recharge = this.totalRecharge
           }
+
+          console.log('✅ 余额信息已更新:', {
+            balance: this.balance,
+            membershipLevel: this.membershipLevel,
+            totalRecharge: this.totalRecharge,
+          })
         }
       } catch (error) {
         console.error('获取用户余额信息失败:', error)
@@ -338,15 +348,58 @@ export const useUserStore = defineStore('user', {
     },
 
     // 获取充值记录
-    async fetchRechargeRecords(page = 1, limit = 10) {
+    async fetchRechargeRecords(params = {}) {
       try {
-        const response = await getRechargeRecordsService({ page, limit })
+        const {
+          page = 1,
+          limit = 10,
+          status = null,
+          start_date = null,
+          end_date = null,
+          sort = 'desc',
+        } = params
+
+        const queryParams = { page, limit, sort }
+        if (status) queryParams.status = status
+        if (start_date) queryParams.start_date = start_date
+        if (end_date) queryParams.end_date = end_date
+
+        const response = await getRechargeRecordsService(queryParams)
         if (response.data?.code === 200 && response.data?.data) {
           this.rechargeRecords = response.data.data.records || []
           return response.data.data
         }
       } catch (error) {
         console.error('获取充值记录失败:', error)
+        throw error
+      }
+    },
+
+    // 获取充值统计汇总
+    async fetchRechargeSummary(period = 'all') {
+      try {
+        const response = await request.get('/api/recharge/summary', {
+          params: { period },
+        })
+        if (response.data?.code === 200 && response.data?.data) {
+          return response.data.data
+        }
+      } catch (error) {
+        console.error('获取充值统计失败:', error)
+        throw error
+      }
+    },
+
+    // 获取充值记录详情
+    async fetchRechargeRecordDetail(id) {
+      try {
+        const response = await request.get(`/api/recharge/records/${id}`)
+        if (response.data?.code === 200 && response.data?.data) {
+          return response.data.data
+        }
+      } catch (error) {
+        console.error('获取充值记录详情失败:', error)
+        throw error
       }
     },
 
@@ -424,7 +477,7 @@ export const useUserStore = defineStore('user', {
         }
       } catch (error) {
         console.error('获取会员折扣信息失败:', error)
-        
+
         // 如果接口不存在，返回默认的会员信息
         if (error.message && error.message.includes('接口不存在')) {
           console.warn('会员折扣接口不存在，使用默认会员信息')
@@ -432,11 +485,11 @@ export const useUserStore = defineStore('user', {
             membership_level: this.membershipLevel || '普通会员',
             discount_rate: 1.0,
             benefits: '基础购物体验',
-            discount_percentage: 0
+            discount_percentage: 0,
           }
           return defaultMembership
         }
-        
+
         throw error
       }
     },
