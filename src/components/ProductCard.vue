@@ -4,7 +4,15 @@
     <div class="product-image" @click="goToProduct">
       <img :src="product.image" :alt="product.name" />
       <button class="favorite-btn" @click.stop="toggleFavorite">
-        {{ isFavorite ? '❤️' : '🤍' }}
+        <el-icon :size="20" :color="isFavorite ? '#ff4757' : '#d9d9d9'">
+          <component
+            :is="
+              isFavorite
+                ? ElementPlusIconsVue.StarFilled
+                : ElementPlusIconsVue.Star
+            "
+          />
+        </el-icon>
       </button>
     </div>
 
@@ -13,7 +21,12 @@
       <p class="product-unit">{{ product.unit }}</p>
 
       <div class="product-rating" v-if="product.rating">
-        <span class="stars">⭐ {{ product.rating }}</span>
+        <span class="stars">
+          <el-icon :size="14" color="#fadb14">
+            <component :is="ElementPlusIconsVue.StarFilled" />
+          </el-icon>
+          {{ product.rating }}
+        </span>
         <span class="reviews">({{ product.reviews }} reviews)</span>
       </div>
 
@@ -35,6 +48,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { useCartStore } from '../stores/cartStore'
 
 const props = defineProps({

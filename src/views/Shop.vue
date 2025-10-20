@@ -510,44 +510,6 @@
                     </svg>
                     {{ product.stock === 0 ? '已售罄' : '加入购物车' }}
                   </button>
-
-                  <!-- 收藏按钮 -->
-                  <button
-                    class="action-btn favorite-btn"
-                    :class="{ 'is-favorite': product.is_favorite }"
-                    @click="toggleFavorite(product)"
-                    :disabled="product.stock === 0"
-                    :title="product.is_favorite ? '取消收藏' : '添加收藏'"
-                  >
-                    <svg
-                      v-if="!product.is_favorite"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.50903 2.9987 7.05 2.9987C5.59096 2.9987 4.19169 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.04097 1.5487 8.5C1.5487 9.95903 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61Z"
-                      />
-                    </svg>
-                    <svg
-                      v-else
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.50903 2.9987 7.05 2.9987C5.59096 2.9987 4.19169 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.04097 1.5487 8.5C1.5487 9.95903 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61Z"
-                      />
-                    </svg>
-                  </button>
                 </div>
               </div>
             </div>
@@ -646,7 +608,6 @@ import { useProductStore } from '../stores/productStore'
 import { useCartStore } from '../stores/cartStore'
 import { useUserStore } from '../stores/userStore'
 import Breadcrumb from '../components/Breadcrumb.vue'
-import { toggleFavorite as toggleFavoriteAPI } from '../api/favorites'
 
 const router = useRouter()
 const route = useRoute()
@@ -1081,36 +1042,6 @@ const addToCart = product => {
 
   cartStore.addToCart(product)
   showToast(`${product.name} 已加入购物车`, 'success')
-}
-
-// 收藏功能
-const toggleFavorite = async product => {
-  if (!userStore.isLoggedIn) {
-    ElMessage.warning('请先登录')
-    router.push('/login')
-    return
-  }
-
-  try {
-    // 使用统一的切换收藏接口
-    const response = await toggleFavoriteAPI(product.id)
-
-    // 根据API返回的消息判断操作结果
-    const message = response.data?.message || ''
-    if (message.includes('收藏成功') || message.includes('已添加到收藏')) {
-      product.is_favorite = true
-      showToast('已添加到收藏', 'success')
-    } else if (message.includes('已取消收藏') || message.includes('取消收藏')) {
-      product.is_favorite = false
-      showToast('已取消收藏', 'success')
-    } else {
-      // 如果消息不明确，根据当前状态切换
-      product.is_favorite = !product.is_favorite
-      showToast(product.is_favorite ? '已添加到收藏' : '已取消收藏', 'success')
-    }
-  } catch {
-    showToast('操作失败，请重试', 'error')
-  }
 }
 
 // Toast 提示
@@ -1677,10 +1608,12 @@ h1 {
 
 .product-actions {
   margin-top: auto;
+  display: flex;
+  gap: 8px;
 }
 
 .add-to-cart-btn {
-  width: 100%;
+  flex: 1;
   padding: 10px;
   background: #618961;
   color: white;
@@ -2455,30 +2388,6 @@ h1 {
 .action-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* 收藏按钮样式 */
-.favorite-btn {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  border-color: #e9ecef;
-}
-
-.favorite-btn:hover:not(:disabled) {
-  background-color: #e9ecef;
-  border-color: #dee2e6;
-  color: #495057;
-}
-
-.favorite-btn.is-favorite {
-  background-color: #ff6b6b;
-  color: #ffffff;
-  border-color: #ff6b6b;
-}
-
-.favorite-btn.is-favorite:hover:not(:disabled) {
-  background-color: #ff5252;
-  border-color: #ff5252;
 }
 
 /* 排序控制样式 */

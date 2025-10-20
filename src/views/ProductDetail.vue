@@ -95,21 +95,27 @@
               </div>
             </div>
             <div class="highlight-item">
-              <div class="highlight-icon">🚚</div>
+              <div class="highlight-icon">
+                <el-icon :size="24" color="#67c23a"><Van /></el-icon>
+              </div>
               <div class="highlight-text">
                 <span class="highlight-title">快速配送</span>
                 <span class="highlight-desc">24小时内送达</span>
               </div>
             </div>
             <div class="highlight-item">
-              <div class="highlight-icon">❄️</div>
+              <div class="highlight-icon">
+                <el-icon :size="24" color="#409EFF"><IceCreamRound /></el-icon>
+              </div>
               <div class="highlight-text">
                 <span class="highlight-title">新鲜保障</span>
                 <span class="highlight-desc">冷链保鲜配送</span>
               </div>
             </div>
             <div class="highlight-item">
-              <div class="highlight-icon">✓</div>
+              <div class="highlight-icon">
+                <el-icon :size="24" color="#67c23a"><CircleCheck /></el-icon>
+              </div>
               <div class="highlight-text">
                 <span class="highlight-title">品质保证</span>
                 <span class="highlight-desc">不满意可退换</span>
@@ -139,7 +145,28 @@
           <!-- Rating Section -->
           <div class="rating-section">
             <div class="star-rating">
-              <span class="stars">{{ renderStars(product.rating || 0) }}</span>
+              <span class="stars">
+                <el-icon
+                  v-for="star in renderStars(product.rating || 0)"
+                  :key="star.key"
+                  :size="18"
+                  :color="
+                    star.type === 'full'
+                      ? '#fadb14'
+                      : star.type === 'half'
+                        ? '#fadb14'
+                        : '#d9d9d9'
+                  "
+                >
+                  <component
+                    :is="
+                      star.type === 'empty'
+                        ? ElementPlusIconsVue.StarFilled
+                        : ElementPlusIconsVue.StarFilled
+                    "
+                  />
+                </el-icon>
+              </span>
               <span class="rating-value">
                 {{ formatRating(product.rating) }}
               </span>
@@ -503,7 +530,20 @@
                       <span class="rating-display">
                         {{ formatRating(product.rating) }}
                         <span class="stars-inline">
-                          {{ renderStars(product.rating) }}
+                          <el-icon
+                            v-for="star in renderStars(product.rating)"
+                            :key="star.key"
+                            :size="14"
+                            :color="
+                              star.type === 'full'
+                                ? '#fadb14'
+                                : star.type === 'half'
+                                  ? '#fadb14'
+                                  : '#d9d9d9'
+                            "
+                          >
+                            <component :is="ElementPlusIconsVue.StarFilled" />
+                          </el-icon>
                         </span>
                         <span
                           class="review-count-inline"
@@ -571,7 +611,22 @@
             <span class="average-rating">
               {{ formatRating(averageRating) }}
             </span>
-            <div class="rating-stars">{{ renderStars(averageRating) }}</div>
+            <div class="rating-stars">
+              <el-icon
+                v-for="star in renderStars(averageRating)"
+                :key="star.key"
+                :size="20"
+                :color="
+                  star.type === 'full'
+                    ? '#fadb14'
+                    : star.type === 'half'
+                      ? '#fadb14'
+                      : '#d9d9d9'
+                "
+              >
+                <component :is="ElementPlusIconsVue.StarFilled" />
+              </el-icon>
+            </div>
             <span class="total-reviews">基于 {{ reviews.length }} 条评价</span>
           </div>
         </div>
@@ -605,7 +660,20 @@
                 </div>
               </div>
               <div class="star-rating">
-                {{ renderStars(review.rating) }}
+                <el-icon
+                  v-for="star in renderStars(review.rating)"
+                  :key="star.key"
+                  :size="16"
+                  :color="
+                    star.type === 'full'
+                      ? '#fadb14'
+                      : star.type === 'half'
+                        ? '#fadb14'
+                        : '#d9d9d9'
+                  "
+                >
+                  <component :is="ElementPlusIconsVue.StarFilled" />
+                </el-icon>
               </div>
             </div>
             <div class="review-content">
@@ -613,11 +681,33 @@
             </div>
             <div class="review-engagement">
               <button class="engagement-btn" @click="likeReview(review.id)">
-                <span class="emoji">👍</span>
+                <svg
+                  viewBox="0 0 1024 1024"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  class="like-icon"
+                >
+                  <path
+                    d="M885.9 533.7c16.8-22.2 26.1-49.4 26.1-77.7 0-44.9-25.1-87.4-65.5-111.1a67.67 67.67 0 0 0-34.3-9.3H572.4l6-122.9c1.4-29.7-9.1-57.9-29.5-79.4A106.62 106.62 0 0 0 471 99.9c-52 0-98 35-111.8 85.1l-85.9 311h-.3v428h472.3c9.2 0 18.2-1.8 26.5-5.4 47.6-20.3 78.3-66.8 78.3-118.4 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7-.2-12.6-2-25.1-5.6-37.1zM112 528v364c0 17.7 14.3 32 32 32h65V496h-65c-17.7 0-32 14.3-32 32z"
+                  />
+                </svg>
                 <span class="count">{{ review.likes || 0 }}</span>
               </button>
               <button class="engagement-btn" @click="dislikeReview(review.id)">
-                <span class="emoji">👎</span>
+                <svg
+                  viewBox="0 0 1024 1024"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  class="dislike-icon"
+                >
+                  <path
+                    d="M885.9 490.3c3.6-12 5.4-24.4 5.4-37 0-28.3-9.3-55.5-26.1-77.7 3.6-12 5.4-24.4 5.4-37 0-28.3-9.3-55.5-26.1-77.7 3.6-12 5.4-24.4 5.4-37 0-51.6-30.7-98.1-78.3-118.4a66.1 66.1 0 0 0-26.5-5.4H273.3c-17.7 0-32 14.3-32 32v364c0 17.7 14.3 32 32 32h.3l85.8 310.8C373.4 889 419.4 924 471.4 924c29.7 0 58.4-11.5 79.9-32.1 21.5-20.7 32.1-48.9 29.7-79.4l-6-122.9h239.9c12.1 0 23.9-3.2 34.3-9.3 40.4-23.5 65.5-66.1 65.5-111 0-28.3-9.3-55.5-26.1-77.7zM112 132v364c0 17.7 14.3 32 32 32h65V100h-65c-17.7 0-32 14.3-32 32z"
+                  />
+                </svg>
                 <span class="count">{{ review.dislikes || 0 }}</span>
               </button>
             </div>
@@ -642,7 +732,9 @@
                 :alt="item.name"
                 loading="lazy"
               />
-              <div v-else class="product-placeholder">🍎</div>
+              <div v-else class="product-placeholder">
+                <el-icon :size="32" color="#67c23a"><Apple /></el-icon>
+              </div>
               <div class="product-overlay">
                 <span class="view-detail">查看详情</span>
               </div>
@@ -651,7 +743,20 @@
               <h3 class="related-product-name">{{ item.name }}</h3>
               <div class="related-product-rating">
                 <span class="stars-small">
-                  {{ renderStars(item.rating || 0) }}
+                  <el-icon
+                    v-for="star in renderStars(item.rating || 0)"
+                    :key="star.key"
+                    :size="12"
+                    :color="
+                      star.type === 'full'
+                        ? '#fadb14'
+                        : star.type === 'half'
+                          ? '#fadb14'
+                          : '#d9d9d9'
+                    "
+                  >
+                    <component :is="ElementPlusIconsVue.StarFilled" />
+                  </el-icon>
                 </span>
               </div>
               <div class="related-product-price">
@@ -670,7 +775,9 @@
 
     <!-- Empty State (if no product after loading) -->
     <div v-else class="error-container">
-      <div class="error-icon">📦</div>
+      <div class="error-icon">
+        <el-icon :size="80" color="#909399"><Box /></el-icon>
+      </div>
       <h2 class="error-title">商品不存在</h2>
       <p class="error-message">该商品可能已下架或不存在</p>
       <div class="error-actions">
@@ -704,6 +811,14 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import {
+  Van,
+  IceCreamRound,
+  CircleCheck,
+  Apple,
+  Box,
+} from '@element-plus/icons-vue'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
 import { useUserStore } from '@/stores/userStore'
@@ -804,9 +919,20 @@ const renderStars = rating => {
   const hasHalfStar = numRating % 1 >= 0.5
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
 
-  return (
-    '★'.repeat(fullStars) + (hasHalfStar ? '☆' : '') + '☆'.repeat(emptyStars)
-  )
+  const stars = []
+  // 添加实心星星
+  for (let i = 0; i < fullStars; i++) {
+    stars.push({ type: 'full', key: `full-${i}` })
+  }
+  // 添加半星
+  if (hasHalfStar) {
+    stars.push({ type: 'half', key: 'half' })
+  }
+  // 添加空心星星
+  for (let i = 0; i < emptyStars; i++) {
+    stars.push({ type: 'empty', key: `empty-${i}` })
+  }
+  return stars
 }
 
 const formatDate = date => {
@@ -1755,9 +1881,9 @@ onMounted(() => {
 }
 
 .stars-inline {
-  color: #ffa726;
-  font-size: 14px;
-  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .review-count-inline {
@@ -1961,9 +2087,9 @@ onMounted(() => {
 }
 
 .stars {
-  color: #ffa726;
-  font-size: 18px;
-  letter-spacing: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .rating-value {
@@ -2383,15 +2509,8 @@ onMounted(() => {
 
 .rating-stars {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.rating-stars::before {
-  content: '';
-  color: #ffa726;
-  font-size: 18px;
-  letter-spacing: 2px;
+  align-items: center;
+  gap: 2px;
 }
 
 .total-reviews {
@@ -2478,9 +2597,9 @@ onMounted(() => {
 }
 
 .star-rating {
-  font-size: 16px;
-  color: #ffa726;
-  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .review-content {
@@ -2515,16 +2634,30 @@ onMounted(() => {
 
 .engagement-btn:hover {
   background-color: #f5f5f5;
-  border-color: #618961;
-  color: #618961;
+  border-color: #67c23a;
+  color: #67c23a;
 }
 
-.engagement-btn .emoji {
-  font-size: 16px;
+.engagement-btn:hover .el-icon {
+  color: #67c23a !important;
+}
+
+.engagement-btn .like-icon,
+.engagement-btn .dislike-icon {
+  color: #ff9800;
+  fill: #ff9800;
+  transition: all 0.2s;
+}
+
+.engagement-btn:hover .like-icon,
+.engagement-btn:hover .dislike-icon {
+  color: #67c23a;
+  fill: #67c23a;
 }
 
 .engagement-btn .count {
   font-weight: 500;
+  color: #333;
 }
 
 /* Related Products */
@@ -2637,9 +2770,9 @@ onMounted(() => {
 }
 
 .stars-small {
-  color: #ffa726;
-  font-size: 14px;
-  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
 }
 
 .related-product-price {

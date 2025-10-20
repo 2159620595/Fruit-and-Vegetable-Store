@@ -480,6 +480,7 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { useOrderStore } from '@/stores/orderStore'
 import { useLogisticsStore } from '@/stores/logisticsStore'
 import Footer from '@/components/Footer.vue'
@@ -507,12 +508,12 @@ const searchTipText = computed(() => {
   if (!searchKeyword.value) return ''
   const keyword = searchKeyword.value.trim()
   if (/^[a-zA-Z]+$/.test(keyword)) {
-    return '💡 检测到拼音输入，将自动匹配中文商品名'
+    return '检测到拼音输入，将自动匹配中文商品名'
   }
   if (/^\d+$/.test(keyword)) {
-    return '💡 搜索订单号'
+    return '搜索订单号'
   }
-  return '💡 按 Enter 搜索'
+  return '按 Enter 搜索'
 })
 
 // 评价对话框状态
@@ -1013,9 +1014,10 @@ const handleConfirmOrder = async (orderId, event) => {
 
     loading.close()
     ElMessage.success({
-      message: '✅ 确认收货成功！感谢您的购买',
+      message: '确认收货成功！感谢您的购买',
       duration: 3000,
       showClose: true,
+      icon: h('el-icon', { size: 20 }, h(ElementPlusIconsVue.CircleCheck)),
     })
 
     // 刷新列表 - 根据当前标签加载订单
@@ -1147,9 +1149,10 @@ const handleReviewSubmit = async reviewData => {
       })
     } else {
       ElMessage.success({
-        message: '✅ 评价提交成功！感谢您的反馈',
+        message: '评价提交成功！感谢您的反馈',
         duration: 3000,
         showClose: true,
+        icon: h('el-icon', { size: 20 }, h(ElementPlusIconsVue.CircleCheck)),
       })
     }
 
@@ -1283,9 +1286,10 @@ const handleBuyAgain = async (orderId, event) => {
 
     if (result && result.items && result.items.length > 0) {
       ElMessage.success({
-        message: `✅ 已将 ${result.items.length} 件商品添加到购物车`,
+        message: `已将 ${result.items.length} 件商品添加到购物车`,
         duration: 3000,
         showClose: true,
+        icon: h('el-icon', { size: 20 }, h(ElementPlusIconsVue.ShoppingCart)),
       })
 
       // 跳转到购物车页面
@@ -1345,9 +1349,10 @@ const handlePaymentConfirm = async paymentMethod => {
 
     loading.close()
     ElMessage.success({
-      message: '✅ 支付成功！订单状态已更新',
+      message: '支付成功！订单状态已更新',
       duration: 3000,
       showClose: true,
+      icon: h('el-icon', { size: 20 }, h(ElementPlusIconsVue.SuccessFilled)),
     })
 
     // 刷新列表 - 根据当前标签加载订单
@@ -1416,7 +1421,10 @@ const handleContactSeller = async (orderId, event) => {
             </div>
             <div style="background: #f0f9ff; padding: 12px; border-radius: 4px; border-left: 4px solid #409EFF;">
               <div style="font-size: 13px; color: #666; line-height: 1.5;">
-                💡 温馨提示：<br>
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                  <el-icon :size="16" color="#409EFF"><component :is="ElementPlusIconsVue.InfoFilled" /></el-icon>
+                  <strong>温馨提示：</strong>
+                </div>
                 • 请提供订单号以便客服快速处理<br>
                 • 工作时间响应更快，非工作时间请留言<br>
                 • 紧急问题可拨打客服热线

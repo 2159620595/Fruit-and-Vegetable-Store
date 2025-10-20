@@ -15,21 +15,27 @@
         class="payment-select"
         size="large"
       >
-        <el-option value="wechat" label="💚 微信支付">
+        <el-option value="wechat" label="微信支付">
           <span class="payment-option-content">
-            <span class="payment-icon">💚</span>
+            <el-icon class="payment-icon wechat-icon" :size="20">
+              <ChatDotRound />
+            </el-icon>
             <span class="payment-name">微信支付</span>
           </span>
         </el-option>
-        <el-option value="alipay" label="💙 支付宝">
+        <el-option value="alipay" label="支付宝">
           <span class="payment-option-content">
-            <span class="payment-icon">💙</span>
+            <el-icon class="payment-icon alipay-icon" :size="20">
+              <Wallet />
+            </el-icon>
             <span class="payment-name">支付宝</span>
           </span>
         </el-option>
-        <el-option value="credit_card" label="💳 信用卡">
+        <el-option value="credit_card" label="信用卡">
           <span class="payment-option-content">
-            <span class="payment-icon">💳</span>
+            <el-icon class="payment-icon card-icon" :size="20">
+              <CreditCard />
+            </el-icon>
             <span class="payment-name">信用卡</span>
           </span>
         </el-option>
@@ -53,6 +59,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { ChatDotRound, Wallet, CreditCard } from '@element-plus/icons-vue'
 
 const props = defineProps({
   modelValue: {
@@ -146,11 +153,22 @@ const handleClose = () => {
 }
 
 .payment-icon {
-  font-size: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 24px;
+}
+
+.wechat-icon {
+  color: #07c160;
+}
+
+.alipay-icon {
+  color: #1677ff;
+}
+
+.card-icon {
+  color: #f5222d;
 }
 
 .payment-name {

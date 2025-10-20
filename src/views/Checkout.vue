@@ -9,7 +9,11 @@
         v-if="cartStore.selectedItems.length === 0"
         class="empty-cart-message"
       >
-        <div class="empty-icon">🛒</div>
+        <div class="empty-icon">
+          <el-icon :size="80" color="#909399">
+            <ShoppingCart />
+          </el-icon>
+        </div>
         <h2>没有要结账的商品</h2>
         <p>请先在购物车中选择要购买的商品</p>
         <button class="back-to-cart-btn" @click="router.push('/cart')">
@@ -78,21 +82,27 @@
               class="payment-select"
               size="large"
             >
-              <el-option value="wechat" label="💚 微信支付">
+              <el-option value="wechat" label="微信支付">
                 <span class="payment-option-content">
-                  <span class="payment-icon">💚</span>
+                  <el-icon class="payment-icon wechat-icon" :size="20">
+                    <ChatDotRound />
+                  </el-icon>
                   <span class="payment-name">微信支付</span>
                 </span>
               </el-option>
-              <el-option value="alipay" label="💙 支付宝">
+              <el-option value="alipay" label="支付宝">
                 <span class="payment-option-content">
-                  <span class="payment-icon">💙</span>
+                  <el-icon class="payment-icon alipay-icon" :size="20">
+                    <Wallet />
+                  </el-icon>
                   <span class="payment-name">支付宝</span>
                 </span>
               </el-option>
-              <el-option value="credit_card" label="💳 信用卡/借记卡">
+              <el-option value="credit_card" label="信用卡/借记卡">
                 <span class="payment-option-content">
-                  <span class="payment-icon">💳</span>
+                  <el-icon class="payment-icon card-icon" :size="20">
+                    <CreditCard />
+                  </el-icon>
                   <span class="payment-name">信用卡/借记卡</span>
                 </span>
               </el-option>
@@ -162,7 +172,11 @@
                   :src="item.image_url || item.image"
                   :alt="item.name"
                 />
-                <div v-else class="image-placeholder">🍎</div>
+                <div v-else class="image-placeholder">
+                  <el-icon :size="32" color="#67c23a">
+                    <Apple />
+                  </el-icon>
+                </div>
               </div>
               <div class="product-info">
                 <div class="product-name">{{ item.name }}</div>
@@ -208,13 +222,21 @@
 
           <!-- Order Tips -->
           <div class="order-tips">
-            <p class="tip-item">✓ 所有商品均为新鲜配送</p>
-            <p class="tip-item">✓ 支持7天无理由退货</p>
+            <p class="tip-item">
+              <el-icon :size="16" color="#67c23a"><CircleCheck /></el-icon>
+              所有商品均为新鲜配送
+            </p>
+            <p class="tip-item">
+              <el-icon :size="16" color="#67c23a"><CircleCheck /></el-icon>
+              支持7天无理由退货
+            </p>
             <p v-if="freeShippingRemaining > 0" class="tip-item shipping-tip">
-              💡 再购买 ¥{{ freeShippingRemaining.toFixed(2) }} 即可免运费
+              <el-icon :size="16"><InfoFilled /></el-icon>
+              再购买 ¥{{ freeShippingRemaining.toFixed(2) }} 即可免运费
             </p>
             <p v-else class="tip-item shipping-tip success">
-              🎉 恭喜！已满 ¥50，享受免运费
+              <el-icon :size="16"><SuccessFilled /></el-icon>
+              恭喜！已满 ¥50，享受免运费
             </p>
           </div>
         </div>
@@ -231,6 +253,16 @@ defineOptions({
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, ElSelect, ElOption } from 'element-plus'
+import {
+  ChatDotRound,
+  Wallet,
+  CreditCard,
+  ShoppingCart,
+  Apple,
+  CircleCheck,
+  InfoFilled,
+  SuccessFilled,
+} from '@element-plus/icons-vue'
 import { useCartStore } from '../stores/cartStore'
 import { useOrderStore } from '../stores/orderStore'
 // import { useUserStore } from '../stores/userStore' // 暂时未使用
@@ -632,8 +664,10 @@ const formatPrice = price => {
 }
 
 .empty-icon {
-  font-size: 80px;
   margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .empty-cart-message h2 {
@@ -830,11 +864,22 @@ const formatPrice = price => {
 }
 
 .payment-icon {
-  font-size: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 24px;
+}
+
+.wechat-icon {
+  color: #07c160;
+}
+
+.alipay-icon {
+  color: #1677ff;
+}
+
+.card-icon {
+  color: #f5222d;
 }
 
 .payment-name {
@@ -939,7 +984,9 @@ const formatPrice = price => {
 }
 
 .image-placeholder {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-info {

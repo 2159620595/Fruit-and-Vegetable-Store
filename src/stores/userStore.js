@@ -124,9 +124,14 @@ export const useUserStore = defineStore('user', {
         // 调用用户信息API
         const response = await getUserProfileService()
 
-        if (response.data?.code === 200 && response.data?.data?.user) {
-          // 更新用户信息
-          this.user = response.data.data.user
+        if (response.data?.code === 200 && response.data?.data) {
+          // 更新用户信息，包含统计数据
+          const data = response.data.data
+          this.user = {
+            ...data.user,
+            order_stats: data.order_stats,
+            favorite_count: data.favorite_count,
+          }
         } else {
           // 如果API失败，使用localStorage中的信息
           this.initFromStorage()
