@@ -209,23 +209,12 @@
           <div class="quantity-section">
             <span class="quantity-label">数量:</span>
             <div class="quantity-selector">
-              <button
-                class="quantity-btn"
+              <el-button
                 :disabled="quantity <= 1"
                 @click="decreaseQuantity"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 256 256"
-                >
-                  <path
-                    d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"
-                  ></path>
-                </svg>
-              </button>
+                :icon="Minus"
+                circle
+              />
               <input
                 type="number"
                 class="quantity-input"
@@ -234,104 +223,49 @@
                 :max="maxQuantity"
                 @blur="validateQuantity"
               />
-              <button
-                class="quantity-btn"
+              <el-button
                 :disabled="quantity >= maxQuantity"
                 @click="increaseQuantity"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 256 256"
-                >
-                  <path
-                    d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"
-                  ></path>
-                </svg>
-              </button>
+                :icon="Plus"
+                circle
+              />
             </div>
           </div>
 
           <!-- Action Buttons -->
           <div class="action-buttons">
-            <button
-              class="btn btn-secondary"
+            <el-button
               :disabled="!canAddToCart"
               @click="addToCart"
+              :icon="ShoppingCart"
+              size="large"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 256 256"
-              >
-                <path
-                  d="M222.14,58.87A8,8,0,0,0,216,56H54.68L49.79,29.14A16,16,0,0,0,34.05,16H16a8,8,0,0,0,0,16h18L59.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,152,204a28,28,0,1,0,28-28H83.17a8,8,0,0,1-7.87-6.57L72.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,222.14,58.87ZM96,204a12,12,0,1,1-12-12A12,12,0,0,1,96,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,192,204Zm4-68H69.22L57.59,72H206.41Z"
-                ></path>
-              </svg>
-              <span>加入购物车</span>
-            </button>
+              加入购物车
+            </el-button>
 
             <!-- 收藏按钮 -->
-            <button
-              class="btn btn-favorite"
-              :class="{
-                'is-favorite': isFavorite,
-                'is-loading': favoriteLoading,
-              }"
+            <el-button
+              :type="isFavorite ? 'danger' : 'default'"
               :disabled="favoriteLoading"
               @click="toggleFavorite"
+              size="large"
+              :icon="
+                isFavorite
+                  ? ElementPlusIconsVue.StarFilled
+                  : ElementPlusIconsVue.Star
+              "
             >
-              <div class="favorite-icon">
-                <svg
-                  v-if="!isFavorite"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="heart-outline"
-                >
-                  <path
-                    d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.50903 2.9987 7.05 2.9987C5.59096 2.9987 4.19169 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.04097 1.5487 8.5C1.5487 9.95903 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61Z"
-                  />
-                </svg>
-                <svg
-                  v-else
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="heart-filled"
-                >
-                  <path
-                    d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.50903 2.9987 7.05 2.9987C5.59096 2.9987 4.19169 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.04097 1.5487 8.5C1.5487 9.95903 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61Z"
-                  />
-                </svg>
-              </div>
-              <span class="favorite-text">
-                {{ isFavorite ? '已收藏' : '收藏' }}
-              </span>
-              <div v-if="favoriteLoading" class="loading-spinner"></div>
-            </button>
+              {{ isFavorite ? '已收藏' : '收藏' }}
+            </el-button>
 
-            <button
-              class="btn btn-primary"
+            <el-button
+              type="success"
               :disabled="!canAddToCart"
               @click="buyNow"
+              size="large"
             >
-              <span>立即购买</span>
-            </button>
+              立即购买
+            </el-button>
           </div>
         </div>
       </div>
@@ -819,6 +753,7 @@ import {
   Box,
 } from '@element-plus/icons-vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import { Plus, Minus, ShoppingCart } from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
 import { useUserStore } from '@/stores/userStore'
@@ -2227,24 +2162,32 @@ onMounted(() => {
 .quantity-btn {
   width: 36px;
   height: 36px;
-  border: none;
+  border: 1px solid #dcdfe6;
   background-color: #f5f5f5;
-  color: #333;
+  color: #67c23a;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 4px;
+  padding: 0;
 }
 
 .quantity-btn:hover:not(:disabled) {
-  background-color: #618961;
+  background-color: #67c23a;
+  border-color: #67c23a;
   color: white;
+  transform: scale(1.05);
 }
 
 .quantity-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.quantity-btn .el-icon {
+  font-size: 16px;
 }
 
 .quantity-input {

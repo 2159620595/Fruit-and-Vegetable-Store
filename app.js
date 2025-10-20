@@ -40,8 +40,9 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 )
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+// 增加请求体大小限制以支持头像上传（base64格式）
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 app.use('/images', express.static('images'))
 
 // 增强的请求日志中间件

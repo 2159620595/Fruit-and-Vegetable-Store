@@ -90,12 +90,13 @@
                       <td class="col-price">{{ item.price }}</td>
                       <td class="col-quantity">
                         <div class="quantity-controls">
-                          <button
+                          <el-button
                             @click="updateQuantity(item.id, item.quantity - 1)"
                             :disabled="item.quantity <= 1"
-                          >
-                            -
-                          </button>
+                            size="small"
+                            :icon="Minus"
+                            circle
+                          />
                           <input
                             type="number"
                             v-model.number="item.quantity"
@@ -103,18 +104,24 @@
                             min="1"
                             max="999"
                           />
-                          <button
+                          <el-button
                             @click="updateQuantity(item.id, item.quantity + 1)"
-                          >
-                            +
-                          </button>
+                            size="small"
+                            :icon="Plus"
+                            circle
+                          />
                         </div>
                       </td>
                       <td class="col-subtotal">{{ item.subtotal }}</td>
                       <td class="col-actions">
-                        <button class="remove-btn" @click="removeItem(item.id)">
+                        <el-button
+                          type="danger"
+                          text
+                          @click="removeItem(item.id)"
+                          :icon="Delete"
+                        >
                           删除
-                        </button>
+                        </el-button>
                       </td>
                     </tr>
                   </tbody>
@@ -134,7 +141,12 @@
                 </div>
                 <div class="summary-row">
                   <p class="summary-label">运费</p>
-                  <p class="summary-value">{{ orderSummary.shipping }}</p>
+                  <div class="shipping-info">
+                    <p class="summary-value">{{ orderSummary.shipping }}</p>
+                    <p v-if="orderSummary.shippingTip" class="shipping-tip">
+                      {{ orderSummary.shippingTip }}
+                    </p>
+                  </div>
                 </div>
                 <div class="summary-row total-row">
                   <p class="summary-label">总计</p>
@@ -147,16 +159,22 @@
               <!-- 按钮组 -->
               <div class="action-buttons">
                 <div class="button-container">
-                  <button class="continue-btn" @click="continueShopping">
+                  <el-button
+                    @click="continueShopping"
+                    :icon="Back"
+                    class="continue-btn"
+                  >
                     继续购物
-                  </button>
-                  <button
-                    class="checkout-btn"
+                  </el-button>
+                  <el-button
+                    type="success"
                     @click="checkout"
                     :disabled="!cartStore.hasSelected"
+                    :icon="ShoppingCart"
+                    class="checkout-btn"
                   >
                     结账 ({{ cartStore.selectedCount }})
-                  </button>
+                  </el-button>
                 </div>
               </div>
             </div>
@@ -176,8 +194,20 @@ defineOptions({
 import router from '@/router'
 import { computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Plus,
+  Minus,
+  Delete,
+  Back,
+  ShoppingCart,
+} from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cartStore'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import {
+  calculateShippingFee,
+  formatShippingFee,
+  calculateFreeShippingRemaining,
+} from '@/config/shipping'
 
 const cartStore = useCartStore()
 
@@ -198,11 +228,18 @@ const cartItems = computed(() => {
 
 // 订单汇总（基于已选中的商品）
 const orderSummary = computed(() => {
-  const subtotal = cartStore.selectedTotal.toFixed(2)
+  const subtotal = cartStore.selectedTotal
+  const shippingFee = calculateShippingFee(subtotal)
+  const remaining = calculateFreeShippingRemaining(subtotal)
+  const total = subtotal + shippingFee
+
   return {
-    subtotal: `¥${subtotal}`,
-    shipping: '免费',
-    total: `¥${subtotal}`,
+    subtotal: `¥${subtotal.toFixed(2)}`,
+    shipping: formatShippingFee(shippingFee),
+    shippingTip: remaining > 0 ? `再购¥${remaining.toFixed(2)}即可免运费` : '',
+    total: `¥${total.toFixed(2)}`,
+    rawShipping: shippingFee,
+    rawTotal: total,
   }
 })
 
@@ -690,29 +727,32 @@ const reloadCart = async () => {
   gap: 6px;
 }
 
-.quantity-controls button {
+.quantity-controls .quantity-btn {
   width: 28px;
   height: 28px;
   border: 1px solid #dbe6db;
   background-color: #f0f4f0;
   border-radius: 4px;
   cursor: pointer;
-  color: #111811;
+  color: #67c23a;
   font-size: 16px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  padding: 0;
 }
 
-.quantity-controls button:hover:not(:disabled) {
-  background-color: #e5ebe5;
-  border-color: #c8d8c8;
+.quantity-controls .quantity-btn:hover:not(:disabled) {
+  background-color: #67c23a;
+  border-color: #67c23a;
+  color: white;
+  transform: scale(1.05);
 }
 
-.quantity-controls button:disabled {
-  opacity: 0.5;
+.quantity-controls .quantity-btn:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -751,14 +791,22 @@ const reloadCart = async () => {
 .remove-btn {
   background-color: transparent;
   border: none;
-  color: #dc3545;
+  color: #f56c6c;
   cursor: pointer;
   font-size: 14px;
-  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
 }
 
 .remove-btn:hover {
-  color: #c82333;
+  color: #f56c6c;
+  transform: scale(1.05);
+}
+
+.remove-btn .el-icon {
+  font-size: 16px;
 }
 
 /* 订单汇总 */
@@ -797,6 +845,31 @@ const reloadCart = async () => {
   text-align: right;
 }
 
+.shipping-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.shipping-tip {
+  font-size: 12px;
+  color: #67c23a;
+  font-weight: 500;
+  margin: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .total-row {
   border-top: 1px solid #dbe6db;
   padding-top: 12px;
@@ -824,53 +897,50 @@ const reloadCart = async () => {
 .button-container {
   display: flex;
   flex: 1;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
-  padding: 12px 16px;
-  justify-content: space-between;
-}
-
-.continue-btn,
-.checkout-btn {
-  display: flex;
-  min-width: 84px;
-  max-width: 480px;
-  cursor: pointer;
+  padding: 16px;
+  justify-content: flex-end;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 8px;
-  height: 40px;
-  padding: 0 16px;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.5;
-  letter-spacing: 0.015em;
-  border: none;
 }
 
 .continue-btn {
-  background-color: #f0f4f0;
-  color: #111811;
+  min-width: 120px;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
-.continue-btn:hover {
-  background-color: #e5ebe5;
+.continue-btn .el-icon {
+  font-size: 18px;
 }
 
 .checkout-btn {
-  background-color: #11d411;
-  color: #111811;
+  min-width: 200px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
+  transition: all 0.3s ease;
 }
 
 .checkout-btn:hover:not(:disabled) {
-  background-color: #0ec50e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.4);
+}
+
+.checkout-btn .el-icon {
+  font-size: 18px;
 }
 
 .checkout-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
-  background-color: #11d411;
+  transform: none;
+  box-shadow: none;
 }
 
 /* 面包屑导航样式 */

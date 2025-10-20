@@ -51,7 +51,7 @@
                   value="standard"
                 />
                 <div class="radio-content">
-                  <div class="radio-title">标准配送 - ¥5.00</div>
+                  <div class="radio-title">标准配送 - ¥8.00</div>
                   <div class="radio-description">3-5个工作日内送达</div>
                 </div>
               </label>
@@ -66,7 +66,7 @@
                   value="express"
                 />
                 <div class="radio-content">
-                  <div class="radio-title">特快配送 - ¥10.00</div>
+                  <div class="radio-title">特快配送 - ¥13.00</div>
                   <div class="radio-description">1-2 个工作日内送达</div>
                 </div>
               </label>
@@ -236,7 +236,7 @@
             </p>
             <p v-else class="tip-item shipping-tip success">
               <el-icon :size="16"><SuccessFilled /></el-icon>
-              恭喜！已满 ¥50，享受免运费
+              恭喜！已满 ¥{{ FREE_SHIPPING_THRESHOLD }}，享受免运费
             </p>
           </div>
         </div>
@@ -269,6 +269,11 @@ import { useOrderStore } from '../stores/orderStore'
 // import { useAddressStore } from '../stores/addressStore' // 暂时未使用
 import AddressSelector from '../components/AddressSelector.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import {
+  calculateShippingFee,
+  calculateFreeShippingRemaining,
+  FREE_SHIPPING_THRESHOLD,
+} from '@/config/shipping'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -305,21 +310,16 @@ const submitting = ref(false)
 // 优惠金额（可以后续从优惠券系统获取）
 const discount = ref(0)
 
-// 运费计算
+// 运费计算（使用统一配置）
 const shippingCost = computed(() => {
   const subtotal = Number(cartStore.selectedTotal) || 0
-  // 满50免运费（严格判断）
-  if (subtotal >= 50) {
-    return 0
-  }
-  return deliveryMethod.value === 'express' ? 10.0 : 5.0
+  return calculateShippingFee(subtotal, deliveryMethod.value)
 })
 
 // 距离免运费还差多少
 const freeShippingRemaining = computed(() => {
   const subtotal = Number(cartStore.selectedTotal) || 0
-  const remaining = 50 - subtotal
-  return remaining > 0 ? remaining : 0
+  return calculateFreeShippingRemaining(subtotal)
 })
 
 // 总金额计算

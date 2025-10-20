@@ -298,48 +298,51 @@
 
       <!-- Action Buttons -->
       <div class="action-buttons">
-        <button class="btn btn-secondary" @click="router.push('/orders')">
+        <el-button @click="router.push('/orders')" :icon="Back">
           返回订单列表
-        </button>
-        <button
+        </el-button>
+        <el-button
           v-if="orderStatusInfo?.canPay"
-          class="btn btn-primary"
+          type="primary"
           @click="handlePayOrder"
+          :icon="Wallet"
         >
           立即支付
-        </button>
-        <button
+        </el-button>
+        <el-button
           v-if="order.status === 'delivered'"
-          class="btn btn-primary"
+          type="primary"
           @click="handleReview"
+          :icon="Edit"
         >
           评价订单
-        </button>
-        <button
+        </el-button>
+        <el-button
           v-if="
             ['processing', 'shipped', 'in_transit', 'delivered'].includes(
               order.status
             )
           "
-          class="btn btn-outline"
           @click="handleTrackOrder"
+          :icon="Van"
         >
           查看物流
-        </button>
-        <button
+        </el-button>
+        <el-button
           v-if="order.status === 'delivered'"
-          class="btn btn-outline"
           @click="handleBuyAgain"
+          :icon="ShoppingCart"
         >
           再次购买
-        </button>
-        <button
+        </el-button>
+        <el-button
           v-if="orderStatusInfo?.canCancel"
-          class="btn btn-danger"
+          type="danger"
           @click="handleCancelOrder"
+          :icon="Close"
         >
           取消订单
-        </button>
+        </el-button>
       </div>
     </div>
 
@@ -349,12 +352,10 @@
       <h2 class="empty-title">订单不存在</h2>
       <p class="empty-message">该订单可能已被删除或不存在</p>
       <div class="empty-actions">
-        <button class="btn btn-primary" @click="router.push('/orders')">
+        <el-button type="primary" @click="router.push('/orders')" :icon="Back">
           返回订单列表
-        </button>
-        <button class="btn btn-secondary" @click="loadOrderDetail">
-          重新加载
-        </button>
+        </el-button>
+        <el-button @click="loadOrderDetail" :icon="Refresh">重新加载</el-button>
       </div>
     </div>
 
@@ -374,6 +375,15 @@
 import { ref, computed, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Back,
+  Wallet,
+  Edit,
+  Van,
+  ShoppingCart,
+  Close,
+  Refresh,
+} from '@element-plus/icons-vue'
 import { useOrderStore } from '@/stores/orderStore'
 // import { useUserStore } from '@/stores/userStore' // 暂时未使用
 import { useLogisticsStore } from '@/stores/logisticsStore'
@@ -1893,6 +1903,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+}
+
+.btn .el-icon {
+  font-size: 16px;
 }
 
 .btn:disabled {

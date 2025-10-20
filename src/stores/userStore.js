@@ -4,6 +4,9 @@ import {
   userLoginService,
   userRegisterService,
   getUserProfileService,
+  updateAvatarService,
+  updateUserProfileService,
+  changePasswordService,
 } from '@/api/user.js'
 
 export const useUserStore = defineStore('user', {
@@ -191,6 +194,58 @@ export const useUserStore = defineStore('user', {
       }
 
       // Pinia持久化插件会自动清除
+    },
+
+    // 更新用户头像
+    async updateAvatar(formData) {
+      this.loading = true
+      try {
+        const response = await updateAvatarService(formData)
+
+        // 重新获取用户信息以更新头像
+        await this.fetchProfile()
+
+        return response.data
+      } catch (error) {
+        this.error = error.message || '头像上传失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 更新用户信息
+    async updateProfile(userData) {
+      this.loading = true
+      try {
+        const response = await updateUserProfileService(userData)
+
+        // 更新本地用户信息
+        if (response.data?.data?.user) {
+          this.user = { ...this.user, ...response.data.data.user }
+        }
+
+        return response.data
+      } catch (error) {
+        this.error = error.message || '更新用户信息失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 修改密码
+    async changePassword(passwordData) {
+      this.loading = true
+      try {
+        const response = await changePasswordService(passwordData)
+        return response.data
+      } catch (error) {
+        this.error = error.message || '修改密码失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
     },
 
     // 清除错误
