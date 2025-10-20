@@ -8,6 +8,15 @@ import {
   updateUserProfileService,
   changePasswordService,
 } from '@/api/user.js'
+import {
+  getUserBalanceService,
+  createRechargeOrderService,
+  confirmRechargePaymentService,
+  getRechargeRecordsService,
+  getBalanceTransactionsService,
+  payWithBalanceService,
+} from '@/api/recharge.js'
+import request from '@/utils/request.js'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -16,6 +25,11 @@ export const useUserStore = defineStore('user', {
     isAuthenticated: false,
     loading: false,
     error: null,
+    balance: 0,
+    membershipLevel: '普通会员',
+    totalRecharge: 0,
+    rechargeRecords: [],
+    balanceTransactions: [],
   }),
 
   persist: {
@@ -135,6 +149,10 @@ export const useUserStore = defineStore('user', {
             order_stats: data.order_stats,
             favorite_count: data.favorite_count,
           }
+          // 更新余额、会员等级和累计充值
+          this.balance = data.user?.balance || 0
+          this.membershipLevel = data.user?.membership_level || '普通会员'
+          this.totalRecharge = data.user?.total_recharge || 0
         } else {
           // 如果API失败，使用localStorage中的信息
           this.initFromStorage()
@@ -251,6 +269,176 @@ export const useUserStore = defineStore('user', {
     // 清除错误
     clearError() {
       this.error = null
+    },
+
+    // 获取用户余额信息
+    async fetchUserBalance() {
+      if (!this.token) {
+        return
+      }
+
+      try {
+        const response = await getUserBalanceService()
+        if (response.data?.code === 200 && response.data?.data) {
+          const data = response.data.data
+          this.balance = data.balance || 0
+          this.membershipLevel = data.membership_level || '普通会员'
+
+          // 更新用户信息中的余额和会员等级
+          if (this.user) {
+            this.user.balance = data.balance
+            this.user.membership_level = data.membership_level
+          }
+        }
+      } catch (error) {
+        console.error('获取用户余额信息失败:', error)
+      }
+    },
+
+    // 创建充值订单
+    async createRechargeOrder(amount, paymentMethod) {
+      this.loading = true
+      try {
+        const response = await createRechargeOrderService({
+          amount,
+          payment_method: paymentMethod,
+        })
+        return response.data
+      } catch (error) {
+        this.error = error.message || '创建充值订单失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 确认充值支付
+    async confirmRechargePayment(rechargeId, transactionId, paymentStatus) {
+      this.loading = true
+      try {
+        const response = await confirmRechargePaymentService({
+          recharge_id: rechargeId,
+          transaction_id: transactionId,
+          payment_status: paymentStatus,
+        })
+
+        // 如果支付成功，重新获取用户信息（包括余额和会员等级）
+        if (paymentStatus === 'success') {
+          await this.fetchUserBalance()
+          await this.fetchProfile() // 重新获取用户信息以更新会员等级
+        }
+
+        return response.data
+      } catch (error) {
+        this.error = error.message || '确认充值支付失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 获取充值记录
+    async fetchRechargeRecords(page = 1, limit = 10) {
+      try {
+        const response = await getRechargeRecordsService({ page, limit })
+        if (response.data?.code === 200 && response.data?.data) {
+          this.rechargeRecords = response.data.data.records || []
+          return response.data.data
+        }
+      } catch (error) {
+        console.error('获取充值记录失败:', error)
+      }
+    },
+
+    // 获取余额变动记录
+    async fetchBalanceTransactions(page = 1, limit = 10, type = null) {
+      try {
+        const params = { page, limit }
+        if (type) params.type = type
+
+        const response = await getBalanceTransactionsService(params)
+        if (response.data?.code === 200 && response.data?.data) {
+          this.balanceTransactions = response.data.data.transactions || []
+          return response.data.data
+        }
+      } catch (error) {
+        console.error('获取余额变动记录失败:', error)
+      }
+    },
+
+    // 使用余额支付
+    async payWithBalance(orderId, amount, description) {
+      this.loading = true
+      try {
+        const response = await payWithBalanceService({
+          order_id: orderId,
+          amount,
+          description,
+        })
+
+        // 更新余额
+        if (response.data?.code === 200 && response.data?.data) {
+          this.balance = response.data.data.balance_after
+          if (this.user) {
+            this.user.balance = this.balance
+          }
+        }
+
+        return response.data
+      } catch (error) {
+        this.error = error.message || '余额支付失败'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 更新余额（用于充值成功后）
+    updateBalance(newBalance) {
+      this.balance = newBalance
+      if (this.user) {
+        this.user.balance = newBalance
+      }
+    },
+
+    // 更新会员等级
+    updateMembershipLevel(newLevel) {
+      this.membershipLevel = newLevel
+      if (this.user) {
+        this.user.membership_level = newLevel
+      }
+    },
+
+    // 获取会员折扣信息
+    async fetchMembershipDiscount() {
+      if (!this.token) {
+        return
+      }
+
+      try {
+        const response = await request.get('/api/user/membership-discount')
+        if (response.data?.code === 200 && response.data?.data) {
+          const data = response.data.data
+          this.membershipLevel = data.membership_level
+          return data
+        }
+      } catch (error) {
+        console.error('获取会员折扣信息失败:', error)
+        
+        // 如果接口不存在，返回默认的会员信息
+        if (error.message && error.message.includes('接口不存在')) {
+          console.warn('会员折扣接口不存在，使用默认会员信息')
+          const defaultMembership = {
+            membership_level: this.membershipLevel || '普通会员',
+            discount_rate: 1.0,
+            benefits: '基础购物体验',
+            discount_percentage: 0
+          }
+          return defaultMembership
+        }
+        
+        throw error
+      }
     },
   },
 })

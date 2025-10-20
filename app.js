@@ -126,7 +126,7 @@ const STATUS_NAMES = {
 }
 
 // 模拟支付
-async function simulatePayment(order, paymentMethod) {
+async function simulatePayment() {
   await new Promise(resolve => setTimeout(resolve, 1000))
   const success = Math.random() > 0.1
   return {
@@ -139,7 +139,7 @@ async function simulatePayment(order, paymentMethod) {
 }
 
 // 生成物流信息
-const generateLogisticsInfo = (orderStatus, trackingNumber) => {
+const generateLogisticsInfo = orderStatus => {
   const baseTraces = [
     {
       time: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
@@ -339,7 +339,7 @@ app.get('/api/home', async (req, res) => {
       try {
         const decoded = jwt.verify(token, JWT_SECRET)
         currentUserId = decoded.userId
-      } catch (err) {
+      } catch {
         // Token无效或过期，继续作为未登录用户
       }
     }
@@ -517,7 +517,7 @@ app.get('/api/products/:id', async (req, res) => {
       try {
         const decoded = jwt.verify(token, JWT_SECRET)
         currentUserId = decoded.userId
-      } catch (err) {
+      } catch {
         // Token无效或过期，继续作为未登录用户
       }
     }
@@ -650,6 +650,9 @@ app.get('/api/categories/:id/products', async (req, res) => {
 // 获取购物车
 app.get('/api/cart', authenticateToken, async (req, res) => {
   try {
+    const userId = req.user.userId
+
+    // 获取购物车商品
     const [cartItems] = await pool.query(
       `
       SELECT c.*, p.name, p.name_en, p.price, p.image_url, p.stock,
@@ -657,22 +660,51 @@ app.get('/api/cart', authenticateToken, async (req, res) => {
       FROM cart c
       JOIN products p ON c.product_id = p.id
       WHERE c.user_id = ?
+      ORDER BY c.created_at DESC
     `,
-      [req.user.userId]
+      [userId]
     )
 
-    const subtotal = cartItems.reduce(
+    // 获取用户会员等级和折扣信息
+    const [[userInfo]] = await pool.query(
+      'SELECT membership_level FROM users WHERE id = ?',
+      [userId]
+    )
+
+    const [[membershipInfo]] = await pool.query(
+      'SELECT discount_rate FROM membership_levels WHERE level_name = ?',
+      [userInfo.membership_level || '普通会员']
+    )
+
+    const discountRate = membershipInfo?.discount_rate || 1.0
+    const membershipLevel = userInfo.membership_level || '普通会员'
+
+    // 计算价格
+    const originalSubtotal = cartItems.reduce(
       (sum, item) => sum + parseFloat(item.subtotal),
       0
     )
-    const shipping = subtotal > 0 ? 5.0 : 0
-    const total = subtotal + shipping
+
+    // 应用会员折扣
+    const discountedSubtotal = originalSubtotal * discountRate
+    const discountAmount = originalSubtotal - discountedSubtotal
+
+    // 计算运费（满100免运费）
+    const shipping = discountedSubtotal >= 100 ? 0 : 10
+    const total = discountedSubtotal + shipping
 
     sendResponse(res, 200, '获取成功', {
       items: cartItems,
-      subtotal: subtotal.toFixed(2),
+      original_subtotal: originalSubtotal.toFixed(2),
+      discount_amount: discountAmount.toFixed(2),
+      subtotal: discountedSubtotal.toFixed(2),
       shipping: shipping.toFixed(2),
       total: total.toFixed(2),
+      membership_info: {
+        level: membershipLevel,
+        discount_rate: discountRate,
+        discount_percentage: Math.round((1 - discountRate) * 100),
+      },
     })
   } catch (error) {
     handleError(res, error, '获取购物车失败')
@@ -954,6 +986,22 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
       )
     }
 
+    // 获取用户会员等级和折扣率
+    const [[userInfo]] = await connection.query(
+      'SELECT membership_level FROM users WHERE id = ?',
+      [req.user.userId]
+    )
+
+    const [[membershipInfo]] = await connection.query(
+      'SELECT discount_rate FROM membership_levels WHERE level_name = ?',
+      [userInfo.membership_level || '普通会员']
+    )
+
+    const discountRate = membershipInfo?.discount_rate || 1.0
+
+    // 计算折扣后的商品总价
+    const discountedSubtotal = calculatedSubtotal * discountRate
+
     // 使用前端传递的运费和总金额，如果没有则使用计算值
     const shippingFee =
       shipping_fee !== undefined
@@ -964,13 +1012,14 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
     const finalTotal =
       total_amount !== undefined
         ? parseFloat(total_amount)
-        : calculatedSubtotal + shippingFee
+        : discountedSubtotal + shippingFee
 
     const [orderResult] = await connection.query(
       `
       INSERT INTO orders (order_number, user_id, total_amount, shipping_fee, 
-        status, payment_method, delivery_method, shipping_address, remark)
-      VALUES (?, ?, ?, ?, 'pending', ?, ?, ?, ?)
+        status, payment_method, delivery_method, shipping_address, remark,
+        original_amount, discount_rate, membership_level)
+      VALUES (?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         orderNumber,
@@ -981,6 +1030,9 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
         delivery_method,
         shipping_address,
         remark,
+        calculatedSubtotal, // 原始商品总价
+        discountRate, // 折扣率
+        userInfo.membership_level || '普通会员', // 会员等级
       ]
     )
 
@@ -1414,12 +1466,14 @@ app.put('/api/orders/:id/status', authenticateToken, async (req, res) => {
 
 // 支付订单
 app.post('/api/orders/:id/pay', authenticateToken, async (req, res) => {
+  const connection = await pool.getConnection()
+
   try {
     const { id } = req.params
-    const { payment_method } = req.body
+    const { payment_method, use_balance } = req.body
     const userId = req.user.userId
 
-    const [[order]] = await pool.query(
+    const [[order]] = await connection.query(
       'SELECT * FROM orders WHERE id = ? AND user_id = ?',
       [id, userId]
     )
@@ -1432,32 +1486,81 @@ app.post('/api/orders/:id/pay', authenticateToken, async (req, res) => {
       return sendResponse(res, 400, '订单状态不允许支付')
     }
 
-    const paymentResult = await simulatePayment(order, payment_method)
+    await connection.beginTransaction()
 
-    if (paymentResult.success) {
-      await pool.query(
-        'UPDATE orders SET status = ?, payment_method = ?, updated_at = NOW() WHERE id = ?',
-        ['processing', payment_method, id]
-      )
+    try {
+      if (use_balance && payment_method === 'balance') {
+        // 使用余额支付
+        const [result] = await connection.query(
+          `
+          CALL sp_process_balance_payment(?, ?, ?, ?)
+        `,
+          [userId, order.total_amount, id, `订单支付: ${order.order_number}`]
+        )
 
-      await pool.query(
-        `
-        INSERT INTO order_status_history (order_id, status, status_name)
-        VALUES (?, 'processing', '支付成功')
-      `,
-        [id]
-      )
+        await connection.query(
+          'UPDATE orders SET status = ?, payment_method = ?, updated_at = NOW() WHERE id = ?',
+          ['processing', 'balance', id]
+        )
 
-      sendResponse(res, 200, '支付成功', {
-        order_id: id,
-        payment_method,
-        transaction_id: paymentResult.transactionId,
-      })
-    } else {
-      sendResponse(res, 400, '支付失败', paymentResult)
+        await connection.query(
+          `
+          INSERT INTO order_status_history (order_id, status, status_name)
+          VALUES (?, 'processing', '余额支付成功')
+        `,
+          [id]
+        )
+
+        await connection.commit()
+
+        sendResponse(res, 200, '余额支付成功', {
+          order_id: id,
+          payment_method: 'balance',
+          paid_amount: order.total_amount,
+          balance_after: result[0][0].balance_after,
+        })
+      } else {
+        // 其他支付方式
+        const paymentResult = await simulatePayment()
+
+        if (paymentResult.success) {
+          await connection.query(
+            'UPDATE orders SET status = ?, payment_method = ?, updated_at = NOW() WHERE id = ?',
+            ['processing', payment_method, id]
+          )
+
+          await connection.query(
+            `
+            INSERT INTO order_status_history (order_id, status, status_name)
+            VALUES (?, 'processing', '支付成功')
+          `,
+            [id]
+          )
+
+          await connection.commit()
+
+          sendResponse(res, 200, '支付成功', {
+            order_id: id,
+            payment_method,
+            transaction_id: paymentResult.transactionId,
+          })
+        } else {
+          await connection.rollback()
+          sendResponse(res, 400, '支付失败', paymentResult)
+        }
+      }
+    } catch (error) {
+      await connection.rollback()
+      if (error.message === '余额不足') {
+        sendResponse(res, 400, '余额不足')
+      } else {
+        throw error
+      }
     }
   } catch (error) {
     handleError(res, error, '支付处理失败')
+  } finally {
+    connection.release()
   }
 })
 
@@ -1809,7 +1912,7 @@ app.get('/api/logistics/:orderId', authenticateToken, async (req, res) => {
     const trackingNumber =
       order.tracking_number || `SF${Date.now().toString().slice(-10)}`
 
-    const traces = generateLogisticsInfo(order.status, trackingNumber)
+    const traces = generateLogisticsInfo(order.status)
 
     sendResponse(res, 200, '获取成功', {
       order_id: orderId,
@@ -2449,7 +2552,7 @@ app.get('/api/products/:id/reviews', async (req, res) => {
       try {
         const decoded = jwt.verify(token, JWT_SECRET)
         currentUserId = decoded.userId
-      } catch (err) {
+      } catch {
         // Token无效或过期，继续作为未登录用户
       }
     }
@@ -2532,7 +2635,7 @@ app.get('/api/products/:id/reviews', async (req, res) => {
 app.get('/api/user/profile', authenticateToken, async (req, res) => {
   try {
     const [[user]] = await pool.query(
-      'SELECT id, username, phone, avatar, member_since FROM users WHERE id = ?',
+      'SELECT id, username, phone, avatar, member_since, balance, membership_level FROM users WHERE id = ?',
       [req.user.userId]
     )
 
@@ -2643,7 +2746,423 @@ app.put('/api/user/change-password', authenticateToken, async (req, res) => {
 })
 
 // ============================================
-// 14. 系统管理路由
+// 14. 充值系统路由
+// ============================================
+
+// 获取充值金额配置
+app.get('/api/recharge/amounts', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT amount, bonus_amount, is_active, sort_order 
+      FROM recharge_amounts 
+      WHERE is_active = TRUE 
+      ORDER BY sort_order ASC
+    `)
+
+    sendResponse(res, 200, '获取成功', rows)
+  } catch (error) {
+    handleError(res, error, '获取充值金额配置失败')
+  }
+})
+
+// 创建充值订单
+app.post('/api/recharge/create', authenticateToken, async (req, res) => {
+  try {
+    const { amount, payment_method } = req.body
+    const userId = req.user.userId
+
+    // 验证充值金额
+    const [amountConfig] = await pool.query(
+      `
+      SELECT bonus_amount FROM recharge_amounts 
+      WHERE amount = ? AND is_active = TRUE
+    `,
+      [amount]
+    )
+
+    if (amountConfig.length === 0) {
+      return sendResponse(res, 400, '无效的充值金额')
+    }
+
+    const bonusAmount = parseFloat(amountConfig[0].bonus_amount) || 0
+    const totalAmount = parseFloat(amount) + bonusAmount
+
+    // 创建充值记录
+    const [result] = await pool.query(
+      `
+      INSERT INTO recharge_records 
+      (user_id, amount, bonus_amount, total_amount, payment_method, payment_status) 
+      VALUES (?, ?, ?, ?, ?, 'pending')
+    `,
+      [userId, amount, bonusAmount, totalAmount, payment_method]
+    )
+
+    const rechargeId = result.insertId
+
+    // 生成支付参数（这里需要根据实际支付接口调整）
+    const paymentData = {
+      recharge_id: rechargeId,
+      amount: amount,
+      total_amount: totalAmount,
+      payment_method: payment_method,
+      // 这里应该调用第三方支付接口获取支付参数
+      payment_url: `https://payment.example.com/pay?amount=${amount}&method=${payment_method}&order_id=${rechargeId}`,
+    }
+
+    sendResponse(res, 200, '充值订单创建成功', paymentData)
+  } catch (error) {
+    handleError(res, error, '创建充值订单失败')
+  }
+})
+
+// 确认充值支付
+app.post('/api/recharge/confirm', authenticateToken, async (req, res) => {
+  try {
+    const { recharge_id, transaction_id, payment_status } = req.body
+    const userId = req.user.userId
+
+    // 更新充值记录状态
+    const [result] = await pool.query(
+      `
+      UPDATE recharge_records 
+      SET payment_status = ?, transaction_id = ?, updated_at = NOW()
+      WHERE id = ? AND user_id = ?
+    `,
+      [payment_status, transaction_id, recharge_id, userId]
+    )
+
+    if (result.affectedRows === 0) {
+      return sendResponse(res, 404, '充值记录不存在')
+    }
+
+    // 如果支付成功，触发器会自动处理余额更新
+    if (payment_status === 'success') {
+      // 获取充值信息
+      const [rechargeInfo] = await pool.query(
+        `
+        SELECT amount, bonus_amount, total_amount 
+        FROM recharge_records 
+        WHERE id = ?
+      `,
+        [recharge_id]
+      )
+
+      sendResponse(res, 200, '充值成功', {
+        recharge_id: recharge_id,
+        amount: rechargeInfo[0].amount,
+        bonus_amount: rechargeInfo[0].bonus_amount,
+        total_amount: rechargeInfo[0].total_amount,
+      })
+    } else {
+      sendResponse(res, 200, '支付状态已更新', { payment_status })
+    }
+  } catch (error) {
+    handleError(res, error, '确认充值支付失败')
+  }
+})
+
+// 获取充值记录
+app.get('/api/recharge/records', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId
+    const { page = 1, limit = 10 } = req.query
+    const offset = (page - 1) * limit
+
+    const [rows] = await pool.query(
+      `
+      SELECT id, amount, bonus_amount, total_amount, payment_method, 
+             payment_status, transaction_id, created_at, updated_at
+      FROM recharge_records 
+      WHERE user_id = ? 
+      ORDER BY created_at DESC 
+      LIMIT ? OFFSET ?
+    `,
+      [userId, parseInt(limit), offset]
+    )
+
+    const [countResult] = await pool.query(
+      `
+      SELECT COUNT(*) as total FROM recharge_records WHERE user_id = ?
+    `,
+      [userId]
+    )
+
+    sendResponse(res, 200, '获取成功', {
+      records: rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: countResult[0].total,
+        pages: Math.ceil(countResult[0].total / limit),
+      },
+    })
+  } catch (error) {
+    handleError(res, error, '获取充值记录失败')
+  }
+})
+
+// 获取余额变动记录
+app.get('/api/recharge/transactions', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId
+    const { page = 1, limit = 10, type } = req.query
+    const offset = (page - 1) * limit
+
+    let whereClause = 'WHERE user_id = ?'
+    const params = [userId]
+
+    if (type) {
+      whereClause += ' AND transaction_type = ?'
+      params.push(type)
+    }
+
+    params.push(parseInt(limit), offset)
+
+    const [rows] = await pool.query(
+      `
+      SELECT id, transaction_type, amount, balance_before, balance_after, 
+             related_id, description, created_at
+      FROM balance_transactions 
+      ${whereClause}
+      ORDER BY created_at DESC 
+      LIMIT ? OFFSET ?
+    `,
+      params
+    )
+
+    const [countResult] = await pool.query(
+      `
+      SELECT COUNT(*) as total FROM balance_transactions ${whereClause}
+    `,
+      params.slice(0, -2)
+    )
+
+    sendResponse(res, 200, '获取成功', {
+      transactions: rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: countResult[0].total,
+        pages: Math.ceil(countResult[0].total / limit),
+      },
+    })
+  } catch (error) {
+    handleError(res, error, '获取余额变动记录失败')
+  }
+})
+
+// 获取用户余额信息
+app.get('/api/recharge/balance', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId
+
+    const [rows] = await pool.query(
+      `
+      SELECT id, username, balance, membership_level, total_recharge, 
+             discount_rate, benefits
+      FROM v_user_balance_info 
+      WHERE id = ?
+    `,
+      [userId]
+    )
+
+    if (rows.length === 0) {
+      return sendResponse(res, 404, '用户不存在')
+    }
+
+    sendResponse(res, 200, '获取成功', rows[0])
+  } catch (error) {
+    handleError(res, error, '获取用户余额信息失败')
+  }
+})
+
+// 获取用户会员折扣信息
+app.get(
+  '/api/user/membership-discount',
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const userId = req.user.userId
+
+      const [[userInfo]] = await pool.query(
+        'SELECT membership_level FROM users WHERE id = ?',
+        [userId]
+      )
+
+      if (!userInfo) {
+        return sendResponse(res, 404, '用户不存在')
+      }
+
+      const [[membershipInfo]] = await pool.query(
+        'SELECT level_name, discount_rate, benefits FROM membership_levels WHERE level_name = ?',
+        [userInfo.membership_level || '普通会员']
+      )
+
+      const discountInfo = {
+        membership_level: userInfo.membership_level || '普通会员',
+        discount_rate: membershipInfo?.discount_rate || 1.0,
+        benefits: membershipInfo?.benefits || '基础购物体验',
+        discount_percentage: Math.round(
+          (1 - (membershipInfo?.discount_rate || 1.0)) * 100
+        ),
+      }
+
+      sendResponse(res, 200, '获取成功', discountInfo)
+    } catch (error) {
+      handleError(res, error, '获取会员折扣信息失败')
+    }
+  }
+)
+
+// 获取会员等级信息
+app.get('/api/recharge/membership-levels', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT level_name, level_icon, min_amount, discount_rate, benefits
+      FROM membership_levels 
+      ORDER BY min_amount ASC
+    `)
+
+    sendResponse(res, 200, '获取成功', rows)
+  } catch (error) {
+    handleError(res, error, '获取会员等级信息失败')
+  }
+})
+
+// 使用余额支付订单
+app.post(
+  '/api/recharge/pay-with-balance',
+  authenticateToken,
+  async (req, res) => {
+    const connection = await pool.getConnection()
+
+    try {
+      const { order_id, amount, description } = req.body
+      const userId = req.user.userId
+
+      // 开始事务
+      await connection.beginTransaction()
+
+      try {
+        // 调用存储过程处理余额支付
+        const [result] = await connection.query(
+          `
+        CALL sp_process_balance_payment(?, ?, ?, ?)
+      `,
+          [userId, amount, order_id, description]
+        )
+
+        // 更新订单支付状态
+        await connection.query(
+          `
+        UPDATE orders 
+        SET payment_status = 'paid', payment_method = 'balance', updated_at = NOW()
+        WHERE id = ? AND user_id = ?
+      `,
+          [order_id, userId]
+        )
+
+        await connection.commit()
+
+        sendResponse(res, 200, '支付成功', {
+          order_id: order_id,
+          paid_amount: amount,
+          payment_method: 'balance',
+          balance_after: result[0][0].balance_after,
+        })
+      } catch (error) {
+        await connection.rollback()
+        throw error
+      }
+    } catch (error) {
+      if (error.message === '余额不足') {
+        sendResponse(res, 400, '余额不足')
+      } else {
+        handleError(res, error, '余额支付失败')
+      }
+    } finally {
+      connection.release()
+    }
+  }
+)
+
+// 申请退款
+app.post('/api/recharge/refund', authenticateToken, async (req, res) => {
+  const connection = await pool.getConnection()
+
+  try {
+    const { transaction_id, amount, reason } = req.body
+    const userId = req.user.userId
+
+    // 验证交易记录
+    const [transaction] = await pool.query(
+      `
+      SELECT id, amount, transaction_type, related_id
+      FROM balance_transactions 
+      WHERE id = ? AND user_id = ? AND transaction_type = 'purchase'
+    `,
+      [transaction_id, userId]
+    )
+
+    if (transaction.length === 0) {
+      return sendResponse(res, 404, '交易记录不存在')
+    }
+
+    const refundAmount = Math.min(amount, Math.abs(transaction[0].amount))
+
+    // 开始事务
+    await connection.beginTransaction()
+
+    try {
+      // 增加用户余额
+      await connection.query(
+        `
+        UPDATE users SET balance = balance + ? WHERE id = ?
+      `,
+        [refundAmount, userId]
+      )
+
+      // 记录退款交易
+      await connection.query(
+        `
+        INSERT INTO balance_transactions 
+        (user_id, transaction_type, amount, balance_before, balance_after, 
+         related_id, description)
+        VALUES (?, 'refund', ?, 
+                (SELECT balance - ? FROM users WHERE id = ?),
+                (SELECT balance FROM users WHERE id = ?),
+                ?, ?)
+      `,
+        [
+          userId,
+          refundAmount,
+          refundAmount,
+          userId,
+          userId,
+          transaction_id,
+          `退款: ${reason || '用户申请退款'}`,
+        ]
+      )
+
+      await connection.commit()
+
+      sendResponse(res, 200, '退款成功', {
+        refund_amount: refundAmount,
+        transaction_id: transaction_id,
+      })
+    } catch (error) {
+      await connection.rollback()
+      throw error
+    }
+  } catch (error) {
+    handleError(res, error, '退款失败')
+  } finally {
+    connection.release()
+  }
+})
+
+// ============================================
+// 15. 系统管理路由
 // ============================================
 
 // 获取系统统计信息
@@ -2693,7 +3212,7 @@ app.get('/api/health', async (req, res) => {
       status: 'healthy',
       timestamp: new Date().toISOString(),
     })
-  } catch (error) {
+  } catch {
     res.status(500).json({
       code: 500,
       message: '服务异常',
@@ -2738,7 +3257,18 @@ app.listen(PORT, () => {
   console.log('  GET    /api/orders/search              - 🆕 订单搜索')
   console.log('  POST   /api/orders/batch-update-status - 🆕 批量更新订单状态')
   console.log('  GET    /api/orders/statistics          - 🆕 订单数据统计')
+  console.log('\n【充值系统 - 全新】')
+  console.log('  GET    /api/recharge/amounts           - 🆕 获取充值金额配置')
+  console.log('  POST   /api/recharge/create            - 🆕 创建充值订单')
+  console.log('  POST   /api/recharge/confirm           - 🆕 确认充值支付')
+  console.log('  GET    /api/recharge/records           - 🆕 获取充值记录')
+  console.log('  GET    /api/recharge/transactions      - 🆕 获取余额变动记录')
+  console.log('  GET    /api/recharge/balance           - 🆕 获取用户余额信息')
+  console.log('  GET    /api/recharge/membership-levels - 🆕 获取会员等级信息')
+  console.log('  POST   /api/recharge/pay-with-balance  - 🆕 使用余额支付订单')
+  console.log('  POST   /api/recharge/refund            - 🆕 申请退款')
   console.log('\n💡 支持自动状态流转（前端调用 PUT /api/orders/:id/status）')
+  console.log('💡 支持余额支付和会员等级自动升级')
   console.log('='.repeat(60) + '\n')
 })
 
