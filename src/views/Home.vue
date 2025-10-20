@@ -331,20 +331,25 @@
               <p class="comment-list-item-content">{{ review.comment }}</p>
               <div class="comment-list-item-like">
                 <!-- 点赞 -->
-                <button class="comment-list-item-likes">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20px"
-                    height="20px"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
-                  >
-                    <path
-                      d="M234,80.12A24,24,0,0,0,216,72H160V56a40,40,0,0,0-40-40,8,8,0,0,0-7.16,4.42L75.06,96H32a16,16,0,0,0-16,16v88a16,16,0,0,0,16,16H204a24,24,0,0,0,23.82-21l12-96A24,24,0,0,0,234,80.12ZM32,112H72v88H32ZM223.94,97l-12,96a8,8,0,0,1-7.94,7H88V105.89l36.71-73.43A24,24,0,0,1,144,56V80a8,8,0,0,0,8,8h64a8,8,0,0,1,7.94,9Z"
-                    ></path>
-                  </svg>
-                  <p>{{ review.likes || 0 }}</p>
-                </button>
+                <el-button
+                  text
+                  :type="review.userAction === 1 ? 'warning' : 'default'"
+                  @click.stop="likeReview(review)"
+                  size="small"
+                >
+                  <el-icon><Star /></el-icon>
+                  {{ review.likes || 0 }}
+                </el-button>
+                <!-- 踩 -->
+                <el-button
+                  text
+                  :type="review.userAction === -1 ? 'danger' : 'default'"
+                  @click.stop="dislikeReview(review)"
+                  size="small"
+                >
+                  <el-icon><CircleClose /></el-icon>
+                  {{ review.dislikes || 0 }}
+                </el-button>
               </div>
             </div>
             <!-- 如果没有评价 -->
@@ -422,10 +427,18 @@ defineOptions({
 
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { Star, CircleClose } from '@element-plus/icons-vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { getGoodsList } from '@/api/index.js'
+import {
+  likeReview as likeReviewAPI,
+  dislikeReview as dislikeReviewAPI,
+} from '@/api/review.js'
+import { useUserStore } from '@/stores/userStore'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 // 数据状态
 const loading = ref(false)
@@ -587,6 +600,64 @@ const click = id => {
 const formatDate = dateString => {
   const date = new Date(dateString)
   return date.toLocaleDateString('zh-CN')
+}
+
+// 点赞评价
+const likeReview = async review => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+
+  try {
+    const response = await likeReviewAPI(review.id)
+
+    // 更新本地数据（从 response.data.data 获取）
+    if (response.data && response.data.data) {
+      review.likes = response.data.data.likes
+      review.dislikes = response.data.data.dislikes
+      review.userAction = response.data.data.userAction
+
+      if (response.data.data.userAction === 1) {
+        ElMessage.success('点赞成功')
+      } else {
+        ElMessage.info('已取消点赞')
+      }
+    }
+  } catch (error) {
+    console.error('点赞失败:', error)
+    ElMessage.error(error.message || '点赞失败')
+  }
+}
+
+// 踩评价
+const dislikeReview = async review => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+
+  try {
+    const response = await dislikeReviewAPI(review.id)
+
+    // 更新本地数据（从 response.data.data 获取）
+    if (response.data && response.data.data) {
+      review.likes = response.data.data.likes
+      review.dislikes = response.data.data.dislikes
+      review.userAction = response.data.data.userAction
+
+      if (response.data.data.userAction === -1) {
+        ElMessage.success('已踩')
+      } else {
+        ElMessage.info('已取消踩')
+      }
+    }
+  } catch (error) {
+    console.error('踩失败:', error)
+    ElMessage.error(error.message || '操作失败')
+  }
 }
 
 // 默认占位图 - SVG格式，轻量且美观
@@ -1169,25 +1240,9 @@ onUnmounted(() => {
 
 .comment-list-item-like {
   display: flex;
-  gap: 36px;
-  color: #618961;
-}
-
-.comment-list-item-likes,
-.comment-list-item-stepon {
-  display: flex;
+  gap: 16px;
   align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: inherit;
-  padding: 0;
-}
-
-.comment-list-item-likes p,
-.comment-list-item-stepon p {
-  color: inherit;
+  margin-top: 8px;
 }
 
 /* 故事 */

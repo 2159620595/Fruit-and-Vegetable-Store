@@ -331,6 +331,19 @@ app.get('/api/home', async (req, res) => {
   try {
     const userId = req.query.user_id || null
 
+    // 从请求头获取当前登录用户ID（用于点赞状态）
+    const token = req.headers.authorization?.split(' ')[1]
+    let currentUserId = null
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET)
+        currentUserId = decoded.userId
+      } catch (err) {
+        // Token无效或过期，继续作为未登录用户
+      }
+    }
+
     const [
       banners,
       categories,
@@ -361,7 +374,7 @@ app.get('/api/home', async (req, res) => {
         ORDER BY p.rating DESC, p.review_count DESC
         LIMIT 4
       `,
-          [userId]
+          [userId || currentUserId]
         )
         .then(([rows]) => rows)
         .catch(() => []),
@@ -405,6 +418,32 @@ app.get('/api/home', async (req, res) => {
         .then(([rows]) => rows)
         .catch(() => []),
     ])
+
+    // 如果用户已登录，获取用户对客户评价的点赞/踩状态
+    if (currentUserId && customerReviews.length > 0) {
+      const reviewIds = customerReviews.map(r => r.id)
+      const [userLikes] = await pool.query(
+        `SELECT review_id, type FROM review_likes 
+         WHERE user_id = ? AND review_id IN (?)`,
+        [currentUserId, reviewIds]
+      )
+
+      // 创建一个映射
+      const likesMap = {}
+      userLikes.forEach(like => {
+        likesMap[like.review_id] = like.type
+      })
+
+      // 为每条评论添加用户的操作状态
+      customerReviews.forEach(review => {
+        review.userAction = likesMap[review.id] || null
+      })
+    } else {
+      // 未登录用户，所有评论的userAction都为null
+      customerReviews.forEach(review => {
+        review.userAction = null
+      })
+    }
 
     sendResponse(res, 200, '获取成功', {
       banner: banners,

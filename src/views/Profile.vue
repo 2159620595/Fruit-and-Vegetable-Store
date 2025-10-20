@@ -13,14 +13,16 @@
             <img
               :src="userStore.user?.avatar || defaultAvatar"
               alt="用户头像"
+              class="avatar-image"
               @error="handleAvatarError"
+              @click="showAvatarPreview = true"
             />
             <el-button
               circle
               size="small"
               type="success"
               class="avatar-edit-btn"
-              @click="showAvatarDialog = true"
+              @click.stop="showAvatarDialog = true"
             >
               <el-icon :size="14">
                 <Edit />
@@ -286,6 +288,33 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 头像预览对话框 -->
+    <el-dialog
+      v-model="showAvatarPreview"
+      title="头像预览"
+      width="auto"
+      :close-on-click-modal="true"
+      center
+      class="avatar-preview-dialog"
+    >
+      <div class="avatar-preview-content">
+        <div class="preview-avatar-container">
+          <img
+            :src="userStore.user?.avatar || defaultAvatar"
+            alt="用户头像预览"
+            class="preview-avatar-large"
+            @error="handleAvatarError"
+          />
+        </div>
+        <div class="preview-actions">
+          <el-button type="primary" @click="handleChangeAvatar">
+            <el-icon><Edit /></el-icon>
+            更换头像
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -321,6 +350,7 @@ const userStore = useUserStore()
 
 // 响应式数据
 const showAvatarDialog = ref(false)
+const showAvatarPreview = ref(false)
 const showPasswordDialog = ref(false)
 const uploading = ref(false)
 const changingPassword = ref(false)
@@ -618,6 +648,12 @@ const handleLogout = async () => {
   }
 }
 
+// 处理更换头像
+const handleChangeAvatar = () => {
+  showAvatarDialog.value = true
+  showAvatarPreview.value = false
+}
+
 // 生命周期
 onMounted(async () => {
   // 确保用户信息是最新的
@@ -680,7 +716,7 @@ onMounted(async () => {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
   background-color: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
@@ -692,12 +728,21 @@ onMounted(async () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .avatar-edit-btn {
   position: absolute;
   bottom: -2px;
   right: -2px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid white !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
 }
 
 .user-info {
@@ -826,10 +871,18 @@ onMounted(async () => {
   gap: 12px;
 }
 
+/* 覆盖 Element Plus 默认的按钮间距 */
+.account-actions .el-button + .el-button {
+  margin-left: 0 !important;
+}
+
 .account-btn {
   width: 100%;
   height: auto;
   padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .btn-icon {
@@ -1040,5 +1093,59 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+/* 头像预览对话框样式 */
+.avatar-preview-dialog :deep(.el-dialog) {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.avatar-preview-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+}
+
+.preview-avatar-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #e5e7eb;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-avatar-large {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.preview-avatar-large:hover {
+  transform: scale(1.05);
+}
+
+.preview-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* 头像图片样式 */
+.avatar-image {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.avatar-image:hover {
+  transform: scale(1.05);
 }
 </style>

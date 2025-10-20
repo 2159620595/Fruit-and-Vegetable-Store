@@ -596,7 +596,7 @@
                 <span class="count">{{ review.likes || 0 }}</span>
               </el-button>
               <el-button
-                :type="review.userAction === -1 ? 'info' : ''"
+                :type="review.userAction === -1 ? 'danger' : ''"
                 :text="review.userAction !== -1"
                 @click="dislikeReview(review.id)"
               >
