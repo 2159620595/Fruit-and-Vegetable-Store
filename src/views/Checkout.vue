@@ -76,12 +76,48 @@
           <!-- Payment Method -->
           <div class="form-section">
             <h2 class="section-title">付款方式</h2>
+
+            <!-- 余额信息显示 -->
+            <div class="balance-info-box">
+              <el-icon class="balance-icon" :size="18">
+                <Wallet />
+              </el-icon>
+              <span class="balance-text">当前余额：</span>
+              <span
+                class="balance-amount"
+                :class="{
+                  insufficient:
+                    parseFloat(userStore.balance || 0) < totalAmount,
+                }"
+              >
+                ¥{{ parseFloat(userStore.balance || 0).toFixed(2) }}
+              </span>
+              <router-link to="/profile" class="recharge-link">
+                <el-icon :size="14"><Plus /></el-icon>
+                充值
+              </router-link>
+            </div>
+
             <el-select
               v-model="paymentMethod"
               placeholder="请选择支付方式"
               class="payment-select"
               size="large"
             >
+              <el-option value="balance" label="余额支付">
+                <span class="payment-option-content">
+                  <el-icon class="payment-icon balance-icon-opt" :size="20">
+                    <Wallet />
+                  </el-icon>
+                  <span class="payment-name">余额支付</span>
+                  <span
+                    v-if="parseFloat(userStore.balance || 0) < totalAmount"
+                    class="insufficient-tag"
+                  >
+                    余额不足
+                  </span>
+                </span>
+              </el-option>
               <el-option value="wechat" label="微信支付">
                 <span class="payment-option-content">
                   <el-icon class="payment-icon wechat-icon" :size="20">
@@ -107,6 +143,22 @@
                 </span>
               </el-option>
             </el-select>
+
+            <!-- 余额不足提示 -->
+            <div
+              v-if="
+                paymentMethod === 'balance' &&
+                parseFloat(userStore.balance || 0) < totalAmount
+              "
+              class="insufficient-warning"
+            >
+              <el-alert
+                title="余额不足，请充值后再试或选择其他支付方式"
+                type="warning"
+                :closable="false"
+                show-icon
+              />
+            </div>
 
             <!-- Credit Card Fields -->
             <div v-if="paymentMethod === 'credit_card'" class="payment-fields">
@@ -265,10 +317,11 @@ import {
   CircleCheck,
   InfoFilled,
   SuccessFilled,
+  Plus,
 } from '@element-plus/icons-vue'
 import { useCartStore } from '../stores/cartStore'
 import { useOrderStore } from '../stores/orderStore'
-// import { useUserStore } from '../stores/userStore' // 暂时未使用
+import { useUserStore } from '../stores/userStore'
 // import { useAddressStore } from '../stores/addressStore' // 暂时未使用
 import AddressSelector from '../components/AddressSelector.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
@@ -277,11 +330,12 @@ import {
   calculateFreeShippingRemaining,
   FREE_SHIPPING_THRESHOLD,
 } from '@/config/shipping'
+import { payOrder } from '@/api/order'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const orderStore = useOrderStore()
-// const userStore = useUserStore() // 暂时未使用
+const userStore = useUserStore()
 // const addressStore = useAddressStore() // 暂时未使用
 
 // 选中的地址ID
@@ -291,7 +345,7 @@ const selectedAddressId = ref(null)
 const selectedAddress = ref(null)
 
 const deliveryMethod = ref('standard')
-const paymentMethod = ref('wechat')
+const paymentMethod = ref('balance') // 默认选择余额支付
 
 const cardInfo = ref({
   number: '',
@@ -333,11 +387,20 @@ const totalAmount = computed(() => {
   return subtotal + shipping - discountAmount
 })
 
-// 页面加载时检查购物车
-onMounted(() => {
+// 页面加载时检查购物车并刷新余额
+onMounted(async () => {
+  // 如果没有选中的商品，页面会显示UI提示，不需要额外的消息提示
   if (cartStore.selectedItems.length === 0) {
-    ElMessage.warning('购物车中没有选中的商品')
-    router.push('/cart')
+    // 静默跳转回购物车（页面UI已经有提示了）
+    // router.push('/cart')  // 注释掉自动跳转，让用户自己点击按钮
+    return
+  }
+
+  // 刷新用户余额
+  try {
+    await userStore.fetchUserBalance()
+  } catch (error) {
+    console.error('获取用户余额失败:', error)
   }
 })
 
@@ -441,10 +504,29 @@ const submitOrder = async () => {
       return
     }
 
+    // 如果选择余额支付，检查余额是否充足
+    if (paymentMethod.value === 'balance') {
+      const balance = parseFloat(userStore.balance || 0)
+      if (balance < totalAmount.value) {
+        ElMessage.error('余额不足，请充值或选择其他支付方式')
+        submitting.value = false
+        return
+      }
+    }
+
     // 显示支付确认对话框
     try {
+      const paymentMethodText =
+        paymentMethod.value === 'balance'
+          ? '余额支付'
+          : paymentMethod.value === 'wechat'
+            ? '微信支付'
+            : paymentMethod.value === 'alipay'
+              ? '支付宝'
+              : '信用卡支付'
+
       await ElMessageBox.confirm(
-        `确认支付 ¥${totalAmount.value.toFixed(2)} 吗？（含运费 ¥${shippingCost.value.toFixed(2)}）`,
+        `使用${paymentMethodText}支付 ¥${totalAmount.value.toFixed(2)}（含运费 ¥${shippingCost.value.toFixed(2)}）`,
         '确认支付',
         {
           confirmButtonText: '确认支付',
@@ -454,34 +536,59 @@ const submitOrder = async () => {
         }
       )
 
-      // 用户确认支付，更新订单状态为待发货
+      // 用户确认支付，调用支付接口
       ElMessage.info('正在处理支付...')
 
-      // 模拟支付处理
-      setTimeout(async () => {
-        try {
-          // 模拟支付成功，更新订单状态为待发货
-          await orderStore.updateOrderStatus(orderId, 'processing')
+      try {
+        // 调用支付接口
+        const paymentData = {
+          payment_method: paymentMethod.value,
+          use_balance: paymentMethod.value === 'balance',
+        }
 
+        const paymentResult = await payOrder(
+          orderId,
+          paymentData.payment_method
+        )
+
+        // 检查响应数据结构
+        const resultData = paymentResult.data || paymentResult
+
+        if (resultData.code === 200) {
+          // 支付成功
           ElMessage.success('支付成功！订单已确认')
+
+          // 如果使用余额支付，更新用户余额
+          if (paymentMethod.value === 'balance') {
+            await userStore.fetchUserBalance()
+          }
 
           // 清除购物车中已购买的商品
           await cartStore.removeSelectedItems()
 
           // 跳转到订单列表页
           router.push('/orders')
-        } catch {
-          ElMessage.error('支付处理失败，请重试')
-        } finally {
-          submitting.value = false
+        } else {
+          ElMessage.error(resultData.message || '支付失败，请重试')
         }
-      }, 2000) // 模拟2秒支付处理时间
+      } catch (payError) {
+        console.error('支付错误:', payError)
+
+        // 如果是余额不足的错误
+        if (payError.message && payError.message.includes('余额不足')) {
+          ElMessage.error('余额不足，请充值或选择其他支付方式')
+        } else {
+          ElMessage.error('支付处理失败，请重试')
+        }
+      } finally {
+        submitting.value = false
+      }
     } catch (error) {
       // 用户取消支付，将订单状态设为待支付
       if (error === 'cancel' || error === 'close') {
         try {
           await orderStore.updateOrderStatus(orderId, 'pending')
-          ElMessage.info('已取消支付，订单状态已更新为待支付')
+          ElMessage.info('已取消支付，您可以稍后在订单列表中继续支付')
         } catch {
           ElMessage.error('更新订单状态失败')
         }
@@ -869,10 +976,80 @@ const formatPrice = price => {
   color: #f5222d;
 }
 
+.balance-icon-opt {
+  color: #67c23a;
+}
+
 .payment-name {
   font-size: 15px;
   color: #333333;
   font-weight: 500;
+  flex: 1;
+}
+
+.insufficient-tag {
+  font-size: 12px;
+  color: #f56c6c;
+  background-color: #fef0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+/* 余额信息框 */
+.balance-info-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #e5e5e5;
+}
+
+.balance-info-box .balance-icon {
+  color: #67c23a;
+}
+
+.balance-info-box .balance-text {
+  font-size: 14px;
+  color: #606266;
+}
+
+.balance-info-box .balance-amount {
+  font-size: 18px;
+  font-weight: 600;
+  color: #67c23a;
+  flex: 1;
+}
+
+.balance-info-box .balance-amount.insufficient {
+  color: #f56c6c;
+}
+
+.recharge-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  background-color: #67c23a;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.recharge-link:hover {
+  background-color: #85ce61;
+  transform: translateY(-1px);
+}
+
+/* 余额不足提示 */
+.insufficient-warning {
+  margin-top: 16px;
 }
 
 /* 下拉面板样式 */

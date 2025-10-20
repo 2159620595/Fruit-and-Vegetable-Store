@@ -46,7 +46,10 @@ export const updateOrderStatus = (id, status) => {
 
 // 支付订单
 export const payOrder = (id, paymentMethod) => {
-  return request.post(`/orders/${id}/pay`, { payment_method: paymentMethod })
+  return request.post(`/orders/${id}/pay`, { 
+    payment_method: paymentMethod,
+    use_balance: paymentMethod === 'balance'
+  })
 }
 
 // 评价订单

@@ -9,6 +9,7 @@ import {
   confirmOrder as confirmOrderAPI,
   deleteOrder as deleteOrderAPI,
   updateOrderStatus as updateOrderStatusAPI,
+  payOrder as payOrderAPI,
   buyAgain as buyAgainAPI,
   searchOrders as searchOrdersAPI,
   batchUpdateOrderStatus as batchUpdateOrderStatusAPI,
@@ -204,14 +205,18 @@ async function updateOrderStatus(id, status) {
 async function payOrder(orderId, paymentMethod) {
   try {
     setLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    await updateOrderStatus(orderId, 'processing')
+    // 调用真实的支付 API
+    const response = await payOrderAPI(orderId, paymentMethod)
+    const result = response.data || response
+
+    // 更新本地订单状态
     const order = orders.value.find(o => o.id === orderId)
     if (order) {
       order.status = 'processing'
       order.payment_method = paymentMethod
     }
-    return { success: true, message: '支付成功' }
+
+    return result
   } catch (err) {
     setError(err.message || '支付失败')
     throw err

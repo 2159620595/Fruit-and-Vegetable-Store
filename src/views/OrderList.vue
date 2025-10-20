@@ -469,6 +469,7 @@
     <!-- 支付对话框 -->
     <PaymentDialog
       v-model="paymentDialogVisible"
+      :amount="currentPaymentAmount"
       @confirm="handlePaymentConfirm"
       @cancel="handlePaymentCancel"
     />
@@ -527,6 +528,7 @@ const currentReviewOrderId = ref(null)
 // 支付对话框状态
 const paymentDialogVisible = ref(false)
 const currentPaymentOrderId = ref(null)
+const currentPaymentAmount = ref(0)
 
 // 自动状态流转相关
 const autoStatusTimers = ref(new Map()) // 存储每个订单的定时器
@@ -1323,6 +1325,12 @@ const handlePayOrder = async (orderId, event) => {
     return
   }
 
+  // 查找当前订单以获取金额
+  const currentOrder = orders.value.find(o => o.id === orderId)
+  if (currentOrder) {
+    currentPaymentAmount.value = parseFloat(currentOrder.total_amount) || 0
+  }
+
   // 打开支付对话框
   currentPaymentOrderId.value = orderId
   paymentDialogVisible.value = true
@@ -1348,6 +1356,14 @@ const handlePaymentConfirm = async paymentMethod => {
     await orderStore.payOrder(currentPaymentOrderId.value, paymentMethod)
 
     loading.close()
+
+    // 如果使用余额支付，刷新用户余额
+    if (paymentMethod === 'balance') {
+      const { useUserStore } = await import('@/stores/userStore')
+      const userStore = useUserStore()
+      await userStore.fetchUserBalance()
+    }
+
     ElMessage.success({
       message: '支付成功！订单状态已更新',
       duration: 3000,
@@ -1362,16 +1378,24 @@ const handlePaymentConfirm = async paymentMethod => {
     console.error('❌ 支付失败:', error)
     const errorMsg =
       error.response?.data?.message || error.message || '支付失败'
-    ElMessage.error(errorMsg)
+
+    // 特殊处理余额不足的情况
+    if (errorMsg.includes('余额不足')) {
+      ElMessage.error('余额不足，请充值或选择其他支付方式')
+    } else {
+      ElMessage.error(errorMsg)
+    }
   } finally {
     actionLoading.value = false
     currentPaymentOrderId.value = null
+    currentPaymentAmount.value = 0
   }
 }
 
 // 取消支付
 const handlePaymentCancel = () => {
   currentPaymentOrderId.value = null
+  currentPaymentAmount.value = 0
 }
 
 // 联系商家

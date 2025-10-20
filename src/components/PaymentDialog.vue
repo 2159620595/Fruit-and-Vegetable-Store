@@ -2,12 +2,29 @@
   <el-dialog
     v-model="visible"
     title="订单支付"
-    width="400px"
+    width="450px"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     @close="handleClose"
   >
     <div class="payment-dialog-content">
+      <!-- 订单金额显示 -->
+      <div v-if="amount" class="payment-amount">
+        <div class="amount-label">订单金额</div>
+        <div class="amount-value">¥{{ amount.toFixed(2) }}</div>
+      </div>
+
+      <!-- 余额信息显示 -->
+      <div v-if="userBalance !== null" class="balance-info">
+        <el-icon class="balance-icon" :size="16">
+          <Wallet />
+        </el-icon>
+        <span class="balance-text">当前余额：</span>
+        <span class="balance-amount" :class="{ 'insufficient': userBalance < amount }">
+          ¥{{ userBalance.toFixed(2) }}
+        </span>
+      </div>
+
       <p class="dialog-tip">请选择支付方式</p>
       <el-select
         v-model="selectedPayment"
@@ -15,6 +32,15 @@
         class="payment-select"
         size="large"
       >
+        <el-option value="balance" label="余额支付">
+          <span class="payment-option-content">
+            <el-icon class="payment-icon balance-icon-opt" :size="20">
+              <Wallet />
+            </el-icon>
+            <span class="payment-name">余额支付</span>
+            <span v-if="userBalance < amount" class="insufficient-tag">余额不足</span>
+          </span>
+        </el-option>
         <el-option value="wechat" label="微信支付">
           <span class="payment-option-content">
             <el-icon class="payment-icon wechat-icon" :size="20">
@@ -40,6 +66,16 @@
           </span>
         </el-option>
       </el-select>
+
+      <!-- 余额不足提示 -->
+      <div v-if="selectedPayment === 'balance' && userBalance < amount" class="insufficient-warning">
+        <el-alert
+          title="余额不足，请充值后再试或选择其他支付方式"
+          type="warning"
+          :closable="false"
+          show-icon
+        />
+      </div>
     </div>
 
     <template #footer>
@@ -48,7 +84,7 @@
         <el-button
           type="primary"
           @click="handleConfirm"
-          :disabled="!selectedPayment"
+          :disabled="!selectedPayment || (selectedPayment === 'balance' && userBalance < amount)"
         >
           确认支付
         </el-button>
@@ -58,28 +94,46 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { ChatDotRound, Wallet, CreditCard } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/userStore'
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false,
   },
+  amount: {
+    type: Number,
+    default: 0,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
 
+const userStore = useUserStore()
 const visible = ref(props.modelValue)
-const selectedPayment = ref('wechat')
+const selectedPayment = ref('balance') // 默认选择余额支付
+
+// 获取用户余额
+const userBalance = computed(() => {
+  return userStore.balance || 0
+})
 
 watch(
   () => props.modelValue,
-  newVal => {
+  async newVal => {
     visible.value = newVal
     if (newVal) {
-      // 对话框打开时重置为默认值
-      selectedPayment.value = 'wechat'
+      // 对话框打开时刷新用户余额并重置为默认值
+      await userStore.fetchUserBalance()
+      
+      // 如果余额充足，默认选择余额支付；否则选择微信支付
+      if (userBalance.value >= props.amount) {
+        selectedPayment.value = 'balance'
+      } else {
+        selectedPayment.value = 'wechat'
+      }
     }
   }
 )
@@ -89,6 +143,11 @@ watch(visible, newVal => {
 })
 
 const handleConfirm = () => {
+  // 如果选择余额支付但余额不足，不允许确认
+  if (selectedPayment.value === 'balance' && userBalance.value < props.amount) {
+    return
+  }
+  
   emit('confirm', selectedPayment.value)
   visible.value = false
 }
@@ -106,6 +165,64 @@ const handleClose = () => {
 <style scoped>
 .payment-dialog-content {
   padding: 20px 0;
+}
+
+/* 订单金额显示 */
+.payment-amount {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.amount-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+}
+
+.amount-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: 'Arial', sans-serif;
+}
+
+/* 余额信息显示 */
+.balance-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.balance-icon {
+  color: #67c23a;
+}
+
+.balance-text {
+  font-size: 14px;
+  color: #606266;
+}
+
+.balance-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #67c23a;
+}
+
+.balance-amount.insufficient {
+  color: #f56c6c;
+}
+
+/* 余额不足提示 */
+.insufficient-warning {
+  margin-top: 16px;
 }
 
 .dialog-tip {
@@ -171,10 +288,24 @@ const handleClose = () => {
   color: #f5222d;
 }
 
+.balance-icon-opt {
+  color: #67c23a;
+}
+
 .payment-name {
   font-size: 15px;
   color: #333333;
   font-weight: 500;
+  flex: 1;
+}
+
+.insufficient-tag {
+  font-size: 12px;
+  color: #f56c6c;
+  background-color: #fef0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: auto;
 }
 
 /* 下拉面板样式 */

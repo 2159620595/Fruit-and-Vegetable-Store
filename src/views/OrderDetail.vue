@@ -366,6 +366,14 @@
       <h3 class="empty-title">暂无商品信息</h3>
       <p class="empty-message">该订单的商品信息可能丢失</p>
     </div>
+
+    <!-- 支付对话框 -->
+    <PaymentDialog
+      v-model="paymentDialogVisible"
+      :amount="paymentAmount"
+      @confirm="handlePaymentConfirm"
+      @cancel="handlePaymentCancel"
+    />
   </div>
 </template>
 
@@ -383,22 +391,29 @@ import {
   Refresh,
 } from '@element-plus/icons-vue'
 import { useOrderStore } from '@/stores/orderStore'
-// import { useUserStore } from '@/stores/userStore' // 暂时未使用
+import { useUserStore } from '@/stores/userStore'
 import { useLogisticsStore } from '@/stores/logisticsStore'
 import LogisticsTracker from '@/components/LogisticsTracker.vue'
 import LogisticsDialog from '@/components/LogisticsDialog.vue'
+import PaymentDialog from '@/components/PaymentDialog.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()
 const router = useRouter()
 const orderStore = useOrderStore()
-// const userStore = useUserStore() // 暂时未使用
+const userStore = useUserStore()
 const logisticsStore = useLogisticsStore()
 
 // State
 const order = ref(null)
 const loading = ref(false)
 const error = ref(null)
+
+// 支付对话框状态
+const paymentDialogVisible = ref(false)
+const paymentAmount = computed(() => {
+  return order.value ? parseFloat(order.value.total_amount) || 0 : 0
+})
 
 // Computed properties
 const orderSteps = computed(() => {
@@ -873,35 +888,44 @@ const handleImageError = event => {
 
 // Action handlers
 const handlePayOrder = async () => {
+  // 打开支付对话框
+  paymentDialogVisible.value = true
+}
+
+// 确认支付
+const handlePaymentConfirm = async paymentMethod => {
   try {
-    const { value: paymentMethod } = await ElMessageBox.prompt(
-      '请选择支付方式',
-      '支付订单',
-      {
-        confirmButtonText: '确认支付',
-        cancelButtonText: '取消',
-        inputType: 'select',
-        inputOptions: {
-          wechat: '微信支付',
-          alipay: '支付宝',
-          credit_card: '信用卡',
-        },
-        inputPlaceholder: '请选择支付方式',
-      }
-    )
-
-    if (!paymentMethod) return
-
+    loading.value = true
+    
     await orderStore.payOrder(order.value.id, paymentMethod)
-    ElMessage.success('支付成功！')
+    
+    // 如果使用余额支付，刷新用户余额
+    if (paymentMethod === 'balance') {
+      await userStore.fetchUserBalance()
+    }
+    
+    ElMessage.success('支付成功！订单状态已更新')
 
     // 重新加载订单详情
     await loadOrderDetail()
   } catch (error) {
-    if (error !== 'cancel' && error !== 'close') {
-      ElMessage.error('支付失败，请重试')
+    console.error('支付错误:', error)
+    const errorMsg = error.response?.data?.message || error.message || '支付失败'
+    
+    // 特殊处理余额不足的情况
+    if (errorMsg.includes('余额不足')) {
+      ElMessage.error('余额不足，请充值或选择其他支付方式')
+    } else {
+      ElMessage.error(errorMsg)
     }
+  } finally {
+    loading.value = false
   }
+}
+
+// 取消支付
+const handlePaymentCancel = () => {
+  // 什么也不做，只是关闭对话框
 }
 
 const handleReview = () => {

@@ -572,7 +572,7 @@ const reloadCart = async () => {
 
 /* 购物车表格 */
 .cart-table-wrapper {
-  padding: 12px 16px;
+  /* padding已移除 */
 }
 
 .cart-table-container {
