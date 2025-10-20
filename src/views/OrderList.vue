@@ -465,6 +465,13 @@
       :order-id="currentReviewOrderId"
       :order="currentReviewOrder"
     />
+
+    <!-- 支付对话框 -->
+    <PaymentDialog
+      v-model="paymentDialogVisible"
+      @confirm="handlePaymentConfirm"
+      @cancel="handlePaymentCancel"
+    />
   </div>
 </template>
 
@@ -480,6 +487,7 @@ import OrderReviewDialog from '@/components/OrderReviewDialog.vue'
 import ReviewDetailDialog from '@/components/ReviewDetailDialog.vue'
 import LogisticsDialog from '@/components/LogisticsDialog.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import PaymentDialog from '@/components/PaymentDialog.vue'
 import { h } from 'vue'
 
 const router = useRouter()
@@ -514,6 +522,10 @@ const currentReviewOrder = ref(null)
 // 查看评价对话框状态
 const reviewDetailDialogVisible = ref(false)
 const currentReviewOrderId = ref(null)
+
+// 支付对话框状态
+const paymentDialogVisible = ref(false)
+const currentPaymentOrderId = ref(null)
 
 // 自动状态流转相关
 const autoStatusTimers = ref(new Map()) // 存储每个订单的定时器
@@ -1307,29 +1319,18 @@ const handlePayOrder = async (orderId, event) => {
     return
   }
 
+  // 打开支付对话框
+  currentPaymentOrderId.value = orderId
+  paymentDialogVisible.value = true
+}
+
+// 确认支付
+const handlePaymentConfirm = async paymentMethod => {
+  if (!currentPaymentOrderId.value) {
+    return
+  }
+
   try {
-    // 显示支付方式选择对话框
-    const { value: paymentMethod } = await ElMessageBox.prompt(
-      '请选择支付方式',
-      '订单支付',
-      {
-        confirmButtonText: '确认支付',
-        cancelButtonText: '取消',
-        inputType: 'select',
-        inputOptions: {
-          wechat: '微信支付',
-          alipay: '支付宝',
-          credit_card: '信用卡',
-        },
-        inputValue: 'wechat',
-        inputPlaceholder: '请选择支付方式',
-      }
-    )
-
-    if (!paymentMethod) {
-      return
-    }
-
     actionLoading.value = true
 
     const loading = ElMessage({
@@ -1340,7 +1341,7 @@ const handlePayOrder = async (orderId, event) => {
     })
 
     // 调用支付API
-    await orderStore.payOrder(orderId, paymentMethod)
+    await orderStore.payOrder(currentPaymentOrderId.value, paymentMethod)
 
     loading.close()
     ElMessage.success({
@@ -1352,16 +1353,20 @@ const handlePayOrder = async (orderId, event) => {
     // 刷新列表 - 根据当前标签加载订单
     await loadOrders()
   } catch (error) {
-    if (error !== 'cancel' && error !== 'close') {
-      // eslint-disable-next-line no-console
-      console.error('❌ 支付失败:', error)
-      const errorMsg =
-        error.response?.data?.message || error.message || '支付失败'
-      ElMessage.error(errorMsg)
-    }
+    // eslint-disable-next-line no-console
+    console.error('❌ 支付失败:', error)
+    const errorMsg =
+      error.response?.data?.message || error.message || '支付失败'
+    ElMessage.error(errorMsg)
   } finally {
     actionLoading.value = false
+    currentPaymentOrderId.value = null
   }
+}
+
+// 取消支付
+const handlePaymentCancel = () => {
+  currentPaymentOrderId.value = null
 }
 
 // 联系商家

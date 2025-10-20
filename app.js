@@ -820,8 +820,15 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
   try {
     await connection.beginTransaction()
 
-    const { items, shipping_address, delivery_method, payment_method, remark } =
-      req.body
+    const {
+      items,
+      shipping_address,
+      delivery_method,
+      payment_method,
+      remark,
+      shipping_fee,
+      total_amount,
+    } = req.body
 
     if (!items || items.length === 0) {
       return sendResponse(res, 400, '订单商品不能为空')
@@ -833,7 +840,7 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
 
     const orderNumber = generateOrderNumber()
 
-    let totalAmount = 0
+    let calculatedSubtotal = 0
     const orderItems = []
 
     for (const item of items) {
@@ -851,7 +858,7 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
       }
 
       const subtotal = product.price * item.quantity
-      totalAmount += subtotal
+      calculatedSubtotal += subtotal
 
       orderItems.push({
         product_id: product.id,
@@ -868,8 +875,17 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
       )
     }
 
-    const shippingFee = delivery_method === 'express' ? 10.0 : 5.0
-    const finalTotal = totalAmount + shippingFee
+    // 使用前端传递的运费和总金额，如果没有则使用计算值
+    const shippingFee =
+      shipping_fee !== undefined
+        ? parseFloat(shipping_fee)
+        : delivery_method === 'express'
+          ? 10.0
+          : 5.0
+    const finalTotal =
+      total_amount !== undefined
+        ? parseFloat(total_amount)
+        : calculatedSubtotal + shippingFee
 
     const [orderResult] = await connection.query(
       `

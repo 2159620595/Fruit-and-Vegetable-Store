@@ -52,6 +52,8 @@ async function createOrder(orderData) {
       shipping_address: JSON.stringify(orderData.shippingAddress),
       delivery_method: orderData.deliveryMethod,
       payment_method: orderData.paymentMethod,
+      shipping_fee: orderData.shippingFee || 0,
+      total_amount: orderData.totalAmount || 0,
       remark: orderData.remark || '',
     }
     const response = await createOrderAPI(formattedData)
