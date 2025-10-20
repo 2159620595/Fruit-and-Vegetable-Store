@@ -1473,6 +1473,9 @@ const handleRecharge = async () => {
     // 模拟支付成功（实际项目中应该调用第三方支付接口）
     const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
+    // 保存充值前的等级
+    const oldLevel = userLevel.value
+
     // 确认充值支付
     const result = await userStore.confirmRechargePayment(
       orderData.data.recharge_id,
@@ -1480,22 +1483,28 @@ const handleRecharge = async () => {
       'success'
     )
 
+    // 刷新用户余额和个人信息以更新会员等级
+    await userStore.fetchUserBalance()
+    await userStore.fetchProfile()
+
     ElMessage({
       message: `充值成功！余额已增加 ¥${result.data.total_amount}`,
       type: 'success',
       icon: h(SuccessFilled),
     })
 
-    // 检查是否升级
-    const newLevel = getNewLevelAfterRecharge()
-    if (newLevel !== userLevel.value) {
-      ElMessage({
-        message: `恭喜！您已升级为 ${newLevel}！`,
-        type: 'success',
-        icon: h(Trophy),
-        duration: 5000,
-      })
-    }
+    // 检查是否升级（等待数据更新）
+    setTimeout(() => {
+      const newLevel = userLevel.value
+      if (newLevel !== oldLevel && newLevel !== '普通会员') {
+        ElMessage({
+          message: `恭喜！您已从 ${oldLevel} 升级为 ${newLevel}！`,
+          type: 'success',
+          icon: h(Trophy),
+          duration: 5000,
+        })
+      }
+    }, 500)
 
     // 重置状态
     selectedAmount.value = 0
@@ -1534,6 +1543,20 @@ const fetchRechargeHistory = async () => {
       totalRecords.value = result.total || 0
       if (result.statistics) {
         recordsStatistics.value = result.statistics
+      }
+
+      // 调试：检查返回的时间数据
+      if (rechargeRecords.value.length > 0) {
+        const firstRecord = rechargeRecords.value[0]
+        console.log('📝 充值记录样例数据:', {
+          created_at: firstRecord.created_at,
+          created_at_type: typeof firstRecord.created_at,
+          formatted: formatDateTime(firstRecord.created_at),
+          payment_method: firstRecord.payment_method,
+          payment_method_formatted: getPaymentMethodName(
+            firstRecord.payment_method
+          ),
+        })
       }
     }
   } catch (error) {
@@ -1584,25 +1607,66 @@ const viewRecordDetail = async record => {
 // 格式化日期时间
 const formatDateTime = datetime => {
   if (!datetime) return '-'
-  const date = new Date(datetime)
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+
+  try {
+    // 处理多种日期格式
+    let date
+    if (typeof datetime === 'string') {
+      // MySQL返回的时间格式通常是 'YYYY-MM-DD HH:mm:ss'
+      // 需要确保时区正确处理
+      date = new Date(datetime)
+    } else if (datetime instanceof Date) {
+      date = datetime
+    } else if (typeof datetime === 'number') {
+      // 时间戳
+      date = new Date(datetime)
+    } else {
+      console.warn('未知的日期格式:', datetime, typeof datetime)
+      return '-'
+    }
+
+    // 检查日期是否有效
+    if (isNaN(date.getTime())) {
+      console.error('无效的日期:', datetime)
+      return '-'
+    }
+
+    // 格式化为本地时间
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const seconds = String(date.getSeconds()).padStart(2, '0')
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+  } catch (error) {
+    console.error('日期格式化错误:', error, datetime)
+    return '-'
+  }
 }
 
 // 获取支付方式名称
 const getPaymentMethodName = method => {
+  if (!method) return '-'
+
   const methods = {
     alipay: '支付宝',
     wechat: '微信支付',
     bank: '银行卡',
     balance: '余额支付',
+    credit_card: '信用卡',
+    bank_transfer: '银行转账',
+    cash_on_delivery: '货到付款',
   }
-  return methods[method] || method || '-'
+
+  // 统一转换为小写进行匹配
+  const normalizedMethod = String(method).trim().toLowerCase()
+  const result = methods[normalizedMethod] || method
+
+  console.log(`💳 支付方式转换: "${method}" -> "${result}"`)
+
+  return result
 }
 
 // 获取状态类型

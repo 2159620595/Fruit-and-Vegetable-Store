@@ -11,12 +11,18 @@
 
     <!-- Error State -->
     <div v-else-if="error" class="error-container">
-      <div class="error-icon">⚠️</div>
+      <el-icon class="error-icon" :size="64">
+        <WarningFilled />
+      </el-icon>
       <h2 class="error-title">加载失败</h2>
       <p class="error-message">{{ error }}</p>
       <div class="error-actions">
-        <el-button type="primary" @click="loadOrderDetail">重试</el-button>
-        <el-button @click="router.push('/orders')">返回订单列表</el-button>
+        <el-button type="primary" @click="loadOrderDetail" :icon="Refresh">
+          重试
+        </el-button>
+        <el-button @click="router.push('/orders')" :icon="Back">
+          返回订单列表
+        </el-button>
       </div>
     </div>
 
@@ -32,19 +38,14 @@
               :class="orderStatusInfo?.statusClass"
               :style="{ backgroundColor: orderStatusInfo?.statusColor }"
             >
-              <span class="status-icon">{{ orderStatusInfo?.statusIcon }}</span>
+              <component
+                v-if="orderStatusInfo?.statusIconComponent"
+                :is="orderStatusInfo.statusIconComponent"
+                class="status-icon"
+              />
               {{ orderStatusInfo?.statusText }}
             </span>
             <span class="order-date">{{ formatDate(order.created_at) }}</span>
-            <span
-              v-if="orderStatusInfo?.statusDuration"
-              class="status-duration"
-            >
-              已{{ orderStatusInfo.statusDuration }}
-            </span>
-          </div>
-          <div v-if="orderStatusInfo?.nextAction" class="status-action">
-            {{ orderStatusInfo.nextAction }}
           </div>
         </div>
         <div class="order-actions">
@@ -52,6 +53,7 @@
             v-if="orderStatusInfo?.canPay"
             type="primary"
             @click="handlePayOrder"
+            :icon="Wallet"
           >
             立即支付
           </el-button>
@@ -59,6 +61,7 @@
             v-if="order.status === 'delivered'"
             type="success"
             @click="handleReview"
+            :icon="Edit"
           >
             评价订单
           </el-button>
@@ -70,6 +73,7 @@
             "
             plain
             @click="handleTrackOrder"
+            :icon="Van"
           >
             查看物流
           </el-button>
@@ -77,6 +81,7 @@
             v-if="order.status === 'delivered'"
             plain
             @click="handleBuyAgain"
+            :icon="ShoppingCart"
           >
             再次购买
           </el-button>
@@ -84,6 +89,7 @@
             v-if="orderStatusInfo?.canCancel"
             type="danger"
             @click="handleCancelOrder"
+            :icon="Close"
           >
             取消订单
           </el-button>
@@ -106,8 +112,10 @@
           >
             <div class="timeline-icon">
               <div class="icon-circle">
-                <span v-if="step.completed">✓</span>
-                <span v-else>{{ step.icon }}</span>
+                <el-icon v-if="step.completed" :size="20">
+                  <Checked />
+                </el-icon>
+                <component v-else :is="step.iconComponent" :size="20" />
               </div>
             </div>
             <div class="timeline-content">
@@ -134,7 +142,9 @@
                 @error="handleImageError"
               />
               <div v-else class="image-placeholder">
-                {{ getProductIcon(item.category) }}
+                <el-icon :size="32">
+                  <component :is="getProductIconComponent(item.category)" />
+                </el-icon>
               </div>
             </div>
             <div class="item-details">
@@ -194,16 +204,6 @@
               ¥{{ priceCalculations?.formattedTotalAmount || '0.00' }}
             </span>
           </div>
-          <div v-if="itemStatistics" class="summary-stats">
-            <span class="stats-text">
-              共{{ itemStatistics.totalItems }}件商品，{{
-                itemStatistics.uniqueProducts
-              }}种商品
-              <span v-if="itemStatistics.categoryCount > 1">
-                ，涉及{{ itemStatistics.categoryCount }}个分类
-              </span>
-            </span>
-          </div>
         </div>
       </div>
 
@@ -236,19 +236,6 @@
           <div v-if="order.carrier" class="delivery-row">
             <span class="delivery-label">快递公司：</span>
             <span class="delivery-value">{{ order.carrier }}</span>
-          </div>
-          <div v-if="orderStatusInfo?.estimatedDelivery" class="delivery-row">
-            <span class="delivery-label">预计送达：</span>
-            <span class="delivery-value">
-              {{ orderStatusInfo.estimatedDelivery }}
-            </span>
-          </div>
-          <div
-            v-if="addressInfo && !addressInfo.isComplete"
-            class="delivery-warning"
-          >
-            <span class="warning-icon">⚠️</span>
-            <span class="warning-text">地址信息不完整，可能影响配送</span>
           </div>
         </div>
       </div>
@@ -293,60 +280,13 @@
           </div>
         </div>
       </div>
-
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <el-button @click="router.push('/orders')" :icon="Back">
-          返回订单列表
-        </el-button>
-        <el-button
-          v-if="orderStatusInfo?.canPay"
-          type="primary"
-          @click="handlePayOrder"
-          :icon="Wallet"
-        >
-          立即支付
-        </el-button>
-        <el-button
-          v-if="order.status === 'delivered'"
-          type="primary"
-          @click="handleReview"
-          :icon="Edit"
-        >
-          评价订单
-        </el-button>
-        <el-button
-          v-if="
-            ['processing', 'shipped', 'in_transit', 'delivered'].includes(
-              order.status
-            )
-          "
-          @click="handleTrackOrder"
-          :icon="Van"
-        >
-          查看物流
-        </el-button>
-        <el-button
-          v-if="order.status === 'delivered'"
-          @click="handleBuyAgain"
-          :icon="ShoppingCart"
-        >
-          再次购买
-        </el-button>
-        <el-button
-          v-if="orderStatusInfo?.canCancel"
-          type="danger"
-          @click="handleCancelOrder"
-          :icon="Close"
-        >
-          取消订单
-        </el-button>
-      </div>
     </div>
 
     <!-- Empty State -->
     <div v-else class="empty-container">
-      <div class="empty-icon">📦</div>
+      <el-icon class="empty-icon" :size="64">
+        <Box />
+      </el-icon>
       <h2 class="empty-title">订单不存在</h2>
       <p class="empty-message">该订单可能已被删除或不存在</p>
       <div class="empty-actions">
@@ -355,16 +295,6 @@
         </el-button>
         <el-button @click="loadOrderDetail" :icon="Refresh">重新加载</el-button>
       </div>
-    </div>
-
-    <!-- Order Items Empty State -->
-    <div
-      v-if="order && (!order.items || order.items.length === 0)"
-      class="items-empty"
-    >
-      <div class="empty-icon">🛒</div>
-      <h3 class="empty-title">暂无商品信息</h3>
-      <p class="empty-message">该订单的商品信息可能丢失</p>
     </div>
 
     <!-- 支付对话框 -->
@@ -383,12 +313,25 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Back,
+  Refresh,
+  WarningFilled,
+  Box,
+  Clock,
+  Van,
+  Location,
+  SuccessFilled,
+  CircleCloseFilled,
+  QuestionFilled,
   Wallet,
   Edit,
-  Van,
   ShoppingCart,
   Close,
-  Refresh,
+  Checked,
+  Apple,
+  Orange,
+  ForkSpoon,
+  Coffee,
+  Dish,
 } from '@element-plus/icons-vue'
 import { useOrderStore } from '@/stores/orderStore'
 import { useUserStore } from '@/stores/userStore'
@@ -427,31 +370,31 @@ const orderSteps = computed(() => {
     {
       key: 'pending',
       status: '待支付',
-      icon: '⏰',
+      iconComponent: h(Clock),
       statusValue: 'pending',
     },
     {
       key: 'processing',
       status: '待发货',
-      icon: '📦',
+      iconComponent: h(Box),
       statusValue: 'processing',
     },
     {
       key: 'shipped',
       status: '已发货',
-      icon: '🚚',
+      iconComponent: h(Van),
       statusValue: 'shipped',
     },
     {
       key: 'in_transit',
       status: '运输中',
-      icon: '📍',
+      iconComponent: h(Location),
       statusValue: 'in_transit',
     },
     {
       key: 'delivered',
       status: '已完成',
-      icon: '✅',
+      iconComponent: h(SuccessFilled),
       statusValue: 'delivered',
     },
   ]
@@ -666,28 +609,6 @@ const priceCalculations = computed(() => {
   }
 })
 
-// 商品统计信息
-const itemStatistics = computed(() => {
-  if (!order.value?.items) return null
-
-  const items = order.value.items
-  const totalItems = items.reduce(
-    (sum, item) => sum + (parseInt(item.quantity) || 1),
-    0
-  )
-  const uniqueProducts = items.length
-  const categories = [
-    ...new Set(items.map(item => item.category).filter(Boolean)),
-  ]
-
-  return {
-    totalItems,
-    uniqueProducts,
-    categories,
-    categoryCount: categories.length,
-  }
-})
-
 const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleString('zh-CN', {
@@ -704,7 +625,7 @@ const orderStatusConfig = {
   pending: {
     text: '待支付',
     class: 'status-pending',
-    icon: '⏰',
+    iconComponent: Clock,
     color: '#f56c6c',
     description: '等待用户支付',
     canPay: true,
@@ -713,7 +634,7 @@ const orderStatusConfig = {
   processing: {
     text: '待发货',
     class: 'status-processing',
-    icon: '📦',
+    iconComponent: Box,
     color: '#e6a23c',
     description: '商家正在准备商品',
     canPay: false,
@@ -722,7 +643,7 @@ const orderStatusConfig = {
   shipped: {
     text: '已发货',
     class: 'status-shipped',
-    icon: '🚚',
+    iconComponent: Van,
     color: '#409eff',
     description: '商品已发出，正在配送',
     canPay: false,
@@ -731,7 +652,7 @@ const orderStatusConfig = {
   in_transit: {
     text: '运输中',
     class: 'status-transit',
-    icon: '📍',
+    iconComponent: Location,
     color: '#67c23a',
     description: '商品正在运输途中',
     canPay: false,
@@ -740,7 +661,7 @@ const orderStatusConfig = {
   delivered: {
     text: '已完成',
     class: 'status-delivered',
-    icon: '✅',
+    iconComponent: SuccessFilled,
     color: '#67c23a',
     description: '订单已完成',
     canPay: false,
@@ -749,7 +670,7 @@ const orderStatusConfig = {
   cancelled: {
     text: '已取消',
     class: 'status-cancelled',
-    icon: '❌',
+    iconComponent: CircleCloseFilled,
     color: '#909399',
     description: '订单已取消',
     canPay: false,
@@ -770,7 +691,7 @@ const getStatusInfo = status => {
     orderStatusConfig[status] || {
       text: status || '未知状态',
       class: 'status-default',
-      icon: '❓',
+      iconComponent: QuestionFilled,
       color: '#909399',
       description: '状态未知',
       canPay: false,
@@ -828,16 +749,17 @@ const addressInfo = computed(() => {
   }
 })
 
-const getProductIcon = category => {
+const getProductIconComponent = category => {
   const icons = {
-    水果: '🍎',
-    蔬菜: '🥬',
-    肉类: '🥩',
-    海鲜: '🦐',
-    饮品: '🥤',
-    零食: '🍪',
+    水果: Apple,
+    蔬菜: Orange,
+    肉类: ForkSpoon,
+    海鲜: Dish,
+    饮品: Coffee,
+    零食: Orange,
+    其他: Box,
   }
-  return icons[category] || '📦'
+  return icons[category] || Box
 }
 
 const handleImageError = event => {
@@ -850,38 +772,8 @@ const handleImageError = event => {
   // 创建占位符
   const placeholder = document.createElement('div')
   placeholder.className = 'image-placeholder'
-
-  // 获取商品类别图标
-  const itemElement = img.closest('.order-item')
-  const category = itemElement
-    ? itemElement.querySelector('.item-name')?.textContent?.includes('水果')
-      ? '水果'
-      : itemElement.querySelector('.item-name')?.textContent?.includes('蔬菜')
-        ? '蔬菜'
-        : itemElement.querySelector('.item-name')?.textContent?.includes('肉类')
-          ? '肉类'
-          : itemElement
-                .querySelector('.item-name')
-                ?.textContent?.includes('海鲜')
-            ? '海鲜'
-            : itemElement
-                  .querySelector('.item-name')
-                  ?.textContent?.includes('饮品')
-              ? '饮品'
-              : itemElement
-                    .querySelector('.item-name')
-                    ?.textContent?.includes('零食')
-                ? '零食'
-                : '其他'
-    : '其他'
-
-  placeholder.textContent = getProductIcon(category)
+  placeholder.innerHTML = `<svg class="el-icon" style="width: 32px; height: 32px;"><use xlink:href="#icon-box"></use></svg>`
   placeholder.title = '图片加载失败'
-
-  // 添加错误样式
-  placeholder.style.backgroundColor = '#f5f5f5'
-  placeholder.style.color = '#999'
-  placeholder.style.border = '1px dashed #ddd'
 
   container.appendChild(placeholder)
 }
@@ -896,22 +788,23 @@ const handlePayOrder = async () => {
 const handlePaymentConfirm = async paymentMethod => {
   try {
     loading.value = true
-    
+
     await orderStore.payOrder(order.value.id, paymentMethod)
-    
+
     // 如果使用余额支付，刷新用户余额
     if (paymentMethod === 'balance') {
       await userStore.fetchUserBalance()
     }
-    
+
     ElMessage.success('支付成功！订单状态已更新')
 
     // 重新加载订单详情
     await loadOrderDetail()
   } catch (error) {
     console.error('支付错误:', error)
-    const errorMsg = error.response?.data?.message || error.message || '支付失败'
-    
+    const errorMsg =
+      error.response?.data?.message || error.message || '支付失败'
+
     // 特殊处理余额不足的情况
     if (errorMsg.includes('余额不足')) {
       ElMessage.error('余额不足，请充值或选择其他支付方式')
@@ -1217,7 +1110,7 @@ onMounted(() => {
 }
 
 .error-icon {
-  font-size: 64px;
+  color: #f56c6c;
   margin-bottom: 20px;
 }
 
@@ -1253,7 +1146,7 @@ onMounted(() => {
 }
 
 .empty-icon {
-  font-size: 64px;
+  color: #909399;
   margin-bottom: 20px;
 }
 
@@ -1277,65 +1170,6 @@ onMounted(() => {
   justify-content: center;
 }
 
-/* Items Empty State */
-.items-empty {
-  background: #fff;
-  border-radius: 12px;
-  padding: 40px;
-  text-align: center;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.items-empty .empty-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.items-empty .empty-title {
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-
-.items-empty .empty-message {
-  font-size: 14px;
-  margin-bottom: 0;
-}
-
-/* Summary Stats */
-.summary-stats {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.stats-text {
-  font-size: 14px;
-  color: #666;
-  font-style: italic;
-}
-
-/* Delivery Warning */
-.delivery-warning {
-  margin-top: 16px;
-  padding: 12px;
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.warning-icon {
-  font-size: 16px;
-}
-
-.warning-text {
-  font-size: 14px;
-  color: #856404;
-}
-
 /* Status Badge Enhancements */
 .status-badge {
   display: inline-flex;
@@ -1350,23 +1184,8 @@ onMounted(() => {
 }
 
 .status-icon {
-  font-size: 16px;
-}
-
-.status-duration {
-  font-size: 12px;
-  color: #666;
-  margin-left: 8px;
-  padding: 2px 8px;
-  background: #f5f5f5;
-  border-radius: 12px;
-}
-
-.status-action {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #666;
-  font-style: italic;
+  font-size: 18px;
+  margin-right: 4px;
 }
 
 /* Status Colors */
@@ -1618,9 +1437,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
   color: #666666;
   transition: all 0.3s ease;
+}
+
+.icon-circle .el-icon {
+  font-size: 20px;
 }
 
 .timeline-item.completed .icon-circle {
@@ -1725,8 +1547,13 @@ onMounted(() => {
 }
 
 .image-placeholder {
-  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   color: #999;
+  background: #f5f5f5;
 }
 
 .item-details {
@@ -1901,18 +1728,6 @@ onMounted(() => {
   flex: 1;
 }
 
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  padding: 32px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
@@ -1948,11 +1763,6 @@ onMounted(() => {
     align-items: center;
     padding-top: 12px;
     border-top: 1px solid #f0f0f0;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-    align-items: stretch;
   }
 
   .order-actions .el-button {

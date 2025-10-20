@@ -365,8 +365,18 @@ export const useUserStore = defineStore('user', {
         if (end_date) queryParams.end_date = end_date
 
         const response = await getRechargeRecordsService(queryParams)
+
+        console.log('🔍 充值记录API响应:', response.data)
+
         if (response.data?.code === 200 && response.data?.data) {
-          this.rechargeRecords = response.data.data.records || []
+          const records = response.data.data.records || []
+          this.rechargeRecords = records
+
+          // 确保时间字段被正确处理
+          if (records.length > 0) {
+            console.log('✅ 第一条记录:', records[0])
+          }
+
           return response.data.data
         }
       } catch (error) {
@@ -392,11 +402,26 @@ export const useUserStore = defineStore('user', {
 
     // 获取充值记录详情
     async fetchRechargeRecordDetail(id) {
+      if (!this.token) {
+        throw new Error('请先登录')
+      }
+
       try {
         const response = await request.get(`/api/recharge/records/${id}`)
-        if (response.data?.code === 200 && response.data?.data) {
-          return response.data.data
+
+        // 处理多种可能的响应格式
+        if (response.data) {
+          // 格式1: { code: 200, data: {...}, message: '...' }
+          if (response.data.code === 200 && response.data.data) {
+            return response.data.data
+          }
+          // 格式2: 直接返回数据
+          if (response.data.id) {
+            return response.data
+          }
         }
+
+        throw new Error('获取充值记录详情失败')
       } catch (error) {
         console.error('获取充值记录详情失败:', error)
         throw error
