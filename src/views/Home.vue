@@ -1,506 +1,431 @@
 <template>
   <div class="home">
-    <!-- 测试导航条 -->
-    <div class="test-nav">
-      <button @click="toggleTestNav" class="test-nav-toggle">
-        {{ testNavOpen ? '✕' : '☰' }}
-      </button>
-      <div class="test-nav-content" :class="{ open: testNavOpen }">
-        <div class="nav-section">
-          <h4>主要页面</h4>
-          <a href="#" @click.prevent="router.push('/')" class="nav-link">
-            首页
-          </a>
-          <a href="#" @click.prevent="router.push('/shop')" class="nav-link">
-            商品列表
-          </a>
-          <a href="#" @click.prevent="router.push('/cart')" class="nav-link">
-            购物车
-          </a>
-          <a
-            href="#"
-            @click.prevent="router.push('/checkout')"
-            class="nav-link"
-          >
-            结账
-          </a>
-        </div>
-        <div class="nav-section">
-          <h4>用户相关</h4>
-          <a href="#" @click.prevent="router.push('/login')" class="nav-link">
-            登录
-          </a>
-          <a href="#" @click.prevent="router.push('/signup')" class="nav-link">
-            注册
-          </a>
-          <a href="#" @click.prevent="router.push('/profile')" class="nav-link">
-            个人中心
-          </a>
-        </div>
-        <div class="nav-section">
-          <h4>订单相关</h4>
-          <a href="#" @click.prevent="router.push('/orders')" class="nav-link">
-            我的订单
-          </a>
-          <a href="#" @click.prevent="router.push('/order/1')" class="nav-link">
-            订单详情
-          </a>
-        </div>
-        <div class="nav-section">
-          <h4>商品相关</h4>
-          <a
-            href="#"
-            @click.prevent="router.push('/product/1')"
-            class="nav-link"
-          >
-            商品详情
-          </a>
-        </div>
-      </div>
-    </div>
+    <div class="container">
+      <!-- 面包屑导航（包含 logo 和导航） -->
+      <Breadcrumb current-page="首页"></Breadcrumb>
 
-    <div class="root">
-      <div class="container">
-        <!-- header 开始 -->
-        <Header></Header>
+      <!-- 内容开始 -->
+      <div class="main">
+        <div class="main-content">
+          <!-- 轮播图开始 -->
+          <div class="banner-container">
+            <div class="banner">
+              <div class="banner-wrapper">
+                <!-- 加载骨架屏 -->
+                <div class="banner-skeleton" v-if="!bannerImagesLoaded">
+                  <div class="skeleton-shimmer"></div>
+                </div>
 
-        <!-- 内容开始 -->
-        <div class="main">
-          <div class="main-content">
-            <!-- 轮播图开始 -->
-            <div class="banner-container">
-              <div class="banner">
-                <div class="banner-wrapper">
-                  <!-- 加载骨架屏 -->
-                  <div class="banner-skeleton" v-if="!bannerImagesLoaded">
-                    <div class="skeleton-shimmer"></div>
-                  </div>
-
+                <div
+                  class="banner-image"
+                  :class="{ loaded: bannerImagesLoaded }"
+                  :style="{
+                    backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url(${
+                      bannerList.length > 0
+                        ? bannerList[currentBannerIndex].image_url
+                        : ''
+                    })`,
+                  }"
+                >
+                  <!-- 轮播图内容 -->
                   <div
-                    class="banner-image"
-                    :class="{ loaded: bannerImagesLoaded }"
-                    :style="{
-                      backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url(${
-                        bannerList.length > 0
-                          ? bannerList[currentBannerIndex].image_url
-                          : ''
-                      })`,
-                    }"
+                    class="banner-content"
+                    v-if="
+                      bannerList.length > 0 &&
+                      bannerList[currentBannerIndex].title
+                    "
                   >
-                    <!-- 轮播图内容 -->
-                    <div
-                      class="banner-content"
-                      v-if="
-                        bannerList.length > 0 &&
-                        bannerList[currentBannerIndex].title
-                      "
+                    <h3 class="banner-title">
+                      {{ bannerList[currentBannerIndex].title }}
+                    </h3>
+                    <p
+                      class="banner-description"
+                      v-if="bannerList[currentBannerIndex].description"
                     >
-                      <h3 class="banner-title">
-                        {{ bannerList[currentBannerIndex].title }}
-                      </h3>
-                      <p
-                        class="banner-description"
-                        v-if="bannerList[currentBannerIndex].description"
-                      >
-                        {{ bannerList[currentBannerIndex].description }}
-                      </p>
-                    </div>
-
-                    <!-- 左右箭头 -->
-                    <button
-                      class="banner-arrow banner-arrow-left"
-                      @click="prevBanner"
-                      v-if="bannerList.length > 1 && bannerImagesLoaded"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        viewBox="0 0 256 256"
-                      >
-                        <path
-                          d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"
-                        ></path>
-                      </svg>
-                    </button>
-                    <button
-                      class="banner-arrow banner-arrow-right"
-                      @click="nextBanner"
-                      v-if="bannerList.length > 1 && bannerImagesLoaded"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        viewBox="0 0 256 256"
-                      >
-                        <path
-                          d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"
-                        ></path>
-                      </svg>
-                    </button>
-
-                    <!-- 小圆点 -->
-                    <div
-                      class="banner-icons"
-                      v-if="bannerList.length > 1 && bannerImagesLoaded"
-                    >
-                      <div
-                        v-for="(item, index) in bannerList"
-                        :key="index"
-                        class="dot"
-                        :class="{ active: index === currentBannerIndex }"
-                        @click="goToBanner(index)"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- 轮播图结束 -->
-
-            <!-- 分类开始 -->
-            <div class="bar">
-              <div class="bar-item">
-                <a class="bar-items active" href="#">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24px"
-                    height="24px"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
-                  >
-                    <path
-                      d="M100,86.38V100H86.38A14.25,14.25,0,0,1,72,87,14,14,0,0,1,87,72,14.25,14.25,0,0,1,100,86.38ZM72,169a14,14,0,0,0,15,15,14.25,14.25,0,0,0,13-14.34V156H86.38A14.25,14.25,0,0,0,72,169ZM184,87a14,14,0,0,0-15-15,14.25,14.25,0,0,0-13,14.34V100h13.62A14.25,14.25,0,0,0,184,87Zm40-23V192a32,32,0,0,1-32,32H64a32,32,0,0,1-32-32V64A32,32,0,0,1,64,32H192A32,32,0,0,1,224,64Zm-68,76V116h13.38c16.39,0,30.21-12.88,30.61-29.25A30,30,0,0,0,169.25,56C152.88,56.41,140,70.23,140,86.62V100H116V86.62C116,70.23,103.12,56.41,86.75,56A30,30,0,0,0,56,86.75C56.41,103.12,70.23,116,86.62,116H100v24H86.62C70.23,140,56.41,152.88,56,169.25A30,30,0,0,0,86.75,200c16.37-.4,29.25-14.22,29.25-30.61V156h24v13.38c0,16.39,12.88,30.21,29.25,30.61A30,30,0,0,0,200,169.25c-.4-16.37-14.22-29.25-30.61-29.25Zm-40,0h24V116H116Zm40,30a14,14,0,1,0,14-14H156Z"
-                    ></path>
-                  </svg>
-                  <p>时令水果</p>
-                </a>
-                <a class="bar-items" href="#">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24px"
-                    height="24px"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
-                  >
-                    <path
-                      d="M232,64H203.31l26.35-26.34a8,8,0,0,0-11.32-11.32L192,52.69V24a8,8,0,0,0-16,0V56.57a64,64,0,0,0-77.2,10.12l0,0,0,0,0,0c-40.1,39.39-70.25,133.08-73.19,142.45a16,16,0,0,0,21.26,21.26c9.37-2.94,103.18-33.13,142.47-73.21A64,64,0,0,0,199.43,80H232a8,8,0,0,0,0-16Zm-54.12,82c-8.94,9.12-21.25,17.8-34.85,25.73l-25.38-25.39a8,8,0,0,0-11.32,11.32l22.09,22.09c-40.87,21.19-86.32,35.42-87,35.63A7.93,7.93,0,0,0,40,216a7.93,7.93,0,0,0,.59-1.41c.29-.93,28-89.58,64-130.67l33.77,33.77a8,8,0,0,0,11.32-11.32L116.18,72.88A48,48,0,0,1,177.88,146Z"
-                    ></path>
-                  </svg>
-                  <p>新鲜蔬菜</p>
-                </a>
-                <a class="bar-items" href="#">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24px"
-                    height="24px"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
-                  >
-                    <path
-                      d="M248,80H8a8,8,0,0,0-8,8,128,128,0,0,0,256,0A8,8,0,0,0,248,80ZM77.4,149.91l42.6-42.6V167.6A79.59,79.59,0,0,1,77.4,149.91ZM66.09,138.6A79.59,79.59,0,0,1,48.4,96h60.29ZM136,107.31l42.6,42.6A79.59,79.59,0,0,1,136,167.6Zm53.91,31.29L147.31,96H207.6A79.59,79.59,0,0,1,189.91,138.6ZM128,200A112.15,112.15,0,0,1,16.28,96H32.34a96,96,0,0,0,191.32,0h16.06A112.15,112.15,0,0,1,128,200Z"
-                    ></path>
-                  </svg>
-                  <p>健康果汁</p>
-                </a>
-                <a class="bar-items" href="#">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24px"
-                    height="24px"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
-                  >
-                    <path
-                      d="M223.45,40.07a8,8,0,0,0-7.52-7.52C139.8,28.08,78.82,51,52.82,94a87.09,87.09,0,0,0-12.76,49c.57,15.92,5.21,32,13.79,47.85l-19.51,19.5a8,8,0,0,0,11.32,11.32l19.5-19.51C81,210.73,97.09,215.37,113,215.94q1.67.06,3.33.06A86.93,86.93,0,0,0,162,203.18C205,177.18,227.93,116.21,223.45,40.07ZM153.75,189.5c-22.75,13.78-49.68,14-76.71.77l88.63-88.62a8,8,0,0,0-11.32-11.32L65.73,179c-13.19-27-13-54,.77-76.71,22.09-36.47,74.6-56.44,141.31-54.06C210.2,114.89,190.22,167.41,153.75,189.5Z"
-                    ></path>
-                  </svg>
-                  <p>有机蔬菜</p>
-                </a>
-              </div>
-            </div>
-            <!-- 分类结束 -->
-
-            <!-- 热门精选开始 -->
-            <h2 class="title">热门精选</h2>
-            <div class="product">
-              <div class="product-list">
-                <!-- 显示热门精选商品 -->
-                <div
-                  class="product-list-item"
-                  v-for="item in popularPicks"
-                  :key="item.id"
-                  @click="click(item.id)"
-                >
-                  <div
-                    class="product-list-item-img lazy-image"
-                    :data-bg="item.image_url"
-                    v-lazy-bg
-                  >
-                    <div class="image-skeleton" v-if="!item.imageLoaded"></div>
-                  </div>
-                  <div>
-                    <p class="product-name">{{ item.name }}</p>
-                    <p class="product-price">
-                      ¥{{ item.price }}{{ item.unit }}
+                      {{ bannerList[currentBannerIndex].description }}
                     </p>
                   </div>
-                </div>
-              </div>
-            </div>
-            <!-- 热门精选结束 -->
 
-            <!-- 客户最爱开始 -->
-            <h2 class="title">客户最爱</h2>
-            <div class="grid-container">
-              <div
-                class="grid-item"
-                v-for="item in customerFavorites"
-                :key="item.id"
-                @click="click(item.id)"
-              >
-                <div
-                  class="grid-item-img lazy-image"
-                  :data-bg="item.image_url"
-                  v-lazy-bg
-                >
-                  <div class="image-skeleton" v-if="!item.imageLoaded"></div>
-                </div>
-                <div>
-                  <p class="product-name">{{ item.name }}</p>
-                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
-                </div>
-              </div>
-              <!-- 如果没有数据显示提示 -->
-              <div v-if="customerFavorites.length === 0" class="empty-tip">
-                暂无客户最爱商品
-              </div>
-            </div>
-            <!-- 客户最爱结束 -->
-
-            <!-- 新品上市开始 -->
-            <h2 class="title">新品上市</h2>
-            <div class="grid-container">
-              <div
-                class="grid-item"
-                v-for="item in newArrivals"
-                :key="item.id"
-                @click="click(item.id)"
-              >
-                <div
-                  class="grid-item-img lazy-image"
-                  :data-bg="item.image_url"
-                  v-lazy-bg
-                >
-                  <div class="image-skeleton" v-if="!item.imageLoaded"></div>
-                  <!-- 新品标签 -->
-                  <span class="new-badge" v-if="item.is_new">新品</span>
-                </div>
-                <div>
-                  <p class="product-name">{{ item.name }}</p>
-                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
-                </div>
-              </div>
-            </div>
-            <!-- 新品上市结束 -->
-
-            <!-- 限时优惠开始 -->
-            <h2 class="title">限时优惠</h2>
-            <div class="grid-container">
-              <div
-                class="grid-item"
-                v-for="item in limitedOffers"
-                :key="item.id"
-                @click="click(item.id)"
-              >
-                <div
-                  class="grid-item-img lazy-image"
-                  :data-bg="item.image_url"
-                  v-lazy-bg
-                >
-                  <div class="image-skeleton" v-if="!item.imageLoaded"></div>
-                  <!-- 显示折扣标签 -->
-                  <span
-                    class="discount-badge"
-                    v-if="item.is_discount && item.discount_rate"
+                  <!-- 左右箭头 -->
+                  <button
+                    class="banner-arrow banner-arrow-left"
+                    @click="prevBanner"
+                    v-if="bannerList.length > 1 && bannerImagesLoaded"
                   >
-                    {{ item.discount_rate }}
-                  </span>
-                </div>
-                <div>
-                  <p class="product-name">{{ item.name }}</p>
-                  <div class="price-wrapper">
-                    <p class="product-price">
-                      ¥{{ item.price }}{{ item.unit }}
-                    </p>
-                    <p class="original-price" v-if="item.original_price">
-                      ¥{{ item.original_price }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <!-- 如果没有优惠商品 -->
-              <div v-if="limitedOffers.length === 0" class="empty-tip">
-                暂无优惠商品
-              </div>
-            </div>
-            <!-- 限时优惠结束 -->
-
-            <!-- 客户评价开始 -->
-            <h2 class="title">客户评价</h2>
-            <div class="comment-list">
-              <div
-                class="comment-list-item"
-                v-for="review in reviews"
-                :key="review.id"
-              >
-                <div class="comment-list-item-user">
-                  <div
-                    class="comment-list-item-user-avatar lazy-image"
-                    :data-bg="review.user_avatar"
-                    v-lazy-bg
-                  >
-                    <div
-                      class="image-skeleton"
-                      v-if="!review.avatarLoaded"
-                    ></div>
-                  </div>
-                  <div class="comment-list-item-user-info">
-                    <p class="comment-list-item-user-info-name">
-                      {{ review.user_name }}
-                    </p>
-                    <p class="comment-list-item-user-info-date">
-                      {{ formatDate(review.created_at) }}
-                    </p>
-                  </div>
-                </div>
-                <!-- 五星评价 -->
-                <div class="comment-list-item-star">
-                  <svg
-                    v-for="n in 5"
-                    :key="n"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20px"
-                    height="20px"
-                    :fill="n <= review.rating ? 'currentColor' : 'none'"
-                    :stroke="n <= review.rating ? 'none' : 'currentColor'"
-                    viewBox="0 0 256 256"
-                  >
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z"
-                    ></path>
-                  </svg>
-                </div>
-                <!-- 评论内容 -->
-                <p class="comment-list-item-content">{{ review.comment }}</p>
-                <div class="comment-list-item-like">
-                  <!-- 点赞 -->
-                  <button class="comment-list-item-likes">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="20px"
-                      height="20px"
+                      width="24"
+                      height="24"
                       fill="currentColor"
                       viewBox="0 0 256 256"
                     >
                       <path
-                        d="M234,80.12A24,24,0,0,0,216,72H160V56a40,40,0,0,0-40-40,8,8,0,0,0-7.16,4.42L75.06,96H32a16,16,0,0,0-16,16v88a16,16,0,0,0,16,16H204a24,24,0,0,0,23.82-21l12-96A24,24,0,0,0,234,80.12ZM32,112H72v88H32ZM223.94,97l-12,96a8,8,0,0,1-7.94,7H88V105.89l36.71-73.43A24,24,0,0,1,144,56V80a8,8,0,0,0,8,8h64a8,8,0,0,1,7.94,9Z"
+                        d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"
                       ></path>
                     </svg>
-                    <p>{{ review.likes || 0 }}</p>
                   </button>
+                  <button
+                    class="banner-arrow banner-arrow-right"
+                    @click="nextBanner"
+                    v-if="bannerList.length > 1 && bannerImagesLoaded"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"
+                      ></path>
+                    </svg>
+                  </button>
+
+                  <!-- 小圆点 -->
+                  <div
+                    class="banner-icons"
+                    v-if="bannerList.length > 1 && bannerImagesLoaded"
+                  >
+                    <div
+                      v-for="(item, index) in bannerList"
+                      :key="index"
+                      class="dot"
+                      :class="{ active: index === currentBannerIndex }"
+                      @click="goToBanner(index)"
+                    ></div>
+                  </div>
                 </div>
               </div>
-              <!-- 如果没有评价 -->
-              <div v-if="reviews.length === 0" class="empty-tip">
-                暂无客户评价
+            </div>
+          </div>
+          <!-- 轮播图结束 -->
+
+          <!-- 分类开始 -->
+          <div class="bar">
+            <div class="bar-item">
+              <a class="bar-items active" href="#">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24px"
+                  height="24px"
+                  fill="currentColor"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    d="M100,86.38V100H86.38A14.25,14.25,0,0,1,72,87,14,14,0,0,1,87,72,14.25,14.25,0,0,1,100,86.38ZM72,169a14,14,0,0,0,15,15,14.25,14.25,0,0,0,13-14.34V156H86.38A14.25,14.25,0,0,0,72,169ZM184,87a14,14,0,0,0-15-15,14.25,14.25,0,0,0-13,14.34V100h13.62A14.25,14.25,0,0,0,184,87Zm40-23V192a32,32,0,0,1-32,32H64a32,32,0,0,1-32-32V64A32,32,0,0,1,64,32H192A32,32,0,0,1,224,64Zm-68,76V116h13.38c16.39,0,30.21-12.88,30.61-29.25A30,30,0,0,0,169.25,56C152.88,56.41,140,70.23,140,86.62V100H116V86.62C116,70.23,103.12,56.41,86.75,56A30,30,0,0,0,56,86.75C56.41,103.12,70.23,116,86.62,116H100v24H86.62C70.23,140,56.41,152.88,56,169.25A30,30,0,0,0,86.75,200c16.37-.4,29.25-14.22,29.25-30.61V156h24v13.38c0,16.39,12.88,30.21,29.25,30.61A30,30,0,0,0,200,169.25c-.4-16.37-14.22-29.25-30.61-29.25Zm-40,0h24V116H116Zm40,30a14,14,0,1,0,14-14H156Z"
+                  ></path>
+                </svg>
+                <p>时令水果</p>
+              </a>
+              <a class="bar-items" href="#">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24px"
+                  height="24px"
+                  fill="currentColor"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    d="M232,64H203.31l26.35-26.34a8,8,0,0,0-11.32-11.32L192,52.69V24a8,8,0,0,0-16,0V56.57a64,64,0,0,0-77.2,10.12l0,0,0,0,0,0c-40.1,39.39-70.25,133.08-73.19,142.45a16,16,0,0,0,21.26,21.26c9.37-2.94,103.18-33.13,142.47-73.21A64,64,0,0,0,199.43,80H232a8,8,0,0,0,0-16Zm-54.12,82c-8.94,9.12-21.25,17.8-34.85,25.73l-25.38-25.39a8,8,0,0,0-11.32,11.32l22.09,22.09c-40.87,21.19-86.32,35.42-87,35.63A7.93,7.93,0,0,0,40,216a7.93,7.93,0,0,0,.59-1.41c.29-.93,28-89.58,64-130.67l33.77,33.77a8,8,0,0,0,11.32-11.32L116.18,72.88A48,48,0,0,1,177.88,146Z"
+                  ></path>
+                </svg>
+                <p>新鲜蔬菜</p>
+              </a>
+              <a class="bar-items" href="#">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24px"
+                  height="24px"
+                  fill="currentColor"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    d="M248,80H8a8,8,0,0,0-8,8,128,128,0,0,0,256,0A8,8,0,0,0,248,80ZM77.4,149.91l42.6-42.6V167.6A79.59,79.59,0,0,1,77.4,149.91ZM66.09,138.6A79.59,79.59,0,0,1,48.4,96h60.29ZM136,107.31l42.6,42.6A79.59,79.59,0,0,1,136,167.6Zm53.91,31.29L147.31,96H207.6A79.59,79.59,0,0,1,189.91,138.6ZM128,200A112.15,112.15,0,0,1,16.28,96H32.34a96,96,0,0,0,191.32,0h16.06A112.15,112.15,0,0,1,128,200Z"
+                  ></path>
+                </svg>
+                <p>健康果汁</p>
+              </a>
+              <a class="bar-items" href="#">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24px"
+                  height="24px"
+                  fill="currentColor"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    d="M223.45,40.07a8,8,0,0,0-7.52-7.52C139.8,28.08,78.82,51,52.82,94a87.09,87.09,0,0,0-12.76,49c.57,15.92,5.21,32,13.79,47.85l-19.51,19.5a8,8,0,0,0,11.32,11.32l19.5-19.51C81,210.73,97.09,215.37,113,215.94q1.67.06,3.33.06A86.93,86.93,0,0,0,162,203.18C205,177.18,227.93,116.21,223.45,40.07ZM153.75,189.5c-22.75,13.78-49.68,14-76.71.77l88.63-88.62a8,8,0,0,0-11.32-11.32L65.73,179c-13.19-27-13-54,.77-76.71,22.09-36.47,74.6-56.44,141.31-54.06C210.2,114.89,190.22,167.41,153.75,189.5Z"
+                  ></path>
+                </svg>
+                <p>有机蔬菜</p>
+              </a>
+            </div>
+          </div>
+          <!-- 分类结束 -->
+
+          <!-- 热门精选开始 -->
+          <h2 class="title">热门精选</h2>
+          <div class="product">
+            <div class="product-list">
+              <!-- 显示热门精选商品 -->
+              <div
+                class="product-list-item"
+                v-for="item in popularPicks"
+                :key="item.id"
+                @click="click(item.id)"
+              >
+                <div
+                  class="product-list-item-img lazy-image"
+                  :data-bg="item.image_url"
+                  v-lazy-bg
+                >
+                  <div class="image-skeleton" v-if="!item.imageLoaded"></div>
+                </div>
+                <div>
+                  <p class="product-name">{{ item.name }}</p>
+                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                </div>
               </div>
             </div>
-            <!-- 客户评价结束 -->
+          </div>
+          <!-- 热门精选结束 -->
 
-            <!-- 故事 -->
-            <h2 class="title">我们的故事</h2>
-            <p class="story">
-              在 Fresh
-              Harvest,我们致力于将最新鲜、最优质的农产品直接从本地农场送到您的餐桌。我们的旅程始于一个简单的想法：将消费者与食物来源联系起来,确保新鲜度和可持续性。我们与同样热衷于品质和环境责任的农民紧密合作,采用可持续的耕作方式种植最好的水果和蔬菜。我们的产品涵盖各种时令农产品,从爽脆的苹果和多汁的浆果,到鲜嫩的绿叶蔬菜和营养丰富的根茎类蔬菜。每件产品都经过精心挑选和处理,以保持其新鲜度和营养价值,确保您收到最好的产品。我们推崇透明度和可追溯性,因此您可以随时了解食物的来源和种植方式。我们的承诺不仅仅是提供优质的农产品；我们还致力于教育顾客了解健康饮食和可持续生活的好处。加入我们,支持本地农业,享受最新鲜、最美味的农产品。
-            </p>
+          <!-- 客户最爱开始 -->
+          <h2 class="title">客户最爱</h2>
+          <div class="grid-container">
+            <div
+              class="grid-item"
+              v-for="item in customerFavorites"
+              :key="item.id"
+              @click="click(item.id)"
+            >
+              <div
+                class="grid-item-img lazy-image"
+                :data-bg="item.image_url"
+                v-lazy-bg
+              >
+                <div class="image-skeleton" v-if="!item.imageLoaded"></div>
+              </div>
+              <div>
+                <p class="product-name">{{ item.name }}</p>
+                <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+              </div>
+            </div>
+            <!-- 如果没有数据显示提示 -->
+            <div v-if="customerFavorites.length === 0" class="empty-tip">
+              暂无客户最爱商品
+            </div>
+          </div>
+          <!-- 客户最爱结束 -->
+
+          <!-- 新品上市开始 -->
+          <h2 class="title">新品上市</h2>
+          <div class="grid-container">
+            <div
+              class="grid-item"
+              v-for="item in newArrivals"
+              :key="item.id"
+              @click="click(item.id)"
+            >
+              <div
+                class="grid-item-img lazy-image"
+                :data-bg="item.image_url"
+                v-lazy-bg
+              >
+                <div class="image-skeleton" v-if="!item.imageLoaded"></div>
+                <!-- 新品标签 -->
+                <span class="new-badge" v-if="item.is_new">新品</span>
+              </div>
+              <div>
+                <p class="product-name">{{ item.name }}</p>
+                <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+              </div>
+            </div>
+          </div>
+          <!-- 新品上市结束 -->
+
+          <!-- 限时优惠开始 -->
+          <h2 class="title">限时优惠</h2>
+          <div class="grid-container">
+            <div
+              class="grid-item"
+              v-for="item in limitedOffers"
+              :key="item.id"
+              @click="click(item.id)"
+            >
+              <div
+                class="grid-item-img lazy-image"
+                :data-bg="item.image_url"
+                v-lazy-bg
+              >
+                <div class="image-skeleton" v-if="!item.imageLoaded"></div>
+                <!-- 显示折扣标签 -->
+                <span
+                  class="discount-badge"
+                  v-if="item.is_discount && item.discount_rate"
+                >
+                  {{ item.discount_rate }}
+                </span>
+              </div>
+              <div>
+                <p class="product-name">{{ item.name }}</p>
+                <div class="price-wrapper">
+                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                  <p class="original-price" v-if="item.original_price">
+                    ¥{{ item.original_price }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <!-- 如果没有优惠商品 -->
+            <div v-if="limitedOffers.length === 0" class="empty-tip">
+              暂无优惠商品
+            </div>
+          </div>
+          <!-- 限时优惠结束 -->
+
+          <!-- 客户评价开始 -->
+          <h2 class="title">客户评价</h2>
+          <div class="comment-list">
+            <div
+              class="comment-list-item"
+              v-for="review in reviews"
+              :key="review.id"
+            >
+              <div class="comment-list-item-user">
+                <div
+                  class="comment-list-item-user-avatar lazy-image"
+                  :data-bg="review.user_avatar"
+                  v-lazy-bg
+                >
+                  <div class="image-skeleton" v-if="!review.avatarLoaded"></div>
+                </div>
+                <div class="comment-list-item-user-info">
+                  <p class="comment-list-item-user-info-name">
+                    {{ review.user_name }}
+                  </p>
+                  <p class="comment-list-item-user-info-date">
+                    {{ formatDate(review.created_at) }}
+                  </p>
+                </div>
+              </div>
+              <!-- 五星评价 -->
+              <div class="comment-list-item-star">
+                <svg
+                  v-for="n in 5"
+                  :key="n"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20px"
+                  height="20px"
+                  :fill="n <= review.rating ? 'currentColor' : 'none'"
+                  :stroke="n <= review.rating ? 'none' : 'currentColor'"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z"
+                  ></path>
+                </svg>
+              </div>
+              <!-- 评论内容 -->
+              <p class="comment-list-item-content">{{ review.comment }}</p>
+              <div class="comment-list-item-like">
+                <!-- 点赞 -->
+                <button class="comment-list-item-likes">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20px"
+                    height="20px"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M234,80.12A24,24,0,0,0,216,72H160V56a40,40,0,0,0-40-40,8,8,0,0,0-7.16,4.42L75.06,96H32a16,16,0,0,0-16,16v88a16,16,0,0,0,16,16H204a24,24,0,0,0,23.82-21l12-96A24,24,0,0,0,234,80.12ZM32,112H72v88H32ZM223.94,97l-12,96a8,8,0,0,1-7.94,7H88V105.89l36.71-73.43A24,24,0,0,1,144,56V80a8,8,0,0,0,8,8h64a8,8,0,0,1,7.94,9Z"
+                    ></path>
+                  </svg>
+                  <p>{{ review.likes || 0 }}</p>
+                </button>
+              </div>
+            </div>
+            <!-- 如果没有评价 -->
+            <div v-if="reviews.length === 0" class="empty-tip">
+              暂无客户评价
+            </div>
+          </div>
+          <!-- 客户评价结束 -->
+
+          <!-- 故事 -->
+          <h2 class="title">我们的故事</h2>
+          <p class="story">
+            在 Fresh
+            Harvest,我们致力于将最新鲜、最优质的农产品直接从本地农场送到您的餐桌。我们的旅程始于一个简单的想法：将消费者与食物来源联系起来,确保新鲜度和可持续性。我们与同样热衷于品质和环境责任的农民紧密合作,采用可持续的耕作方式种植最好的水果和蔬菜。我们的产品涵盖各种时令农产品,从爽脆的苹果和多汁的浆果,到鲜嫩的绿叶蔬菜和营养丰富的根茎类蔬菜。每件产品都经过精心挑选和处理,以保持其新鲜度和营养价值,确保您收到最好的产品。我们推崇透明度和可追溯性,因此您可以随时了解食物的来源和种植方式。我们的承诺不仅仅是提供优质的农产品；我们还致力于教育顾客了解健康饮食和可持续生活的好处。加入我们,支持本地农业,享受最新鲜、最美味的农产品。
+          </p>
+        </div>
+      </div>
+      <!-- 内容区结束 -->
+
+      <!-- 联系我们部分 -->
+      <section id="contact-section" class="contact-section">
+        <div class="contact-content">
+          <h2 class="contact-title">联系我们</h2>
+          <div class="contact-info">
+            <div class="contact-item">
+              <div class="contact-icon">📞</div>
+              <div class="contact-details">
+                <h3>客服热线</h3>
+                <p>400-123-4567</p>
+                <p>工作时间：9:00-18:00</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">📧</div>
+              <div class="contact-details">
+                <h3>邮箱联系</h3>
+                <p>service@freshharvest.com</p>
+                <p>24小时内回复</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">📍</div>
+              <div class="contact-details">
+                <h3>公司地址</h3>
+                <p>北京市朝阳区果蔬大厦</p>
+                <p>欢迎预约参观</p>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- 内容区结束 -->
+      </section>
 
-        <!-- 联系我们部分 -->
-        <section id="contact-section" class="contact-section">
-          <div class="container">
-            <div class="contact-content">
-              <h2 class="contact-title">联系我们</h2>
-              <div class="contact-info">
-                <div class="contact-item">
-                  <div class="contact-icon">📞</div>
-                  <div class="contact-details">
-                    <h3>客服热线</h3>
-                    <p>400-123-4567</p>
-                    <p>工作时间：9:00-18:00</p>
-                  </div>
-                </div>
-                <div class="contact-item">
-                  <div class="contact-icon">📧</div>
-                  <div class="contact-details">
-                    <h3>邮箱联系</h3>
-                    <p>service@freshharvest.com</p>
-                    <p>24小时内回复</p>
-                  </div>
-                </div>
-                <div class="contact-item">
-                  <div class="contact-icon">📍</div>
-                  <div class="contact-details">
-                    <h3>公司地址</h3>
-                    <p>北京市朝阳区果蔬大厦</p>
-                    <p>欢迎预约参观</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <!-- 底部开始 -->
+      <footer class="footer">
+        <div class="footer-content">
+          <div class="footer-content-links">
+            <a href="#">关于我们</a>
+            <a href="#">隐私政策</a>
+            <a href="#">服务条款</a>
+            <a href="#">常见问题</a>
           </div>
-        </section>
-
-        <!-- 底部开始 -->
-        <footer class="footer">
-          <div class="footer-container">
-            <div class="footer-content">
-              <div class="footer-content-links">
-                <a href="#">关于我们</a>
-                <a href="#">隐私政策</a>
-                <a href="#">服务条款</a>
-                <a href="#">常见问题</a>
-              </div>
-              <p class="copyright">© 2024 Fresh Harvest. 保留所有权利。</p>
-            </div>
-          </div>
-        </footer>
-        <!-- 底部结束 -->
-      </div>
+          <p class="copyright">© 2024 Fresh Harvest. 保留所有权利。</p>
+        </div>
+      </footer>
+      <!-- 底部结束 -->
     </div>
   </div>
 </template>
 
 <script setup>
+// 组件名称
+defineOptions({
+  name: 'HomePage',
+})
+
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Header from '@/components/Header.vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 import { getGoodsList } from '@/api/index.js'
 
 const router = useRouter()
-
-// 测试导航条状态
-const testNavOpen = ref(false)
-
-// 测试导航条方法
-const toggleTestNav = () => {
-  testNavOpen.value = !testNavOpen.value
-}
 
 // 数据状态
 const loading = ref(false)
@@ -759,102 +684,9 @@ onUnmounted(() => {
   position: relative;
 }
 
-/* 测试导航条样式 */
-.test-nav {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1000;
-}
-
-.test-nav-toggle {
-  background-color: #2c3e50;
-  color: white;
-  border: none;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.test-nav-toggle:hover {
-  background-color: #34495e;
-  transform: scale(1.1);
-}
-
-.test-nav-content {
-  position: absolute;
-  top: 60px;
-  left: 0;
-  width: 300px;
-  background-color: #2c3e50;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.test-nav-content.open {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.nav-section {
-  padding: 20px;
-  border-bottom: 1px solid #34495e;
-}
-
-.nav-section:last-child {
-  border-bottom: none;
-}
-
-.nav-section h4 {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #ecf0f1;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.nav-link {
-  display: block;
-  color: #bdc3c7;
-  text-decoration: none;
-  padding: 8px 12px;
-  margin-bottom: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  font-size: 14px;
-}
-
-.nav-link:hover {
-  background-color: #34495e;
-  color: white;
-  transform: translateX(4px);
-}
-
-.root {
-  font-family: Epilogue, 'Noto Sans', sans-serif;
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 100vh;
-  flex-direction: column;
+.home {
   background-color: #ffffff;
-  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 .container {
@@ -862,9 +694,8 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: 20px;
   display: flex;
-  height: 100%;
-  flex-grow: 1;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 /* Header 样式 */
@@ -948,18 +779,15 @@ onUnmounted(() => {
 
 /* 主内容区 */
 .main {
-  padding: 0 160px;
-  display: flex;
   flex: 1;
-  justify-content: center;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
 }
 
 .main-content {
   display: flex;
   flex-direction: column;
-  max-width: 960px;
   flex: 1;
 }
 
@@ -1373,15 +1201,9 @@ onUnmounted(() => {
 
 /* 底部 */
 .footer {
-  display: flex;
-  justify-content: center;
-}
-
-.footer-container {
-  display: flex;
-  max-width: 960px;
-  flex: 1;
-  flex-direction: column;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e5e5e5;
+  margin-top: auto;
 }
 
 .footer-content {
@@ -1390,6 +1212,8 @@ onUnmounted(() => {
   gap: 24px;
   padding: 40px 20px;
   text-align: center;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .footer-content-links {
@@ -1419,12 +1243,14 @@ onUnmounted(() => {
 /* 联系我们部分样式 */
 .contact-section {
   background-color: #f8f9fa;
-  padding: 60px 0;
+  padding: 60px 20px;
   margin-top: 40px;
 }
 
 .contact-content {
   text-align: center;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .contact-title {
@@ -1502,23 +1328,9 @@ onUnmounted(() => {
 }
 
 /* 响应式设计 */
-@media (max-width: 1200px) {
-  .main {
-    padding: 0 80px;
-  }
-}
-
 @media (max-width: 768px) {
-  .header {
-    padding: 12px 20px;
-  }
-
-  .nav-right-items {
-    display: none;
-  }
-
-  .main {
-    padding: 0 20px;
+  .container {
+    padding: 10px;
   }
 
   .product-list {

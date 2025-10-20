@@ -1,8 +1,48 @@
 <template>
   <div class="breadcrumb-container">
     <div class="breadcrumb-content">
-      <!-- 左侧面包屑导航 -->
-      <nav class="breadcrumb">
+      <!-- 首页：显示 Logo 和导航 -->
+      <div v-if="isHomePage" class="home-header">
+        <div class="logo">
+          <span class="leaf-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M173.79,51.48a221.25,221.25,0,0,0-41.67-34.34,8,8,0,0,0-8.24,0A221.25,221.25,0,0,0,82.21,51.48C54.59,80.48,40,112.47,40,144a88,88,0,0,0,176,0C216,112.47,201.41,80.48,173.79,51.48ZM96,184c0-27.67,22.53-47.28,32-54.3,9.48,7,32,26.63,32,54.3a32,32,0,0,1-64,0Z"
+              ></path>
+            </svg>
+          </span>
+          <span class="brand-name">果蔬商城</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#" class="nav-link" @click.prevent="router.push('/shop')">
+            所有产品
+          </a>
+          <a
+            href="#"
+            class="nav-link"
+            @click.prevent="router.push('/shop?filter=new')"
+          >
+            新到商品
+          </a>
+          <a
+            href="#"
+            class="nav-link"
+            @click.prevent="router.push('/shop?filter=sale')"
+          >
+            促销活动
+          </a>
+          <a href="#" class="nav-link" @click.prevent="scrollToContact">
+            联系我们
+          </a>
+        </nav>
+      </div>
+
+      <!-- 其他页面：显示面包屑导航 -->
+      <nav v-else class="breadcrumb">
         <span
           class="breadcrumb-item back-item"
           @click="goBack"
@@ -180,13 +220,6 @@
                     userStore.user?.username || userStore.user?.name || '用户'
                   }}
                 </span>
-                <!-- 调试信息 -->
-                <small
-                  v-if="userStore.user"
-                  style="display: block; color: #999; font-size: 10px"
-                >
-                  调试: {{ JSON.stringify(userStore.user) }}
-                </small>
               </div>
               <div class="user-menu-items">
                 <a href="#" @click.prevent="goToProfile" class="user-menu-item">
@@ -216,6 +249,27 @@
                     ></path>
                   </svg>
                   我的订单
+                </a>
+                <a
+                  href="#"
+                  @click.prevent="goToFavorites"
+                  class="user-menu-item"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M178,32c-20.65,0-35.73,11.15-42,21.89C129.73,43.15,114.65,32,94,32A60.07,60.07,0,0,0,34,92c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C154.21,218.66,258,162,258,92A60.07,60.07,0,0,0,178,32ZM128,206.8C109.74,196.16,50,149.72,50,92a44,44,0,0,1,44-44c19.45,0,35.78,10.36,42.92,25.32a8,8,0,0,0,14.16,0C150.22,58.36,166.55,48,186,48a44,44,0,0,1,44,44C230,149.72,170.26,196.16,152,206.8Z"
+                    ></path>
+                  </svg>
+                  我的收藏
+                  <span v-if="favoritesCount > 0" class="favorites-count">
+                    {{ favoritesCount }}
+                  </span>
                 </a>
                 <div class="menu-divider"></div>
                 <a
@@ -250,15 +304,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+// 组件名称
+defineOptions({
+  name: 'BreadcrumbComponent',
+})
+
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
 import { useSearchStore } from '@/stores/searchStore'
 import { useCartStore } from '@/stores/cartStore'
+import { getFavoritesCount } from '@/api/favorites'
 
 // 定义 props
-const props = defineProps({
+defineProps({
   currentPage: {
     type: String,
     required: true,
@@ -266,9 +326,15 @@ const props = defineProps({
 })
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 const searchStore = useSearchStore()
 const cartStore = useCartStore()
+
+// 判断是否为首页
+const isHomePage = computed(() => {
+  return route.path === '/'
+})
 
 // 搜索相关状态
 const searchKeyword = ref('')
@@ -276,6 +342,7 @@ const showSuggestions = ref(false)
 
 // 用户菜单状态
 const showUserMenu = ref(false)
+const favoritesCount = ref(0)
 
 // 获取用户信息
 const fetchUserInfo = async () => {
@@ -295,6 +362,8 @@ onMounted(() => {
   if (userStore.isLoggedIn) {
     cartStore.fetchCartCount()
   }
+  // 获取收藏数量
+  loadFavoritesCount()
 })
 
 // 返回上一页
@@ -373,6 +442,56 @@ const goToOrders = () => {
   router.push('/orders')
 }
 
+// 去收藏页
+const goToFavorites = () => {
+  showUserMenu.value = false
+  router.push('/favorites')
+}
+
+// 获取收藏数量
+const loadFavoritesCount = async () => {
+  if (!userStore.isLoggedIn) {
+    favoritesCount.value = 0
+    return
+  }
+
+  try {
+    const response = await getFavoritesCount()
+    favoritesCount.value = response.data?.count || 0
+  } catch {
+    favoritesCount.value = 0
+  }
+}
+
+// 滚动到联系我们部分
+const scrollToContact = () => {
+  // 如果当前在首页，滚动到联系我们部分
+  if (route.path === '/') {
+    const contactSection = document.getElementById('contact-section')
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      // 如果没有找到联系我们部分，滚动到页面底部
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+    }
+  } else {
+    // 如果不在首页，跳转到首页并滚动到联系我们部分
+    router.push('/').then(() => {
+      setTimeout(() => {
+        const contactSection = document.getElementById('contact-section')
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: 'smooth' })
+        } else {
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth',
+          })
+        }
+      }, 100)
+    })
+  }
+}
+
 // 处理退出登录
 const handleLogout = async () => {
   try {
@@ -406,6 +525,7 @@ const handleLogout = async () => {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  min-height: 48px; /* 固定最小高度，确保一致性 */
 }
 
 .breadcrumb {
@@ -414,6 +534,63 @@ const handleLogout = async () => {
   font-size: 14px;
   color: #666;
   flex: 1;
+  line-height: 1.5;
+}
+
+/* 首页 Logo 和导航 */
+.home-header {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex: 1;
+  line-height: 1.5;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.leaf-icon {
+  color: #2d5a27;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.leaf-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.brand-name {
+  font-weight: 600;
+  color: #000000;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex: 1;
+}
+
+.nav-link {
+  color: #000000;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: #2d5a27;
 }
 
 .breadcrumb-item {
@@ -703,6 +880,19 @@ const handleLogout = async () => {
   color: #ff3742;
 }
 
+.favorites-count {
+  background-color: #ff4757;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1.2;
+}
+
 .menu-divider {
   height: 1px;
   background-color: #f0f0f0;
@@ -741,6 +931,22 @@ const handleLogout = async () => {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
+  }
+
+  .home-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .nav-links {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .nav-link {
+    font-size: 13px;
   }
 
   .breadcrumb-actions {

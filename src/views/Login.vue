@@ -1,191 +1,189 @@
 <template>
   <div class="auth-page">
-    <div class="root">
-      <div class="container">
-        <!-- Header 开始 -->
+    <div class="container">
+      <!-- Header 开始 -->
 
-        <!-- Header 结束 -->
+      <!-- Header 结束 -->
 
-        <!-- 表单区域开始 -->
-        <div class="form-wrapper">
-          <div class="form-container">
-            <!-- 标签切换 -->
-            <div class="tabs">
-              <div class="tab-bar">
-                <a
-                  href="#"
-                  :class="['tab-item', { active: activeTab === 'login' }]"
-                  @click.prevent="activeTab = 'login'"
-                >
-                  <p>登录</p>
-                </a>
-                <a
-                  href="#"
-                  :class="['tab-item', { active: activeTab === 'signup' }]"
-                  @click.prevent="activeTab = 'signup'"
-                >
-                  <p>注册</p>
-                </a>
-              </div>
+      <!-- 表单区域开始 -->
+      <div class="form-wrapper">
+        <div class="form-container">
+          <!-- 标签切换 -->
+          <div class="tabs">
+            <div class="tab-bar">
+              <a
+                href="#"
+                :class="['tab-item', { active: activeTab === 'login' }]"
+                @click.prevent="activeTab = 'login'"
+              >
+                <p>登录</p>
+              </a>
+              <a
+                href="#"
+                :class="['tab-item', { active: activeTab === 'signup' }]"
+                @click.prevent="activeTab = 'signup'"
+              >
+                <p>注册</p>
+              </a>
+            </div>
+          </div>
+
+          <!-- 注册表单 -->
+          <div v-if="activeTab === 'signup'" class="form-content">
+            <!-- 用户名 -->
+            <div class="form-group">
+              <label class="form-label">
+                <p class="label-text">用户名</p>
+                <input
+                  type="text"
+                  v-model="signupForm.username"
+                  placeholder="请输入用户名（4-20个字符）"
+                  class="form-input"
+                  @keyup.enter="handleSignup"
+                />
+              </label>
             </div>
 
-            <!-- 注册表单 -->
-            <div v-if="activeTab === 'signup'" class="form-content">
-              <!-- 用户名 -->
-              <div class="form-group">
-                <label class="form-label">
-                  <p class="label-text">用户名</p>
-                  <input
-                    type="text"
-                    v-model="signupForm.username"
-                    placeholder="请输入用户名（4-20个字符）"
-                    class="form-input"
-                    @keyup.enter="handleSignup"
-                  />
-                </label>
-              </div>
-
-              <!-- 密码 -->
-              <div class="form-group">
-                <label class="form-label">
-                  <p class="label-text">密码</p>
-                  <input
-                    type="password"
-                    v-model="signupForm.password"
-                    placeholder="请输入密码（至少6个字符）"
-                    class="form-input"
-                    @keyup.enter="handleSignup"
-                  />
-                </label>
-              </div>
-
-              <!-- 确认密码 -->
-              <div class="form-group">
-                <label class="form-label">
-                  <p class="label-text">确认密码</p>
-                  <input
-                    type="password"
-                    v-model="signupForm.confirm_password"
-                    placeholder="请再次输入密码"
-                    class="form-input"
-                    @keyup.enter="handleSignup"
-                  />
-                </label>
-              </div>
-
-              <!-- 手机号 -->
-              <div class="form-group">
-                <label class="form-label">
-                  <p class="label-text">手机号</p>
-                  <input
-                    type="tel"
-                    v-model="signupForm.phone"
-                    placeholder="请输入手机号"
-                    class="form-input"
-                    @keyup.enter="handleSignup"
-                  />
-                </label>
-              </div>
-
-              <!-- 验证码 -->
-              <div class="form-group">
-                <label class="form-label">
-                  <p class="label-text">验证码</p>
-                  <div class="verification-code-wrapper">
-                    <input
-                      type="text"
-                      v-model="signupForm.verification_code"
-                      placeholder="请输入验证码（测试：123456）"
-                      class="form-input"
-                      @keyup.enter="handleSignup"
-                    />
-                  </div>
-                </label>
-              </div>
-
-              <!-- 注册按钮 -->
-              <div class="form-submit">
-                <button
-                  class="submit-btn"
-                  @click="handleSignup"
-                  :disabled="signupLoading"
-                >
-                  {{ signupLoading ? '注册中...' : '注册' }}
-                </button>
-              </div>
-
-              <!-- 切换到登录 -->
-              <p class="switch-text">
-                已有账号？
-                <a href="#" @click.prevent="activeTab = 'login'">立即登录</a>
-              </p>
-
-              <!-- 第三方登录 -->
-              <h3 class="social-title">或使用第三方登录</h3>
-              <div class="social-buttons">
-                <button class="social-btn">微信</button>
-                <button class="social-btn">支付宝</button>
-              </div>
+            <!-- 密码 -->
+            <div class="form-group">
+              <label class="form-label">
+                <p class="label-text">密码</p>
+                <input
+                  type="password"
+                  v-model="signupForm.password"
+                  placeholder="请输入密码（至少6个字符）"
+                  class="form-input"
+                  @keyup.enter="handleSignup"
+                />
+              </label>
             </div>
 
-            <!-- 登录表单 -->
-            <div v-if="activeTab === 'login'" class="form-content">
-              <!-- 用户名 -->
-              <div class="form-group">
-                <label class="form-label">
-                  <p class="label-text">用户名</p>
+            <!-- 确认密码 -->
+            <div class="form-group">
+              <label class="form-label">
+                <p class="label-text">确认密码</p>
+                <input
+                  type="password"
+                  v-model="signupForm.confirm_password"
+                  placeholder="请再次输入密码"
+                  class="form-input"
+                  @keyup.enter="handleSignup"
+                />
+              </label>
+            </div>
+
+            <!-- 手机号 -->
+            <div class="form-group">
+              <label class="form-label">
+                <p class="label-text">手机号</p>
+                <input
+                  type="tel"
+                  v-model="signupForm.phone"
+                  placeholder="请输入手机号"
+                  class="form-input"
+                  @keyup.enter="handleSignup"
+                />
+              </label>
+            </div>
+
+            <!-- 验证码 -->
+            <div class="form-group">
+              <label class="form-label">
+                <p class="label-text">验证码</p>
+                <div class="verification-code-wrapper">
                   <input
                     type="text"
-                    v-model="loginForm.username"
-                    placeholder="请输入用户名"
+                    v-model="signupForm.verification_code"
+                    placeholder="请输入验证码（测试：123456）"
                     class="form-input"
-                    @keyup.enter="handleLogin"
+                    @keyup.enter="handleSignup"
                   />
-                </label>
-              </div>
+                </div>
+              </label>
+            </div>
 
-              <!-- 密码 -->
-              <div class="form-group">
-                <label class="form-label">
-                  <p class="label-text">密码</p>
-                  <input
-                    type="password"
-                    v-model="loginForm.password"
-                    placeholder="请输入密码"
-                    class="form-input"
-                    @keyup.enter="handleLogin"
-                  />
-                </label>
-              </div>
+            <!-- 注册按钮 -->
+            <div class="form-submit">
+              <button
+                class="submit-btn"
+                @click="handleSignup"
+                :disabled="signupLoading"
+              >
+                {{ signupLoading ? '注册中...' : '注册' }}
+              </button>
+            </div>
 
-              <!-- 登录按钮 -->
-              <div class="form-submit">
-                <button
-                  class="submit-btn"
-                  @click="handleLogin"
-                  :disabled="loginLoading"
-                >
-                  {{ loginLoading ? '登录中...' : '登录' }}
-                </button>
-              </div>
+            <!-- 切换到登录 -->
+            <p class="switch-text">
+              已有账号？
+              <a href="#" @click.prevent="activeTab = 'login'">立即登录</a>
+            </p>
 
-              <!-- 切换到注册 -->
-              <p class="switch-text">
-                还没有账号？
-                <a href="#" @click.prevent="activeTab = 'signup'">立即注册</a>
-              </p>
+            <!-- 第三方登录 -->
+            <h3 class="social-title">或使用第三方登录</h3>
+            <div class="social-buttons">
+              <button class="social-btn">微信</button>
+              <button class="social-btn">支付宝</button>
+            </div>
+          </div>
 
-              <!-- 第三方登录 -->
-              <h3 class="social-title">或使用第三方登录</h3>
-              <div class="social-buttons">
-                <button class="social-btn">微信</button>
-                <button class="social-btn">支付宝</button>
-              </div>
+          <!-- 登录表单 -->
+          <div v-if="activeTab === 'login'" class="form-content">
+            <!-- 用户名 -->
+            <div class="form-group">
+              <label class="form-label">
+                <p class="label-text">用户名</p>
+                <input
+                  type="text"
+                  v-model="loginForm.username"
+                  placeholder="请输入用户名"
+                  class="form-input"
+                  @keyup.enter="handleLogin"
+                />
+              </label>
+            </div>
+
+            <!-- 密码 -->
+            <div class="form-group">
+              <label class="form-label">
+                <p class="label-text">密码</p>
+                <input
+                  type="password"
+                  v-model="loginForm.password"
+                  placeholder="请输入密码"
+                  class="form-input"
+                  @keyup.enter="handleLogin"
+                />
+              </label>
+            </div>
+
+            <!-- 登录按钮 -->
+            <div class="form-submit">
+              <button
+                class="submit-btn"
+                @click="handleLogin"
+                :disabled="loginLoading"
+              >
+                {{ loginLoading ? '登录中...' : '登录' }}
+              </button>
+            </div>
+
+            <!-- 切换到注册 -->
+            <p class="switch-text">
+              还没有账号？
+              <a href="#" @click.prevent="activeTab = 'signup'">立即注册</a>
+            </p>
+
+            <!-- 第三方登录 -->
+            <h3 class="social-title">或使用第三方登录</h3>
+            <div class="social-buttons">
+              <button class="social-btn">微信</button>
+              <button class="social-btn">支付宝</button>
             </div>
           </div>
         </div>
-        <!-- 表单区域结束 -->
       </div>
+      <!-- 表单区域结束 -->
     </div>
   </div>
 </template>
@@ -426,26 +424,13 @@ const handleLogin = async () => {
   min-height: 100vh;
 }
 
-.root {
-  font-family: Epilogue, 'Noto Sans', sans-serif;
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 100vh;
-  flex-direction: column;
-  background-color: #ffffff;
-  overflow-x: hidden;
-}
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   display: flex;
-  height: 100%;
-  flex-grow: 1;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 /* Header 样式 */

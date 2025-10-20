@@ -1179,14 +1179,17 @@ watch(
 
 <style scoped>
 .shop {
+  background-color: #ffffff;
   min-height: 100vh;
-  background-color: #f9f9f9;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 h1 {

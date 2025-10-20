@@ -165,10 +165,21 @@ const router = createRouter({
 
   // 滚动行为
   scrollBehavior(to, from, savedPosition) {
+    // 如果有保存的位置（浏览器前进/后退）
     if (savedPosition) {
       return savedPosition
-    } else {
-      return { top: 0 }
+    }
+    // 如果有锚点
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+      }
+    }
+    // 默认滚动到顶部
+    return {
+      top: 0,
+      behavior: 'instant', // 立即滚动，不使用平滑效果
     }
   },
 })

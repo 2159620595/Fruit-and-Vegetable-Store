@@ -25,3 +25,31 @@ onMounted(() => {
   }
 })
 </script>
+
+<style>
+/* 全局样式 - 确保页面容器一致性 */
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* 确保所有页面从顶部开始 */
+#app > div {
+  width: 100%;
+}
+</style>

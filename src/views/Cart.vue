@@ -1,187 +1,185 @@
 <template>
   <div class="cart-page">
-    <div class="root">
-      <div class="container">
-        <!-- 面包屑导航 -->
-        <Breadcrumb current-page="购物车" />
-        <!-- 主内容区开始 -->
-        <div class="main">
-          <div class="main-content">
-            <!-- 标题和批量操作 -->
-            <div class="page-title">
-              <p>您的购物车</p>
-              <div class="batch-actions" v-if="cartItems.length > 0">
-                <button
-                  class="batch-btn"
-                  @click="handleBatchDelete"
-                  :disabled="!cartStore.hasSelected"
-                >
-                  删除选中
-                </button>
-                <button class="batch-btn" @click="handleClearCart">
-                  清空购物车
-                </button>
-              </div>
+    <div class="container">
+      <!-- 面包屑导航 -->
+      <Breadcrumb current-page="购物车" />
+      <!-- 主内容区开始 -->
+      <div class="main">
+        <div class="main-content">
+          <!-- 标题和批量操作 -->
+          <div class="page-title">
+            <p>您的购物车</p>
+            <div class="batch-actions" v-if="cartItems.length > 0">
+              <button
+                class="batch-btn"
+                @click="handleBatchDelete"
+                :disabled="!cartStore.hasSelected"
+              >
+                删除选中
+              </button>
+              <button class="batch-btn" @click="handleClearCart">
+                清空购物车
+              </button>
             </div>
+          </div>
 
-            <!-- 加载状态 -->
-            <div v-if="cartStore.loading" class="loading-state">
-              <p>加载中...</p>
-            </div>
+          <!-- 加载状态 -->
+          <div v-if="cartStore.loading" class="loading-state">
+            <p>加载中...</p>
+          </div>
 
-            <!-- 错误提示 -->
-            <div v-else-if="cartStore.error" class="error-state">
-              <p>{{ cartStore.error }}</p>
-              <button @click="reloadCart" class="reload-btn">重新加载</button>
-            </div>
+          <!-- 错误提示 -->
+          <div v-else-if="cartStore.error" class="error-state">
+            <p>{{ cartStore.error }}</p>
+            <button @click="reloadCart" class="reload-btn">重新加载</button>
+          </div>
 
-            <!-- 购物车表格 -->
-            <div v-else class="cart-table-wrapper">
-              <div class="cart-table-container">
-                <table class="cart-table">
-                  <thead>
-                    <tr>
-                      <th class="col-select">
-                        <input
-                          type="checkbox"
-                          :checked="cartStore.isAllSelected"
-                          @change="toggleAllSelected"
-                          :disabled="cartItems.length === 0"
-                        />
-                      </th>
-                      <th class="col-product">商品</th>
-                      <th class="col-price">价格</th>
-                      <th class="col-quantity">数量</th>
-                      <th class="col-subtotal">小计</th>
-                      <th class="col-actions">操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-if="cartItems.length === 0">
-                      <td
-                        colspan="6"
-                        style="text-align: center; padding: 40px; color: #999"
-                      >
-                        购物车为空，快去添加商品吧~
-                      </td>
-                    </tr>
-                    <tr
-                      v-for="item in cartItems"
-                      :key="item.id"
-                      class="cart-row"
-                      :class="{ selected: item.selected }"
+          <!-- 购物车表格 -->
+          <div v-else class="cart-table-wrapper">
+            <div class="cart-table-container">
+              <table class="cart-table">
+                <thead>
+                  <tr>
+                    <th class="col-select">
+                      <input
+                        type="checkbox"
+                        :checked="cartStore.isAllSelected"
+                        @change="toggleAllSelected"
+                        :disabled="cartItems.length === 0"
+                      />
+                    </th>
+                    <th class="col-product">商品</th>
+                    <th class="col-price">价格</th>
+                    <th class="col-quantity">数量</th>
+                    <th class="col-subtotal">小计</th>
+                    <th class="col-actions">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="cartItems.length === 0">
+                    <td
+                      colspan="6"
+                      style="text-align: center; padding: 40px; color: #999"
                     >
-                      <td class="col-select">
-                        <input
-                          type="checkbox"
-                          :checked="item.selected"
-                          @change="toggleItemSelected(item.id)"
-                        />
-                      </td>
-                      <td class="col-product">
-                        <div class="product-info">
-                          <div
-                            class="product-image"
-                            :style="{ backgroundImage: `url(${item.image})` }"
-                          ></div>
-                          <span class="product-name">{{ item.name }}</span>
-                        </div>
-                      </td>
-                      <td class="col-price">{{ item.price }}</td>
-                      <td class="col-quantity">
-                        <div class="quantity-controls">
-                          <el-button
-                            @click="updateQuantity(item.id, item.quantity - 1)"
-                            :disabled="item.quantity <= 1"
-                            size="small"
-                            :icon="Minus"
-                            circle
-                          />
-                          <input
-                            type="number"
-                            v-model.number="item.quantity"
-                            @change="updateQuantity(item.id, item.quantity)"
-                            min="1"
-                            max="999"
-                          />
-                          <el-button
-                            @click="updateQuantity(item.id, item.quantity + 1)"
-                            size="small"
-                            :icon="Plus"
-                            circle
-                          />
-                        </div>
-                      </td>
-                      <td class="col-subtotal">{{ item.subtotal }}</td>
-                      <td class="col-actions">
+                      购物车为空，快去添加商品吧~
+                    </td>
+                  </tr>
+                  <tr
+                    v-for="item in cartItems"
+                    :key="item.id"
+                    class="cart-row"
+                    :class="{ selected: item.selected }"
+                  >
+                    <td class="col-select">
+                      <input
+                        type="checkbox"
+                        :checked="item.selected"
+                        @change="toggleItemSelected(item.id)"
+                      />
+                    </td>
+                    <td class="col-product">
+                      <div class="product-info">
+                        <div
+                          class="product-image"
+                          :style="{ backgroundImage: `url(${item.image})` }"
+                        ></div>
+                        <span class="product-name">{{ item.name }}</span>
+                      </div>
+                    </td>
+                    <td class="col-price">{{ item.price }}</td>
+                    <td class="col-quantity">
+                      <div class="quantity-controls">
                         <el-button
-                          type="danger"
-                          text
-                          @click="removeItem(item.id)"
-                          :icon="Delete"
-                        >
-                          删除
-                        </el-button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                          @click="updateQuantity(item.id, item.quantity - 1)"
+                          :disabled="item.quantity <= 1"
+                          size="small"
+                          :icon="Minus"
+                          circle
+                        />
+                        <input
+                          type="number"
+                          v-model.number="item.quantity"
+                          @change="updateQuantity(item.id, item.quantity)"
+                          min="1"
+                          max="999"
+                        />
+                        <el-button
+                          @click="updateQuantity(item.id, item.quantity + 1)"
+                          size="small"
+                          :icon="Plus"
+                          circle
+                        />
+                      </div>
+                    </td>
+                    <td class="col-subtotal">{{ item.subtotal }}</td>
+                    <td class="col-actions">
+                      <el-button
+                        type="danger"
+                        text
+                        @click="removeItem(item.id)"
+                        :icon="Delete"
+                      >
+                        删除
+                      </el-button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 订单汇总 -->
+          <div v-if="cartItems.length > 0">
+            <h3 class="summary-title">订单汇总</h3>
+            <div class="summary-content">
+              <div class="summary-row">
+                <p class="summary-label">
+                  小计 ({{ cartStore.selectedCount }} 件已选商品)
+                </p>
+                <p class="summary-value">{{ orderSummary.subtotal }}</p>
+              </div>
+              <div class="summary-row">
+                <p class="summary-label">运费</p>
+                <div class="shipping-info">
+                  <p class="summary-value">{{ orderSummary.shipping }}</p>
+                  <p v-if="orderSummary.shippingTip" class="shipping-tip">
+                    {{ orderSummary.shippingTip }}
+                  </p>
+                </div>
+              </div>
+              <div class="summary-row total-row">
+                <p class="summary-label">总计</p>
+                <p class="summary-value total-value">
+                  {{ orderSummary.total }}
+                </p>
               </div>
             </div>
 
-            <!-- 订单汇总 -->
-            <div v-if="cartItems.length > 0">
-              <h3 class="summary-title">订单汇总</h3>
-              <div class="summary-content">
-                <div class="summary-row">
-                  <p class="summary-label">
-                    小计 ({{ cartStore.selectedCount }} 件已选商品)
-                  </p>
-                  <p class="summary-value">{{ orderSummary.subtotal }}</p>
-                </div>
-                <div class="summary-row">
-                  <p class="summary-label">运费</p>
-                  <div class="shipping-info">
-                    <p class="summary-value">{{ orderSummary.shipping }}</p>
-                    <p v-if="orderSummary.shippingTip" class="shipping-tip">
-                      {{ orderSummary.shippingTip }}
-                    </p>
-                  </div>
-                </div>
-                <div class="summary-row total-row">
-                  <p class="summary-label">总计</p>
-                  <p class="summary-value total-value">
-                    {{ orderSummary.total }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- 按钮组 -->
-              <div class="action-buttons">
-                <div class="button-container">
-                  <el-button
-                    @click="continueShopping"
-                    :icon="Back"
-                    class="continue-btn"
-                  >
-                    继续购物
-                  </el-button>
-                  <el-button
-                    type="success"
-                    @click="checkout"
-                    :disabled="!cartStore.hasSelected"
-                    :icon="ShoppingCart"
-                    class="checkout-btn"
-                  >
-                    结账 ({{ cartStore.selectedCount }})
-                  </el-button>
-                </div>
+            <!-- 按钮组 -->
+            <div class="action-buttons">
+              <div class="button-container">
+                <el-button
+                  @click="continueShopping"
+                  :icon="Back"
+                  class="continue-btn"
+                >
+                  继续购物
+                </el-button>
+                <el-button
+                  type="success"
+                  @click="checkout"
+                  :disabled="!cartStore.hasSelected"
+                  :icon="ShoppingCart"
+                  class="checkout-btn"
+                >
+                  结账 ({{ cartStore.selectedCount }})
+                </el-button>
               </div>
             </div>
           </div>
         </div>
-        <!-- 主内容区结束 -->
       </div>
+      <!-- 主内容区结束 -->
     </div>
   </div>
 </template>
@@ -358,26 +356,13 @@ const reloadCart = async () => {
   min-height: 100vh;
 }
 
-.root {
-  font-family: Epilogue, 'Noto Sans', sans-serif;
-  position: relative;
-  align-items: center;
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-  flex-direction: column;
-  background-color: #ffffff;
-  overflow-x: hidden;
-}
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   display: flex;
-  height: 100%;
-  flex-grow: 1;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 /* Header 样式 */
