@@ -40,6 +40,23 @@ function setError(message) {
   error.value = message
 }
 
+// 解析订单数据中的 JSON 字段
+function parseOrderData(order) {
+  if (!order) return order
+
+  // 解析 shipping_address JSON 字符串
+  if (order.shipping_address && typeof order.shipping_address === 'string') {
+    try {
+      order.shipping_address = JSON.parse(order.shipping_address)
+    } catch {
+      // 解析失败，设为null
+      order.shipping_address = null
+    }
+  }
+
+  return order
+}
+
 // 公共方法（保持与原 Pinia actions 同名同参）
 async function createOrder(orderData) {
   setLoading(true)
@@ -80,7 +97,9 @@ async function fetchOrders(params = {}) {
       const dateB = new Date(b.created_at || 0)
       return dateB - dateA
     })
-    orders.value = list
+
+    // 解析每个订单的 JSON 字段
+    orders.value = list.map(order => parseOrderData(order))
 
     if (result.counts) {
       Object.assign(orderCounts, {
@@ -114,6 +133,15 @@ async function fetchOrderById(id) {
   try {
     const response = await getOrderDetail(id)
     const result = response.data.data || response.data
+
+    // 解析订单数据
+    if (result.order) {
+      result.order = parseOrderData(result.order)
+    } else {
+      // 如果没有嵌套的 order 字段，直接解析
+      parseOrderData(result)
+    }
+
     currentOrder.value = result
     return result
   } catch (err) {
@@ -339,7 +367,9 @@ async function searchOrders(params = {}) {
       const dateB = new Date(b.created_at || 0)
       return dateB - dateA
     })
-    orders.value = list
+
+    // 解析每个订单的 JSON 字段
+    orders.value = list.map(order => parseOrderData(order))
     return result
   } catch (err) {
     setError(err.message || '搜索订单失败')

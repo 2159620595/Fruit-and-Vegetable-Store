@@ -616,6 +616,7 @@ const getPaymentMethodText = method => {
     wechat: '微信支付',
     alipay: '支付宝',
     credit_card: '信用卡',
+    balance: '余额支付',
   }
   return methodMap[method] || method
 }
