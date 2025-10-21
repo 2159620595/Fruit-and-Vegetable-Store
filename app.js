@@ -1108,7 +1108,7 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
     const queryParams = [...params, parseInt(page_size), offset]
     const [orders] = await pool.query(query, queryParams)
 
-    // 为每个订单获取商品信息
+    // 为每个订单获取商品信息和评价状态
     const ordersWithItems = await Promise.all(
       orders.map(async order => {
         const [orderItems] = await pool.query(
@@ -1128,9 +1128,16 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
           [order.id]
         )
 
+        // 检查订单是否已评价
+        const [[reviewCheck]] = await pool.query(
+          'SELECT COUNT(*) as review_count FROM reviews WHERE order_id = ?',
+          [order.id]
+        )
+
         return {
           ...order,
           items: orderItems,
+          is_reviewed: reviewCheck.review_count > 0,
         }
       })
     )
@@ -1217,7 +1224,7 @@ app.get('/api/orders/search', authenticateToken, async (req, res) => {
 
     console.log('🔍 数据库搜索结果数量:', orders.length)
 
-    // 获取订单商品信息
+    // 获取订单商品信息和评价状态
     const ordersWithItems = await Promise.all(
       orders.map(async order => {
         const [orderItems] = await pool.query(
@@ -1237,9 +1244,16 @@ app.get('/api/orders/search', authenticateToken, async (req, res) => {
           [order.id]
         )
 
+        // 检查订单是否已评价
+        const [[reviewCheck]] = await pool.query(
+          'SELECT COUNT(*) as review_count FROM reviews WHERE order_id = ?',
+          [order.id]
+        )
+
         return {
           ...order,
           items: orderItems,
+          is_reviewed: reviewCheck.review_count > 0,
         }
       })
     )
@@ -1287,9 +1301,17 @@ app.get('/api/orders/search', authenticateToken, async (req, res) => {
           `,
             [order.id]
           )
+
+          // 检查订单是否已评价
+          const [[reviewCheck]] = await pool.query(
+            'SELECT COUNT(*) as review_count FROM reviews WHERE order_id = ?',
+            [order.id]
+          )
+
           pinyinMatched.push({
             ...order,
             items: orderItems,
+            is_reviewed: reviewCheck.review_count > 0,
           })
         }
       }

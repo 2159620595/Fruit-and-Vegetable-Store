@@ -429,8 +429,9 @@ const reloadCart = async () => {
   align-items: center;
   justify-content: space-between;
   white-space: nowrap;
-  border-bottom: 1px solid #f0f4f0;
+  border-bottom: 1px solid #c5cbd3;
   padding: 12px 40px;
+  background: #f0f2f5;
 }
 
 .header-left {
@@ -443,17 +444,17 @@ const reloadCart = async () => {
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #111811;
+  color: #2c3e50;
 }
 
 .nav-logo {
   width: 16px;
   height: 16px;
-  color: #111811;
+  color: #2c3e50;
 }
 
 .nav h2 {
-  color: #111811;
+  color: #2c3e50;
   font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
@@ -467,7 +468,7 @@ const reloadCart = async () => {
 }
 
 .nav-links a {
-  color: #111811;
+  color: #2c3e50;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.5;
@@ -499,10 +500,10 @@ const reloadCart = async () => {
 }
 
 .search-icon {
-  color: #618961;
+  color: #4a8157;
   display: flex;
   border: none;
-  background-color: #f0f4f0;
+  background-color: #e8ebef;
   align-items: center;
   justify-content: center;
   padding-left: 16px;
@@ -519,10 +520,10 @@ const reloadCart = async () => {
   resize: none;
   overflow: hidden;
   border-radius: 8px;
-  color: #111811;
+  color: #2c3e50;
   outline: none;
   border: none;
-  background-color: #f0f4f0;
+  background-color: #e8ebef;
   height: 100%;
   padding: 0 16px 0 8px;
   font-size: 16px;
@@ -534,7 +535,7 @@ const reloadCart = async () => {
 }
 
 .search-input::placeholder {
-  color: #618961;
+  color: #6b7280;
 }
 
 .cart-btn {
@@ -548,8 +549,8 @@ const reloadCart = async () => {
   border-radius: 8px;
   height: 40px;
   padding: 0 16px;
-  background-color: #f0f4f0;
-  color: #111811;
+  background-color: #4a8157;
+  color: white;
   font-size: 14px;
   font-weight: 700;
   line-height: 1.5;
@@ -579,11 +580,15 @@ const reloadCart = async () => {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 16px;
+  padding: 20px;
+  background: #f0f2f5;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .page-title p {
-  color: #111811;
+  color: #2c3e50;
   font-size: 32px;
   font-weight: 700;
   line-height: 1.2;
@@ -605,7 +610,7 @@ const reloadCart = async () => {
 }
 
 .loading-state p {
-  color: #618961;
+  color: #6b7280;
   font-size: 16px;
 }
 
@@ -621,9 +626,10 @@ const reloadCart = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 60px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 
@@ -688,9 +694,10 @@ const reloadCart = async () => {
 .cart-table-container {
   display: flex;
   overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid #dbe6db;
+  border-radius: 12px;
+  border: 1px solid #c5cbd3;
   background-color: #f0f2f5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .cart-table {
@@ -706,7 +713,7 @@ const reloadCart = async () => {
 .cart-table th {
   padding: 12px 16px;
   text-align: left;
-  color: #111811;
+  color: #2c3e50;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.5;
@@ -721,7 +728,7 @@ const reloadCart = async () => {
   cursor: pointer;
   width: 18px;
   height: 18px;
-  accent-color: #11d411;
+  accent-color: #4a8157;
 }
 
 .col-product {
@@ -745,16 +752,16 @@ const reloadCart = async () => {
 }
 
 .cart-row {
-  border-top: 1px solid #dbe6db;
+  border-top: 1px solid #c5cbd3;
   transition: background-color 0.2s;
 }
 
 .cart-row.selected {
-  background-color: #f8fdf8;
+  background-color: #e8f5e8;
 }
 
 .cart-row:hover {
-  background-color: #fafbfa;
+  background-color: #f5f7f9;
 }
 
 .cart-table td {
@@ -782,13 +789,13 @@ const reloadCart = async () => {
 }
 
 .product-name {
-  color: #111811;
+  color: #2c3e50;
 }
 
 .col-price,
 .col-quantity,
 .col-subtotal {
-  color: #618961;
+  color: #4a8157;
 }
 
 /* 数量控件 */
@@ -801,11 +808,11 @@ const reloadCart = async () => {
 .quantity-controls .quantity-btn {
   width: 28px;
   height: 28px;
-  border: 1px solid #dbe6db;
-  background-color: #f0f4f0;
+  border: 1px solid #c5cbd3;
+  background-color: #e8ebef;
   border-radius: 4px;
   cursor: pointer;
-  color: #67c23a;
+  color: #4a8157;
   font-size: 16px;
   font-weight: 600;
   display: flex;
@@ -816,8 +823,8 @@ const reloadCart = async () => {
 }
 
 .quantity-controls .quantity-btn:hover:not(:disabled) {
-  background-color: #67c23a;
-  border-color: #67c23a;
+  background-color: #4a8157;
+  border-color: #4a8157;
   color: white;
   transform: scale(1.05);
 }
@@ -831,10 +838,10 @@ const reloadCart = async () => {
   width: 50px;
   height: 28px;
   text-align: center;
-  border: 1px solid #dbe6db;
+  border: 1px solid #c5cbd3;
   border-radius: 4px;
   background-color: #e8ebef;
-  color: #111811;
+  color: #2c3e50;
   font-size: 14px;
   font-weight: 500;
   padding: 0 4px;
@@ -842,7 +849,7 @@ const reloadCart = async () => {
 }
 
 .quantity-controls input[type='number']:focus {
-  border-color: #11d411;
+  border-color: #4a8157;
 }
 
 /* 隐藏数字输入框的上下箭头 */
@@ -887,6 +894,10 @@ const reloadCart = async () => {
 
 .summary-card {
   border-radius: 12px;
+  background: #f0f2f5;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #c5cbd3;
 }
 
 .summary-header {
@@ -896,7 +907,7 @@ const reloadCart = async () => {
 }
 
 .summary-title {
-  color: #111811;
+  color: #2c3e50;
   font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
@@ -915,14 +926,14 @@ const reloadCart = async () => {
 }
 
 .summary-label {
-  color: #618961;
+  color: #6b7280;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
 }
 
 .summary-value {
-  color: #111811;
+  color: #2c3e50;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
@@ -938,7 +949,7 @@ const reloadCart = async () => {
 
 .shipping-tip {
   font-size: 12px;
-  color: #67c23a;
+  color: #4a8157;
   font-weight: 500;
   margin: 0;
   animation: pulse 2s ease-in-out infinite;
@@ -962,13 +973,13 @@ const reloadCart = async () => {
 .total-row .summary-label {
   font-size: 18px;
   font-weight: 600;
-  color: #111811;
+  color: #2c3e50;
 }
 
 .total-row .total-value {
   font-size: 24px;
   font-weight: 700;
-  color: #67c23a;
+  color: #4a8157;
 }
 
 /* 按钮组 */
@@ -977,9 +988,12 @@ const reloadCart = async () => {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 20px 16px;
+  padding: 20px;
   margin-top: 20px;
-  border-top: 2px solid #f0f0f0;
+  background: #f0f2f5;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #c5cbd3;
 }
 
 /* 面包屑导航样式 */
@@ -992,13 +1006,13 @@ const reloadCart = async () => {
 }
 
 .breadcrumb a {
-  color: #618961;
+  color: #4a8157;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .breadcrumb a:hover {
-  color: #4a6b4a;
+  color: #3a6b47;
 }
 
 .breadcrumb .separator {

@@ -1144,11 +1144,10 @@ const handleReviewSubmit = async reviewData => {
       icon: 'Loading',
     })
 
+    const orderId = currentReviewOrder.value.id
+
     // 调用评价API
-    const result = await orderStore.reviewOrder(
-      currentReviewOrder.value.id,
-      reviewData
-    )
+    const result = await orderStore.reviewOrder(orderId, reviewData)
 
     loading.close()
 
@@ -1659,13 +1658,13 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(240, 242, 245, 0.85);
   z-index: 1;
 }
 
 .order-list-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #dfe3e8;
 }
 
 .container {
@@ -1679,7 +1678,10 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  padding: 16px 0;
+  padding: 20px;
+  background: #f0f2f5;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .page-title {
@@ -1713,10 +1715,10 @@ onUnmounted(() => {
 /* 订单标签页 */
 .order-tabs {
   background: #f0f2f5;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 16px 24px 0;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .tab-label {
@@ -1781,24 +1783,28 @@ onUnmounted(() => {
 /* 加载状态 */
 .loading-container {
   background: #f0f2f5;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 /* 订单列表 */
 .order-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
 .order-card {
   background: #f0f2f5;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
   transition: all 0.3s;
+  margin-bottom: 24px;
+}
+
+.order-card:last-child {
+  margin-bottom: 0;
 }
 
 .order-card:hover {
@@ -1811,7 +1817,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #c5cbd3;
   margin-bottom: 16px;
 }
 
@@ -1844,7 +1850,7 @@ onUnmounted(() => {
 }
 
 .order-items:hover {
-  background-color: #fafafa;
+  background-color: #e8ebef;
 }
 
 .order-products {
@@ -1873,7 +1879,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid #e9ecef;
+  border: 1px solid #c5cbd3;
 }
 
 .product-image {
@@ -1892,7 +1898,7 @@ onUnmounted(() => {
   height: 48px;
   border-radius: 6px;
   background-color: #e8ebef;
-  border: 1px solid #e9ecef;
+  border: 1px solid #c5cbd3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1978,7 +1984,7 @@ onUnmounted(() => {
   justify-content: flex-end;
   gap: 12px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #c5cbd3;
 }
 
 /* 分页 */
@@ -1988,8 +1994,8 @@ onUnmounted(() => {
   margin-top: 32px;
   padding: 24px;
   background: #f0f2f5;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 /* 面包屑导航样式 */

@@ -17,6 +17,25 @@ import {
 } from '@/api/order'
 import { createReview } from '@/api/review'
 
+// 从 localStorage 加载已评价的订单列表
+function loadReviewedOrdersFromStorage() {
+  try {
+    const stored = localStorage.getItem('reviewedOrders')
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+// 保存已评价的订单列表到 localStorage
+function persistReviewedOrders(orderIds) {
+  try {
+    localStorage.setItem('reviewedOrders', JSON.stringify(orderIds))
+  } catch {
+    // 静默失败，localStorage 可能不可用
+  }
+}
+
 // 单例状态
 const orders = ref([])
 const currentOrder = ref(null)
@@ -28,7 +47,7 @@ const orderCounts = reactive({
   to_review: 0,
   cancelled: 0,
 })
-const reviewedOrders = ref([]) // 已评价的订单ID列表
+const reviewedOrders = ref(loadReviewedOrdersFromStorage()) // 从 localStorage 加载已评价的订单ID列表
 const loading = ref(false)
 const error = ref(null)
 
@@ -340,19 +359,23 @@ async function buyAgain(orderId) {
 function syncReviewStatus() {
   const set = new Set(reviewedOrders.value)
   orders.value.forEach(order => {
-    if (order.is_reviewed !== undefined && order.is_reviewed !== null) {
-      if (order.is_reviewed) set.add(order.id)
-      else set.delete(order.id)
-    } else if (set.has(order.id)) {
+    // 优先使用缓存中的评价状态，然后才使用后端返回的状态
+    if (set.has(order.id)) {
       order.is_reviewed = true
+    } else if (order.is_reviewed !== undefined && order.is_reviewed !== null) {
+      if (order.is_reviewed) set.add(order.id)
     }
   })
   reviewedOrders.value = Array.from(set)
+  // 持久化到 localStorage
+  persistReviewedOrders(reviewedOrders.value)
 }
 
 function saveReviewedOrderToCache(orderId) {
   if (!reviewedOrders.value.includes(orderId)) {
     reviewedOrders.value.push(orderId)
+    // 立即持久化到 localStorage
+    persistReviewedOrders(reviewedOrders.value)
   }
 }
 

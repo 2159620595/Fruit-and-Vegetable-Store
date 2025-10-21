@@ -7,7 +7,7 @@
   >
     <div class="review-dialog">
       <!-- 订单信息 -->
-      <div class="order-info">
+      <div class="order-info" v-if="order && order.order_number">
         <h4>订单信息</h4>
         <p>
           <strong>订单号：</strong>
@@ -20,7 +20,10 @@
       </div>
 
       <!-- 商品列表 -->
-      <div class="product-list" v-if="order.items && order.items.length > 0">
+      <div
+        class="product-list"
+        v-if="order && order.items && order.items.length > 0"
+      >
         <h4>商品列表</h4>
         <div class="product-item" v-for="item in order.items" :key="item.id">
           <img
@@ -66,7 +69,7 @@
 
         <!-- 商品评价 -->
         <div
-          v-if="order.items && order.items.length > 0"
+          v-if="order && order.items && order.items.length > 0"
           class="product-reviews"
         >
           <h4>商品评价</h4>
@@ -118,7 +121,7 @@ const props = defineProps({
   },
   order: {
     type: Object,
-    default: () => ({}),
+    default: () => null,
   },
 })
 
@@ -150,7 +153,7 @@ watch(
       reviewForm.comment = ''
 
       // 重置商品评分
-      if (props.order.items) {
+      if (props.order && props.order.items) {
         props.order.items.forEach(item => {
           item.rating = 5
         })

@@ -11,7 +11,7 @@
       <!-- 订单金额显示 -->
       <div v-if="amount" class="payment-amount">
         <div class="amount-label">订单金额</div>
-        <div class="amount-value">¥{{ amount.toFixed(2) }}</div>
+        <div class="amount-value">¥{{ formatAmount(amount) }}</div>
       </div>
 
       <!-- 余额信息显示 -->
@@ -24,7 +24,7 @@
           class="balance-amount"
           :class="{ insufficient: userBalance < amount }"
         >
-          ¥{{ userBalance.toFixed(2) }}
+          ¥{{ formatAmount(userBalance) }}
         </span>
       </div>
 
@@ -126,9 +126,23 @@ const userStore = useUserStore()
 const visible = ref(props.modelValue)
 const selectedPayment = ref('balance') // 默认选择余额支付
 
+// 格式化金额显示
+const formatAmount = value => {
+  const num = Number(value)
+  if (isNaN(num)) {
+    return '0.00'
+  }
+  return num.toFixed(2)
+}
+
 // 获取用户余额
 const userBalance = computed(() => {
-  return userStore.balance || 0
+  const balance = userStore.balance
+  // 确保返回数字类型
+  if (balance === null || balance === undefined || balance === '') {
+    return 0
+  }
+  return Number(balance) || 0
 })
 
 watch(
