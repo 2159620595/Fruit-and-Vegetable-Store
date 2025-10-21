@@ -27,6 +27,7 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   charset: 'utf8mb4',
+  timezone: '+08:00', // 设置为中国标准时间（东八区）
 })
 
 // ============================================
@@ -2903,10 +2904,12 @@ app.get('/api/recharge/records', authenticateToken, async (req, res) => {
     const [rows] = await pool.query(
       `
       SELECT id, amount, bonus_amount, total_amount, payment_method, 
-             payment_status, transaction_id, created_at, updated_at
+             payment_status, transaction_id, 
+             CAST(DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS CHAR) as created_at,
+             CAST(DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i:%s') AS CHAR) as updated_at
       FROM recharge_records 
       ${whereClause}
-      ORDER BY created_at ${orderDirection}
+      ORDER BY recharge_records.created_at ${orderDirection}
       LIMIT ? OFFSET ?
     `,
       [...params, parseInt(limit), offset]
@@ -2938,8 +2941,22 @@ app.get('/api/recharge/records', authenticateToken, async (req, res) => {
 
     const stats = statsResult[0]
 
+    // 确保时间字段是字符串格式，避免 JSON 序列化时转换为 ISO 格式
+    const formattedRows = rows.map(row => ({
+      ...row,
+      // 如果 created_at 是 Date 对象，转换为格式化字符串
+      created_at:
+        typeof row.created_at === 'string'
+          ? row.created_at
+          : row.created_at?.toISOString?.() || row.created_at,
+      updated_at:
+        typeof row.updated_at === 'string'
+          ? row.updated_at
+          : row.updated_at?.toISOString?.() || row.updated_at,
+    }))
+
     sendResponse(res, 200, '获取成功', {
-      records: rows,
+      records: formattedRows,
       total: countResult[0].total,
       pagination: {
         page: parseInt(page),
@@ -2978,8 +2995,8 @@ app.get('/api/recharge/records/:id', authenticateToken, async (req, res) => {
         r.payment_method,
         r.payment_status,
         r.transaction_id,
-        r.created_at,
-        r.updated_at,
+        CAST(DATE_FORMAT(r.created_at, '%Y-%m-%d %H:%i:%s') AS CHAR) as created_at,
+        CAST(DATE_FORMAT(r.updated_at, '%Y-%m-%d %H:%i:%s') AS CHAR) as updated_at,
         u.username,
         u.balance as current_balance
       FROM recharge_records r

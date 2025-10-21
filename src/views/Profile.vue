@@ -1612,9 +1612,14 @@ const formatDateTime = datetime => {
     // 处理多种日期格式
     let date
     if (typeof datetime === 'string') {
-      // MySQL返回的时间格式通常是 'YYYY-MM-DD HH:mm:ss'
-      // 需要确保时区正确处理
-      date = new Date(datetime)
+      // MySQL返回的时间格式：'YYYY-MM-DD HH:mm:ss'
+      // 如果已经是正确的格式字符串，直接返回
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(datetime)) {
+        // 已经是格式化的时间字符串，直接返回
+        return datetime
+      }
+      // 尝试解析为Date对象
+      date = new Date(datetime.replace(/-/g, '/')) // 兼容Safari浏览器
     } else if (datetime instanceof Date) {
       date = datetime
     } else if (typeof datetime === 'number') {
@@ -1625,10 +1630,18 @@ const formatDateTime = datetime => {
       return '-'
     }
 
+    // 如果已经是字符串格式，直接返回
+    if (
+      typeof datetime === 'string' &&
+      /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(datetime)
+    ) {
+      return datetime
+    }
+
     // 检查日期是否有效
     if (isNaN(date.getTime())) {
       console.error('无效的日期:', datetime)
-      return '-'
+      return datetime.toString() // 返回原始值
     }
 
     // 格式化为本地时间
@@ -1642,7 +1655,7 @@ const formatDateTime = datetime => {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
   } catch (error) {
     console.error('日期格式化错误:', error, datetime)
-    return '-'
+    return datetime?.toString() || '-'
   }
 }
 
@@ -1653,16 +1666,41 @@ const getPaymentMethodName = method => {
   const methods = {
     alipay: '支付宝',
     wechat: '微信支付',
+    wechatpay: '微信支付',
     bank: '银行卡',
+    bank_card: '银行卡',
     balance: '余额支付',
     credit_card: '信用卡',
     bank_transfer: '银行转账',
     cash_on_delivery: '货到付款',
+    unionpay: '银联支付',
+    // 英文大写形式映射
+    ALIPAY: '支付宝',
+    WECHAT: '微信支付',
+    WECHATPAY: '微信支付',
+    BANK: '银行卡',
+    BANK_CARD: '银行卡',
+    BALANCE: '余额支付',
+    CREDIT_CARD: '信用卡',
+    BANK_TRANSFER: '银行转账',
+    CASH_ON_DELIVERY: '货到付款',
+    UNIONPAY: '银联支付',
   }
 
   // 统一转换为小写进行匹配
   const normalizedMethod = String(method).trim().toLowerCase()
-  const result = methods[normalizedMethod] || method
+  let result = methods[normalizedMethod]
+
+  // 如果没有找到映射，尝试大写形式
+  if (!result) {
+    result = methods[String(method).trim().toUpperCase()]
+  }
+
+  // 如果还是没有找到，返回原始值
+  if (!result) {
+    result = method
+    console.warn(`⚠️ 未知的支付方式: "${method}"，请添加映射`)
+  }
 
   console.log(`💳 支付方式转换: "${method}" -> "${result}"`)
 
