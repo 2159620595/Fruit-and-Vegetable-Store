@@ -1984,9 +1984,14 @@ onUnmounted(() => {
 .order-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 12px;
   padding-top: 16px;
   border-top: 1px solid #c5cbd3;
+}
+
+.order-actions .el-button {
+  min-height: 32px;
 }
 
 /* 分页 */
@@ -2047,8 +2052,33 @@ onUnmounted(() => {
     padding: 12px;
   }
 
+  .page-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
   .page-title {
     font-size: 24px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .header-actions .el-button {
+    width: 100%;
+  }
+
+  .order-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .order-card {
@@ -2064,6 +2094,7 @@ onUnmounted(() => {
   .order-info {
     flex-direction: column;
     gap: 8px;
+    width: 100%;
   }
 
   .order-number {
@@ -2078,50 +2109,70 @@ onUnmounted(() => {
     align-self: flex-start;
   }
 
-  .order-products {
+  .order-product-images {
+    flex-direction: column;
     gap: 12px;
   }
 
-  .order-product {
-    gap: 12px;
+  .product-images-container {
+    justify-content: flex-start;
+  }
+
+  .product-image-item {
+    width: 70px;
+    height: 70px;
   }
 
   .product-image {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
   }
 
-  .product-name {
+  .product-names {
+    width: 100%;
+  }
+
+  .product-names-text {
     font-size: 14px;
-  }
-
-  .product-price {
-    font-size: 14px;
-  }
-
-  .product-quantity {
-    font-size: 12px;
   }
 
   .order-summary {
     gap: 8px;
   }
 
-  .total-price {
-    font-size: 16px;
+  .summary-item {
+    font-size: 13px;
+  }
+
+  .order-total {
+    align-items: flex-start;
+  }
+
+  .total-amount {
+    font-size: 20px;
   }
 
   .shipping-fee {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .order-actions {
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 8px;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding-top: 12px;
+    border-top: 1px solid #e8ebef;
   }
 
   .order-actions .el-button {
-    width: 100%;
+    flex: 1;
+    min-width: 110px;
+    height: 36px;
+    justify-content: center;
+    font-size: 14px;
   }
 }
 
@@ -2130,8 +2181,20 @@ onUnmounted(() => {
     padding: 8px;
   }
 
+  .page-header {
+    gap: 10px;
+  }
+
   .page-title {
     font-size: 20px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .search-input {
+    font-size: 14px;
   }
 
   .order-card {
@@ -2139,7 +2202,96 @@ onUnmounted(() => {
   }
 
   .order-header {
-    gap: 8px;
+    gap: 10px;
+  }
+
+  .order-number {
+    font-size: 13px;
+  }
+
+  .order-date {
+    font-size: 11px;
+  }
+
+  .product-image-item {
+    width: 60px;
+    height: 60px;
+  }
+
+  .product-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .product-names-text {
+    font-size: 13px;
+  }
+
+  .summary-item {
+    font-size: 12px;
+  }
+
+  .total-amount {
+    font-size: 18px;
+  }
+
+  .order-actions {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 12px;
+    margin-top: 12px;
+  }
+
+  .order-actions .el-button {
+    width: 100%;
+    min-width: auto;
+    height: 44px;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0 16px;
+  }
+
+  /* 统一按钮样式 */
+  .order-actions .el-button--default {
+    background: #f0f2f5;
+    border-color: #d0d5dd;
+    color: #2c3e50;
+  }
+
+  .order-actions .el-button--default:hover {
+    background: #e8ebef;
+    border-color: #4a8157;
+    color: #4a8157;
+  }
+
+  .order-actions .el-button--primary {
+    background: linear-gradient(135deg, #4a8157 0%, #5a9a67 100%);
+    border: none;
+  }
+
+  .order-actions .el-button--success {
+    background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+    border: none;
+  }
+
+  .order-actions .el-button--info {
+    background: #f0f2f5;
+    border-color: #d0d5dd;
+    color: #5a7a98;
+  }
+
+  .order-actions .el-button--info:hover {
+    background: #e8ebef;
+    border-color: #5a7a98;
+    color: #5a7a98;
+  }
+
+  .header-actions .el-button {
+    height: 40px;
+    justify-content: center;
   }
 
   .order-info {
@@ -2192,11 +2344,14 @@ onUnmounted(() => {
   }
 
   .order-actions {
-    gap: 6px;
+    gap: 8px;
   }
 
   .order-actions .el-button {
-    min-width: 100px;
+    width: 100%;
+    min-width: auto;
+    height: 42px;
+    font-size: 13px;
   }
 
   /* 移动端商品图片样式调整 */

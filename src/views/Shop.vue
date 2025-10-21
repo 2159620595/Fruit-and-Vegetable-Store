@@ -1640,39 +1640,126 @@ h1 {
 
   .filters {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    position: static !important; /* 取消sticky定位 */
+    margin-bottom: 16px;
   }
 
   .loading-state .products-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 15px;
+  }
+
+  .category-item {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .filter-section h3 {
+    font-size: 16px;
   }
 }
 
-@media (max-width: 640px) {
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-  }
-
-  .loading-state .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .product-image {
-    height: 150px;
+@media (max-width: 768px) {
+  .shop {
+    padding: 16px;
   }
 
   .page-header {
     flex-direction: column;
     align-items: flex-start !important;
-    gap: 15px;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .products-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px;
+    background: #f0f2f5;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .view-controls {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .view-controls button {
+    height: 36px;
+    width: 36px;
+  }
+
+  .sort-controls {
+    width: 100%;
+  }
+
+  .sort-controls select {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .loading-state .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .product-card {
+    padding: 10px;
+  }
+
+  .product-image {
+    height: 160px;
+  }
+
+  .product-name {
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 16px;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+    position: static !important; /* 确保移动端不会sticky */
+    margin-bottom: 16px;
+  }
+
+  .category-item {
+    padding: 8px 12px;
   }
 }
 
 @media (max-width: 480px) {
+  .shop {
+    padding: 12px;
+  }
+
+  .page-header {
+    padding: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
@@ -1680,24 +1767,101 @@ h1 {
 
   .loading-state .products-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 10px;
+  }
+
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
   }
 
   .product-image {
-    height: 120px;
+    width: 100%;
+    height: 140px;
+  }
+
+  .product-info {
+    padding: 10px 0 0;
   }
 
   .product-name {
     font-size: 13px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .product-price {
-    font-size: 14px;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .product-rating {
+    font-size: 12px;
+    margin-bottom: 8px;
   }
 
   .add-to-cart-btn {
-    font-size: 11px;
-    padding: 4px 8px;
+    font-size: 13px;
+    padding: 8px 12px;
+    width: 100%;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .filters {
+    padding: 10px;
+    position: static !important;
+    margin-bottom: 12px;
+  }
+
+  .category-item {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .filter-section h3 {
+    font-size: 14px;
+  }
+
+  .products-header {
+    padding: 12px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .pagination-info {
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .pagination-button {
+    padding: 8px 14px;
+    font-size: 13px;
+    height: 36px;
+    min-width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page-header {
+    margin-bottom: 16px;
   }
 }
 

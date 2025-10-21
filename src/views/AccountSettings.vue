@@ -565,12 +565,32 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .settings-page {
+    padding: 16px;
+  }
+
   .main-content {
     padding: 16px;
   }
 
+  .page-header h1 {
+    font-size: 24px;
+  }
+
   .settings-section {
     padding: 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .profile-form {
+    max-width: none;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
   }
 
   .security-item,
@@ -580,8 +600,60 @@ onMounted(() => {
     gap: 12px;
   }
 
-  .profile-form {
-    max-width: none;
+  .item-action {
+    width: 100%;
+  }
+
+  .item-action .el-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-page {
+    padding: 12px;
+  }
+
+  .main-content {
+    padding: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .settings-section {
+    padding: 12px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-label {
+    font-size: 13px;
+  }
+
+  .form-input {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .security-item,
+  .privacy-item {
+    padding: 12px;
+  }
+
+  .item-title {
+    font-size: 14px;
+  }
+
+  .item-description {
+    font-size: 12px;
   }
 }
 </style>

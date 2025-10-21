@@ -1999,12 +1999,16 @@ onMounted(async () => {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .profile-page {
+    padding: 16px;
+  }
+
   .main-content {
     padding: 16px;
   }
 
   .user-profile-section {
-    padding: 24px;
+    padding: 20px;
   }
 
   .profile-header {
@@ -2013,39 +2017,147 @@ onMounted(async () => {
     gap: 16px;
   }
 
-  .user-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+  .user-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
   }
 
-  .actions-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .action-card {
-    padding: 16px;
-  }
-}
-
-@media (max-width: 480px) {
   .user-name {
     font-size: 24px;
   }
 
   .user-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .actions-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 
-  .stat-item {
+  .action-card {
+    padding: 16px;
+  }
+
+  .membership-section,
+  .balance-section,
+  .recharge-section,
+  .payment-methods-section,
+  .recharge-records-section {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .amount-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .payment-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 12px;
+  }
+
+  .main-content {
+    padding: 12px;
+  }
+
+  .user-profile-section {
+    padding: 16px;
+  }
+
+  .user-avatar {
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
+  }
+
+  .user-name {
+    font-size: 20px;
+  }
+
+  .user-email {
+    font-size: 13px;
+  }
+
+  .user-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
   }
 
   .stat-number {
-    font-size: 18px;
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
+
+  .actions-grid {
+    gap: 10px;
+  }
+
+  .action-card {
+    padding: 12px;
+  }
+
+  .action-title {
+    font-size: 14px;
+  }
+
+  .membership-section,
+  .balance-section,
+  .recharge-section,
+  .payment-methods-section,
+  .recharge-records-section {
+    padding: 12px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .amount-cards {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .amount-card {
+    padding: 12px;
+  }
+
+  .payment-card {
+    padding: 12px;
+  }
+
+  .records-table {
+    font-size: 12px;
+  }
+
+  .records-table th,
+  .records-table td {
+    padding: 8px;
   }
 }
 

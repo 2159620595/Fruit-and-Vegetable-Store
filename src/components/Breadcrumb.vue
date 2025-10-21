@@ -554,7 +554,7 @@ const handleLogout = async () => {
 
 <style scoped>
 .breadcrumb-container {
-  background-color: #e8ebef;
+  background-color: #ecf0f3;
   border-bottom: 1px solid #e5e5e5;
   margin-bottom: 24px;
 }
@@ -695,7 +695,8 @@ const handleLogout = async () => {
 .search-bar {
   display: flex;
   align-items: center;
-  background-color: #f5f5f5;
+  background-color: #f9fafb;
+  border: 1px solid #e8eaed;
   border-radius: 20px;
   padding: 6px 12px;
   min-width: 200px;
@@ -703,8 +704,9 @@ const handleLogout = async () => {
 }
 
 .search-bar:focus-within {
-  background-color: #e8ebef;
-  box-shadow: 0 0 0 2px #4a8157;
+  background-color: #ffffff;
+  border-color: #4a8157;
+  box-shadow: 0 0 0 2px rgba(74, 129, 87, 0.15);
 }
 
 .search-icon {
@@ -793,17 +795,31 @@ const handleLogout = async () => {
   gap: 8px;
   padding: 8px 12px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
   font-size: 14px;
   color: #333;
+  border-radius: 6px;
+  margin: 0 4px;
 }
 
 .suggestion-item:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(74, 129, 87, 0.1);
+  color: #4a8157;
+  transform: translateX(4px);
+  padding-left: 16px;
+}
+
+.suggestion-item:hover svg {
+  color: #4a8157;
 }
 
 .suggestion-item.hot {
   color: #618961;
+}
+
+.suggestion-item.hot:hover {
+  color: #4a8157;
+  font-weight: 500;
 }
 
 /* 操作按钮样式 */
@@ -981,36 +997,207 @@ const handleLogout = async () => {
   background-color: #4a6b4a;
 }
 
-/* 响应式设计 */
+/* ============================================
+   响应式设计 - 移动端优化
+   ============================================ */
+
+/* 平板设备 (768px - 1024px) */
+@media (max-width: 1024px) {
+  .breadcrumb-content {
+    padding: 12px 16px;
+  }
+
+  .nav-links {
+    gap: 24px;
+  }
+
+  .search-bar {
+    min-width: 180px;
+  }
+}
+
+/* 移动设备 (< 768px) */
 @media (max-width: 768px) {
   .breadcrumb-content {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
+    padding: 12px 16px;
+    min-height: auto;
   }
 
   .home-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 12px;
+  }
+
+  .logo {
+    gap: 8px;
+  }
+
+  .brand-name {
+    font-size: 15px;
   }
 
   .nav-links {
     width: 100%;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
+    justify-content: flex-start;
   }
 
   .nav-link {
     font-size: 13px;
+    padding: 4px 8px;
+    background: rgba(74, 129, 87, 0.08);
+    border-radius: 6px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb .separator {
+    margin: 0 4px;
   }
 
   .breadcrumb-actions {
+    flex-direction: row;
     justify-content: space-between;
+    gap: 8px;
+  }
+
+  .search-container {
+    flex: 1;
+    max-width: 100%;
   }
 
   .search-bar {
-    min-width: 150px;
+    min-width: 0;
+    width: 100%;
+    padding: 6px 10px;
+  }
+
+  .search-bar input {
+    font-size: 13px;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .cart-badge {
+    min-width: 14px;
+    height: 14px;
+    font-size: 9px;
+    top: 1px;
+    right: 1px;
+  }
+
+  .user-dropdown {
+    right: -8px;
+    min-width: 180px;
+    max-width: calc(100vw - 32px);
+  }
+
+  .user-menu-item {
+    font-size: 13px;
+    padding: 6px 0;
+  }
+
+  .search-suggestions {
+    left: -8px;
+    right: -8px;
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* 小屏幕手机 (< 480px) */
+@media (max-width: 480px) {
+  .breadcrumb-content {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .logo {
+    gap: 6px;
+  }
+
+  .leaf-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .brand-name {
+    font-size: 14px;
+  }
+
+  .nav-links {
+    gap: 8px;
+  }
+
+  .nav-link {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+
+  .breadcrumb {
+    font-size: 12px;
+  }
+
+  .breadcrumb-actions {
+    gap: 6px;
+  }
+
+  .search-bar {
+    padding: 5px 8px;
+  }
+
+  .search-bar input {
+    font-size: 12px;
+  }
+
+  .action-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .cart-badge {
+    min-width: 12px;
+    height: 12px;
+    font-size: 8px;
+  }
+
+  .user-dropdown {
+    min-width: 160px;
+  }
+
+  .user-info-section,
+  .user-login-section {
+    padding: 12px;
+  }
+
+  .user-menu-item {
+    font-size: 12px;
+  }
+
+  .login-btn {
+    padding: 6px 12px;
+    font-size: 13px;
   }
 }
 </style>

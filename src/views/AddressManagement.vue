@@ -754,28 +754,89 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .address-management-page {
+    padding: 16px;
+  }
+
   .main-content {
     padding: 16px;
   }
 
+  .page-header h1 {
+    font-size: 24px;
+  }
+
   .addresses-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .address-card {
+    padding: 16px;
   }
 
   .card-header {
     flex-direction: column;
     gap: 12px;
+    align-items: flex-start;
   }
 
   .card-actions {
-    align-self: stretch;
-    justify-content: center;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 12px;
   }
 
   .default-badge {
     position: static;
     align-self: flex-start;
-    margin-top: 8px;
+  }
+
+  .add-address-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .address-management-page {
+    padding: 12px;
+  }
+
+  .main-content {
+    padding: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .addresses-grid {
+    gap: 12px;
+  }
+
+  .address-card {
+    padding: 12px;
+  }
+
+  .card-header {
+    gap: 10px;
+  }
+
+  .recipient-name {
+    font-size: 15px;
+  }
+
+  .phone-number {
+    font-size: 13px;
+  }
+
+  .address-detail {
+    font-size: 13px;
+  }
+
+  .card-actions {
+    gap: 8px;
   }
 }
 </style>

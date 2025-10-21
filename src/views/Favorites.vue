@@ -780,22 +780,78 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .favorites-page {
+    padding: 16px;
+  }
+
   .main-content {
     padding: 16px;
   }
 
+  .page-header h1 {
+    font-size: 24px;
+  }
+
   .products-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .toolbar {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: stretch;
   }
 
   .toolbar-right {
-    justify-content: center;
+    justify-content: space-between;
+  }
+
+  .product-card {
+    padding: 12px;
+  }
+
+  .product-name {
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .favorites-page {
+    padding: 12px;
+  }
+
+  .main-content {
+    padding: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .product-card {
+    padding: 10px;
+  }
+
+  .product-name {
+    font-size: 13px;
+  }
+
+  .product-price {
+    font-size: 15px;
+  }
+
+  .toolbar {
+    gap: 10px;
   }
 }
 </style>

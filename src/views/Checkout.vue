@@ -1256,21 +1256,40 @@ const formatPrice = price => {
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
   .header-content {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
 
   .nav-links {
-    gap: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
   .main-content {
     padding: 16px;
   }
 
+  .checkout-form-section {
+    padding: 16px;
+  }
+
   .checkout-title {
-    font-size: 24px;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .form-section {
+    padding: 16px;
+    margin-bottom: 16px;
   }
 
   .form-row {
@@ -1280,6 +1299,91 @@ const formatPrice = price => {
 
   .half-width {
     width: 100%;
+  }
+
+  .radio-option,
+  .payment-option {
+    padding: 12px;
+  }
+
+  .order-summary-section {
+    padding: 16px;
+  }
+
+  .summary-item {
+    font-size: 14px;
+  }
+
+  .total-price {
+    font-size: 24px;
+  }
+
+  .place-order-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .main-content {
+    padding: 12px;
+  }
+
+  .checkout-form-section,
+  .order-summary-section {
+    padding: 12px;
+  }
+
+  .checkout-title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .form-section {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-label {
+    font-size: 13px;
+  }
+
+  .form-input {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .radio-option,
+  .payment-option {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .summary-item {
+    font-size: 13px;
+  }
+
+  .total-price {
+    font-size: 20px;
+  }
+
+  .place-order-btn {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .tip-item {
+    font-size: 12px;
+    padding: 10px;
   }
 }
 </style>

@@ -2323,6 +2323,10 @@ onUnmounted(() => {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .order-detail-page {
+    padding: 16px;
+  }
+
   .main-content {
     padding: 16px;
   }
@@ -2330,43 +2334,29 @@ onUnmounted(() => {
   .order-header {
     flex-direction: column;
     align-items: flex-start;
-    padding: 20px;
+    padding: 16px;
+    gap: 12px;
   }
 
   .order-number {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .order-date,
+  .order-status {
+    font-size: 13px;
   }
 
   .order-actions {
     width: 100%;
     justify-content: flex-start;
-  }
-
-  .order-item {
-    grid-template-columns: 60px 1fr;
-    grid-template-rows: auto auto;
-    gap: 12px;
-  }
-
-  .item-quantity,
-  .item-total {
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .order-actions .el-button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .breadcrumbs {
-    padding: 16px;
-    margin-top: 8px;
+    flex: 1;
+    min-width: 120px;
   }
 
   .order-progress,
@@ -2374,11 +2364,123 @@ onUnmounted(() => {
   .order-summary,
   .delivery-info,
   .payment-info {
-    padding: 20px;
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .order-item {
+    grid-template-columns: 80px 1fr;
+    gap: 12px;
+  }
+
+  .item-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .item-name {
+    font-size: 14px;
+  }
+
+  .item-price {
+    font-size: 14px;
   }
 
   .timeline-item {
-    padding-left: 50px;
+    padding-left: 60px;
+  }
+
+  .timeline-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .icon-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .summary-row {
+    font-size: 14px;
+  }
+
+  .summary-total {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-detail-page {
+    padding: 12px;
+  }
+
+  .main-content {
+    padding: 12px;
+  }
+
+  .order-header {
+    padding: 12px;
+  }
+
+  .order-number {
+    font-size: 18px;
+  }
+
+  .order-date,
+  .order-status {
+    font-size: 12px;
+  }
+
+  .order-actions {
+    flex-direction: column;
+  }
+
+  .order-actions .el-button {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .order-progress,
+  .order-items,
+  .order-summary,
+  .delivery-info,
+  .payment-info {
+    padding: 12px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .order-item {
+    grid-template-columns: 60px 1fr;
+    gap: 10px;
+  }
+
+  .item-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .item-name {
+    font-size: 13px;
+  }
+
+  .item-price {
+    font-size: 13px;
+  }
+
+  .item-quantity,
+  .item-total {
+    font-size: 12px;
+  }
+
+  .timeline-item {
+    padding-left: 45px;
   }
 
   .timeline-icon {
@@ -2394,6 +2496,30 @@ onUnmounted(() => {
 
   .progress-timeline::before {
     left: 15px;
+  }
+
+  .timeline-time {
+    font-size: 12px;
+  }
+
+  .timeline-title {
+    font-size: 14px;
+  }
+
+  .timeline-description {
+    font-size: 12px;
+  }
+
+  .summary-row {
+    font-size: 13px;
+  }
+
+  .summary-total {
+    font-size: 18px;
+  }
+
+  .info-row {
+    font-size: 13px;
   }
 }
 </style>
