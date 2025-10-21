@@ -556,6 +556,7 @@ const handleLogout = async () => {
 .breadcrumb-container {
   background-color: #e8ebef;
   border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 24px;
 }
 
 .breadcrumb-content {

@@ -1799,6 +1799,7 @@ onUnmounted(() => {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
   transition: all 0.3s;
   margin-bottom: 24px;
 }
@@ -1809,6 +1810,7 @@ onUnmounted(() => {
 
 .order-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 /* 订单头部 */

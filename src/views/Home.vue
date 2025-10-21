@@ -379,6 +379,8 @@
                 class="comment-list-item"
                 v-for="review in reviews"
                 :key="review.id"
+                @click="goToProductFromReview(review)"
+                :title="review.product_id ? '点击查看商品详情' : ''"
               >
                 <div class="comment-list-item-user">
                   <div
@@ -401,6 +403,20 @@
                     <p class="comment-list-item-user-info-date">
                       {{ formatDate(review.created_at) }}
                     </p>
+                  </div>
+                  <!-- 商品图标提示 -->
+                  <div v-if="review.product_id" class="product-indicator">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M216,64H176a48,48,0,0,0-96,0H40A16,16,0,0,0,24,80V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64ZM128,32a32,32,0,0,1,32,32H96A32,32,0,0,1,128,32Zm88,168H40V80H216V200Z"
+                      ></path>
+                    </svg>
                   </div>
                 </div>
                 <!-- 五星评价 -->
@@ -668,6 +684,14 @@ const click = id => {
   router.push(`/product/${id}`)
 }
 
+// 从评价跳转到商品详情页
+const goToProductFromReview = review => {
+  if (review.product_id) {
+    console.log('从评价跳转到商品ID:', review.product_id)
+    router.push(`/product/${review.product_id}`)
+  }
+}
+
 // 格式化日期
 const formatDate = dateString => {
   const date = new Date(dateString)
@@ -891,6 +915,12 @@ onUnmounted(() => {
   font-weight: 500;
   line-height: 1.5;
   text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.nav-right-items a:hover {
+  color: #4a8157;
 }
 
 .nav-right-btns {
@@ -1167,6 +1197,15 @@ onUnmounted(() => {
   gap: 16px;
   border-radius: 8px;
   min-width: 160px;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.product-list-item:hover {
+  transform: translateY(-3px);
+  opacity: 0.9;
 }
 
 .product-list-item-img {
@@ -1219,6 +1258,15 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 12px;
   padding-bottom: 12px;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.grid-item:hover {
+  transform: translateY(-3px);
+  opacity: 0.9;
 }
 
 .grid-item-img {
@@ -1277,6 +1325,7 @@ onUnmounted(() => {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
@@ -1314,6 +1363,22 @@ onUnmounted(() => {
 
 .comment-list-item-user-info {
   flex: 1;
+}
+
+.product-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a8157;
+  padding: 4px;
+  background: rgba(74, 129, 87, 0.1);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.comment-list-item:hover .product-indicator {
+  background: rgba(74, 129, 87, 0.2);
+  transform: scale(1.1);
 }
 
 .comment-list-item-user-info-name {

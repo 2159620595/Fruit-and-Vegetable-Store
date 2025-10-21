@@ -28,6 +28,354 @@ body {
   background: #dfe3e8;
 }
 
+/* ============================================
+   全局交互元素样式
+   ============================================ */
+
+/* 按钮统一样式 */
+button,
+.btn,
+[role='button'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover:not(:disabled),
+.btn:hover:not(:disabled),
+[role='button']:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled),
+.btn:active:not(:disabled),
+[role='button']:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled,
+.btn:disabled,
+[role='button']:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 链接统一样式 */
+a {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+a:hover {
+  opacity: 0.85;
+}
+
+/* 可点击元素统一样式 */
+[onclick],
+[role='link'],
+[role='menuitem'],
+.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+[onclick]:hover,
+[role='link']:hover,
+[role='menuitem']:hover,
+.clickable:hover {
+  opacity: 0.85;
+}
+
+/* 卡片统一 hover 效果 */
+.card,
+.product-card,
+.category-item,
+.review-card,
+.order-card,
+.address-card {
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.card:hover,
+.product-card:hover,
+.category-item:hover,
+.review-card:hover,
+.order-card:hover,
+.address-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* 输入框 hover 效果 */
+input:not([type='checkbox']):not([type='radio']),
+textarea,
+select {
+  transition: all 0.3s ease;
+}
+
+input:not([type='checkbox']):not([type='radio']):hover:not(:disabled),
+textarea:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: var(--primary-color);
+}
+
+input:not([type='checkbox']):not([type='radio']):focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(74, 129, 87, 0.1);
+}
+
+/* 图标按钮统一样式 */
+.icon-btn,
+[class*='icon']:not([class*='icon-circle']) {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.icon-btn:hover,
+[class*='icon']:not([class*='icon-circle']):hover {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+/* Checkbox 和 Radio 统一样式 */
+input[type='checkbox'],
+input[type='radio'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+input[type='checkbox']:hover,
+input[type='radio']:hover {
+  transform: scale(1.1);
+}
+
+/* Label 关联 input 时的样式 */
+label:has(input[type='checkbox']),
+label:has(input[type='radio']) {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+label:has(input[type='checkbox']):hover,
+label:has(input[type='radio']):hover {
+  color: var(--primary-color);
+}
+
+/* 禁用状态统一样式 */
+:disabled,
+[disabled],
+.disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 加载状态 */
+.loading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+/* 拖拽元素 */
+[draggable='true'] {
+  cursor: move;
+}
+
+/* 表格行 hover */
+tr:hover:not(.no-hover) {
+  background-color: rgba(74, 129, 87, 0.05);
+  cursor: pointer;
+}
+
+/* 下拉菜单项 */
+.dropdown-item,
+.menu-item,
+[role='menuitem'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover,
+.menu-item:hover,
+[role='menuitem']:hover {
+  background-color: rgba(74, 129, 87, 0.1);
+  color: var(--primary-color);
+}
+
+/* Tab 统一样式 */
+.tab,
+[role='tab'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab:hover,
+[role='tab']:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f2f5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5cbd3;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+/* 轮播图指示器 */
+.dot,
+.banner-dot,
+.indicator,
+[class*='dot']:not([class*='dropdown']) {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot:hover,
+.banner-dot:hover,
+.indicator:hover {
+  transform: scale(1.2);
+}
+
+/* 标签页 */
+.el-tabs__item,
+.tabs-item,
+[class*='tab-']:not([class*='table']) {
+  cursor: pointer !important;
+  transition: all 0.3s ease;
+}
+
+/* 分页器 */
+.el-pager li,
+.pagination-item,
+[class*='page-'] {
+  cursor: pointer !important;
+  transition: all 0.3s ease;
+}
+
+/* 选择器选项 */
+.el-select-dropdown__item,
+.select-option,
+[class*='option'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* 对话框关闭按钮 */
+.el-dialog__close,
+.close-btn,
+[class*='close'] {
+  cursor: pointer !important;
+  transition: all 0.3s ease;
+}
+
+.el-dialog__close:hover,
+.close-btn:hover {
+  transform: rotate(90deg);
+}
+
+/* 评分星星 */
+.el-rate__icon,
+.star,
+[class*='star'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.el-rate__icon:hover,
+.star:hover {
+  transform: scale(1.2);
+}
+
+/* 图片缩略图 */
+.thumbnail,
+[class*='thumbnail'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.thumbnail:hover,
+[class*='thumbnail']:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* 标签/徽章 */
+.badge,
+.tag,
+.label,
+[class*='badge'],
+[class*='tag']:not([class*='stage']) {
+  transition: all 0.3s ease;
+}
+
+.badge.clickable,
+.tag.clickable,
+.label.clickable {
+  cursor: pointer;
+}
+
+.badge.clickable:hover,
+.tag.clickable:hover,
+.label.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 列表项 */
+.list-item,
+[class*='list-item'],
+[class*='item']:not(input):not(button) {
+  transition: all 0.3s ease;
+}
+
+/* 搜索建议项 */
+.suggestion-item,
+.search-item,
+[class*='suggestion'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.suggestion-item:hover,
+.search-item:hover {
+  background-color: rgba(74, 129, 87, 0.1);
+}
+
+/* 面包屑导航 */
+.breadcrumb-item,
+[class*='breadcrumb'] a {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.breadcrumb-item:hover,
+[class*='breadcrumb'] a:hover {
+  color: var(--primary-color);
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

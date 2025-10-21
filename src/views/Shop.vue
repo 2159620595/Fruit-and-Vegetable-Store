@@ -515,30 +515,34 @@
                 下一页
               </el-button>
             </div>
+          </div>
 
-            <!-- 空状态 - 只在有筛选条件时显示 -->
-            <div v-else-if="hasActiveFilters" class="empty-state">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="64"
-                height="64"
-                fill="currentColor"
-                viewBox="0 0 256 256"
-              >
-                <path
-                  d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
-                ></path>
-              </svg>
-              <p>
-                {{
-                  searchKeyword ? '未找到匹配的商品' : '未找到符合条件的商品'
-                }}
-              </p>
-              <p v-if="searchKeyword" class="suggestion">
-                尝试使用其他关键词或
-                <button @click="clearSearch" class="link-btn">清除搜索</button>
-              </p>
-            </div>
+          <!-- 空状态 - 只在没有商品时显示 -->
+          <div v-else class="empty-state">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="64"
+              height="64"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
+              ></path>
+            </svg>
+            <p>
+              {{ searchKeyword ? '未找到匹配的商品' : '未找到符合条件的商品' }}
+            </p>
+            <p v-if="searchKeyword" class="suggestion">
+              尝试使用其他关键词或
+              <button @click="clearSearch" class="link-btn">清除搜索</button>
+            </p>
+            <p v-else-if="hasActiveFilters" class="suggestion">
+              尝试
+              <button @click="resetFilters" class="link-btn">
+                清除筛选条件
+              </button>
+            </p>
           </div>
         </div>
       </div>
