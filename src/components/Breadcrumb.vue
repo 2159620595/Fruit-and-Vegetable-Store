@@ -193,10 +193,20 @@
         <div class="user-menu-container">
           <button
             class="action-btn user-btn"
+            :class="{ 'has-avatar': userStore.isLoggedIn && userAvatar }"
             @click="toggleUserMenu"
             title="用户中心"
           >
+            <!-- 如果已登录且有头像，显示头像 -->
+            <img
+              v-if="userStore.isLoggedIn && userAvatar"
+              :src="userAvatar"
+              :alt="userStore.user?.username || '用户'"
+              class="user-avatar"
+            />
+            <!-- 否则显示默认图标 -->
             <svg
+              v-else
               xmlns="http://www.w3.org/2000/svg"
               width="18"
               height="18"
@@ -207,7 +217,10 @@
                 d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"
               ></path>
             </svg>
-            <span v-if="userStore.isLoggedIn" class="user-badge"></span>
+            <span
+              v-if="userStore.isLoggedIn && !userAvatar"
+              class="user-badge"
+            ></span>
           </button>
 
           <!-- 用户下拉菜单 -->
@@ -343,6 +356,19 @@ const showSuggestions = ref(false)
 // 用户菜单状态
 const showUserMenu = ref(false)
 const favoritesCount = ref(0)
+
+// 计算用户头像
+const userAvatar = computed(() => {
+  if (!userStore.isLoggedIn || !userStore.user) return null
+
+  // 优先使用用户的头像字段
+  return (
+    userStore.user.avatar ||
+    userStore.user.profile_picture ||
+    userStore.user.image_url ||
+    null
+  )
+})
 
 // 获取用户信息
 const fetchUserInfo = async () => {
@@ -800,6 +826,19 @@ const handleLogout = async () => {
   color: #618961;
 }
 
+/* 用户头像样式 */
+.user-btn.has-avatar {
+  padding: 0;
+  overflow: hidden;
+}
+
+.user-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .user-badge {
   position: absolute;
   top: 6px;
@@ -808,6 +847,7 @@ const handleLogout = async () => {
   height: 8px;
   background-color: #ff4757;
   border-radius: 50%;
+  border: 2px solid #ffffff;
 }
 
 /* 购物车徽章 */
