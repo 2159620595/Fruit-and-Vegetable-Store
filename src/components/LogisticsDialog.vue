@@ -17,7 +17,7 @@
 import LogisticsTracker from '@/components/LogisticsTracker.vue'
 
 // Props
-const props = defineProps({
+defineProps({
   orderId: {
     type: [String, Number],
     required: true,
@@ -48,11 +48,11 @@ const props = defineProps({
 const emit = defineEmits(['update', 'error'])
 
 // Methods
-const handleUpdate = (data) => {
+const handleUpdate = data => {
   emit('update', data)
 }
 
-const handleError = (error) => {
+const handleError = error => {
   emit('error', error)
 }
 </script>

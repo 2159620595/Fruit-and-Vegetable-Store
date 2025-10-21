@@ -588,11 +588,9 @@ defineOptions({
 })
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { Grid, List, RefreshLeft, ShoppingCart } from '@element-plus/icons-vue'
 import { useProductStore } from '../stores/productStore'
 import { useCartStore } from '../stores/cartStore'
-import { useUserStore } from '../stores/userStore'
 import Breadcrumb from '../components/Breadcrumb.vue'
 import SkeletonLoader from '../components/SkeletonLoader.vue'
 
@@ -600,7 +598,6 @@ const router = useRouter()
 const route = useRoute()
 const productStore = useProductStore()
 const cartStore = useCartStore()
-const userStore = useUserStore()
 
 // 筛选状态
 // const minPrice = ref(0) // 暂时未使用
@@ -1539,6 +1536,7 @@ h1 {
   text-overflow: ellipsis;
   display: -webkit-box !important;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   word-break: break-word;
   height: auto !important;
@@ -1791,6 +1789,7 @@ h1 {
     margin-bottom: 6px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -1929,6 +1928,7 @@ h1 {
 .products-grid.grid .description {
   display: -webkit-box !important;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   height: auto !important;
@@ -1983,6 +1983,7 @@ h1 {
 .products-grid.list .description {
   display: -webkit-box !important;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   height: auto !important;
   min-height: 40px !important;

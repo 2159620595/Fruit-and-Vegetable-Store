@@ -399,10 +399,7 @@ onMounted(async () => {
   // 刷新用户余额
   try {
     await userStore.fetchUserBalance()
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('获取用户余额失败:', error)
-  }
+  } catch {}
 })
 
 // 地址选择变化
@@ -573,9 +570,6 @@ const submitOrder = async () => {
           ElMessage.error(resultData.message || '支付失败，请重试')
         }
       } catch (payError) {
-        // eslint-disable-next-line no-console
-        console.error('支付错误:', payError)
-
         // 如果是余额不足的错误
         if (payError.message && payError.message.includes('余额不足')) {
           ElMessage.error('余额不足，请充值或选择其他支付方式')

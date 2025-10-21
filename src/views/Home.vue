@@ -549,7 +549,6 @@ const getHomeData = async () => {
   loading.value = true
   try {
     const result = await getGoodsList()
-    console.log('API 返回:', result)
 
     if (result?.data?.data) {
       const data = result.data.data
@@ -574,16 +573,6 @@ const getHomeData = async () => {
 
       // 客户评价
       reviews.value = data.customer_reviews || []
-
-      console.log('数据加载成功:', {
-        轮播图: bannerList.value.length,
-        分类: categories.value.length,
-        热门精选: popularPicks.value.length,
-        客户最爱: customerFavorites.value.length,
-        新品上市: newArrivals.value.length,
-        限时优惠: limitedOffers.value.length,
-        客户评价: reviews.value.length,
-      })
 
       // 如果有轮播图数据，预加载图片
       if (bannerList.value.length > 0) {
@@ -617,7 +606,6 @@ const preloadBannerImages = () => {
     preloadRemainingImages()
   }
   firstImage.onerror = () => {
-    console.error('轮播图第一张图片加载失败')
     bannerImagesLoaded.value = true // 即使失败也显示，避免一直显示骨架屏
   }
 }
@@ -632,9 +620,7 @@ const preloadRemainingImages = () => {
       img.onload = () => {
         loadedImages.add(banner.image_url)
       }
-      img.onerror = () => {
-        console.error(`轮播图图片 ${index + 2} 加载失败:`, banner.image_url)
-      }
+      img.onerror = () => {}
     }, index * 300) // 每张图片间隔300ms加载
   })
 }
@@ -680,14 +666,12 @@ const goToBanner = index => {
 
 // 点击商品跳转到详情页
 const click = id => {
-  console.log('点击商品ID:', id)
   router.push(`/product/${id}`)
 }
 
 // 从评价跳转到商品详情页
 const goToProductFromReview = review => {
   if (review.product_id) {
-    console.log('从评价跳转到商品ID:', review.product_id)
     router.push(`/product/${review.product_id}`)
   }
 }
@@ -722,7 +706,6 @@ const likeReview = async review => {
       }
     }
   } catch (error) {
-    console.error('点赞失败:', error)
     ElMessage.error(error.message || '点赞失败')
   }
 }
@@ -751,7 +734,6 @@ const dislikeReview = async review => {
       }
     }
   } catch (error) {
-    console.error('踩失败:', error)
     ElMessage.error(error.message || '操作失败')
   }
 }
@@ -792,7 +774,6 @@ const vLazyBg = {
             }
 
             img.onerror = () => {
-              console.error('图片加载失败:', imageUrl)
               // 加载失败时显示占位图
               el.style.backgroundImage = `url(${DEFAULT_PLACEHOLDER})`
               el.classList.add('loaded', 'error')

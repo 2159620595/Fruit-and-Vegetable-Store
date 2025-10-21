@@ -1020,7 +1020,6 @@ const likeReview = async reviewId => {
 
     ElMessage.success(response.data.message || '操作成功')
   } catch (error) {
-    console.error('点赞失败:', error)
     ElMessage.error(error.response?.data?.message || '点赞失败')
   }
 }
@@ -1045,7 +1044,6 @@ const dislikeReview = async reviewId => {
 
     ElMessage.success(response.data.message || '操作成功')
   } catch (error) {
-    console.error('操作失败:', error)
     ElMessage.error(error.response?.data?.message || '操作失败')
   }
 }

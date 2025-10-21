@@ -1169,8 +1169,7 @@ const handleAvatarChange = async file => {
       type: 'success',
       icon: h(SuccessFilled),
     })
-  } catch (error) {
-    console.error('图片处理失败:', error)
+  } catch {
     ElMessage({
       message: '图片处理失败，请重试',
       type: 'error',
@@ -1221,7 +1220,6 @@ const uploadAvatar = async () => {
     // 重置状态
     clearNewAvatar()
   } catch (error) {
-    console.error('头像上传失败:', error)
     ElMessage({
       message: error.message || '头像上传失败，请重试',
       type: 'error',
@@ -1262,7 +1260,6 @@ const changePassword = async () => {
     }
     passwordFormRef.value.resetFields()
   } catch (error) {
-    console.error('密码修改失败:', error)
     ElMessage({
       message: error.message || '密码修改失败，请重试',
       type: 'error',
@@ -1404,13 +1401,8 @@ const getNewLevelAfterRecharge = () => {
     parseFloat(userStore.user?.total_recharge) ||
     0
 
-  console.log('当前累计充值:', totalRecharge)
-  console.log('本次充值金额:', selectedAmount.value)
-
   // 累计充值需要加上本次充值金额（不包括赠送）
   const newTotal = totalRecharge + selectedAmount.value
-
-  console.log('充值后累计充值:', newTotal)
 
   if (newTotal >= 5000) return '钻石会员'
   if (newTotal >= 2000) return '黄金会员'
@@ -1513,7 +1505,6 @@ const handleRecharge = async () => {
     showRechargeDialog.value = false
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('充值失败:', error)
       ElMessage({
         message: error.message || '充值失败，请重试',
         type: 'error',
@@ -1544,23 +1535,8 @@ const fetchRechargeHistory = async () => {
       if (result.statistics) {
         recordsStatistics.value = result.statistics
       }
-
-      // 调试：检查返回的时间数据
-      if (rechargeRecords.value.length > 0) {
-        const firstRecord = rechargeRecords.value[0]
-        console.log('📝 充值记录样例数据:', {
-          created_at: firstRecord.created_at,
-          created_at_type: typeof firstRecord.created_at,
-          formatted: formatDateTime(firstRecord.created_at),
-          payment_method: firstRecord.payment_method,
-          payment_method_formatted: getPaymentMethodName(
-            firstRecord.payment_method
-          ),
-        })
-      }
     }
-  } catch (error) {
-    console.error('获取充值记录失败:', error)
+  } catch {
     ElMessage.error('获取充值记录失败')
   } finally {
     loadingRecords.value = false
@@ -1598,8 +1574,7 @@ const viewRecordDetail = async record => {
       selectedRecord.value = detail
       showRecordDetailDialog.value = true
     }
-  } catch (error) {
-    console.error('获取充值记录详情失败:', error)
+  } catch {
     ElMessage.error('获取充值记录详情失败')
   }
 }
@@ -1626,7 +1601,6 @@ const formatDateTime = datetime => {
       // 时间戳
       date = new Date(datetime)
     } else {
-      console.warn('未知的日期格式:', datetime, typeof datetime)
       return '-'
     }
 
@@ -1699,10 +1673,7 @@ const getPaymentMethodName = method => {
   // 如果还是没有找到，返回原始值
   if (!result) {
     result = method
-    console.warn(`⚠️ 未知的支付方式: "${method}"，请添加映射`)
   }
-
-  console.log(`💳 支付方式转换: "${method}" -> "${result}"`)
 
   return result
 }

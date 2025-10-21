@@ -1,10 +1,46 @@
 <!doctype html>
-<html lang="">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="" />
+    <script>
+      // 最早时机强制设置主题
+      ;(function () {
+        const savedTheme = localStorage.getItem('theme') || 'light'
+        const html = document.documentElement
+        const colorScheme = savedTheme === 'dark' ? 'dark' : 'light'
+        html.className = savedTheme === 'dark' ? 'dark-theme' : 'light-theme'
+        html.style.cssText = 'color-scheme: ' + colorScheme + ' !important;'
+        html.setAttribute('data-theme', savedTheme)
+      })()
+    </script>
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <meta name="color-scheme" content="light" id="theme-color-scheme" />
+    <meta
+      name="description"
+      content="生鲜果蔬商城，提供新鲜优质的水果蔬菜，健康生活从这里开始"
+    />
+    <meta
+      name="keywords"
+      content="生鲜,果蔬,水果,蔬菜,有机,新鲜,健康,商城,网上购物"
+    />
+    <title>生鲜果蔬商城 - 新鲜健康每一天</title>
+    <style>
+      /* 强制覆盖浏览器主题 */
+      :root {
+        color-scheme: light !important;
+      }
+      html.light-theme,
+      html.light-theme * {
+        color-scheme: light !important;
+      }
+      html.dark-theme {
+        color-scheme: dark !important;
+      }
+      html.dark-theme * {
+        color-scheme: dark !important;
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>

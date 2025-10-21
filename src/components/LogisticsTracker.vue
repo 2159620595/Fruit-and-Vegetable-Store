@@ -227,7 +227,6 @@ const loading = ref(false)
 const error = ref(null)
 const logisticsSteps = ref([])
 const lastUpdateTime = ref('')
-const refreshTimer = ref(null)
 const subscriptionId = ref(null)
 const isRealTimeEnabled = ref(false)
 const deliveryAddress = ref(null)
@@ -384,8 +383,8 @@ const getDeliveryAddress = async () => {
       deliveryAddress.value =
         addresses.find(addr => addr.isDefault) || addresses[0]
     }
-  } catch (err) {
-    console.warn('获取收货地址失败:', err)
+  } catch {
+    // 静默处理地址获取失败
   }
 }
 

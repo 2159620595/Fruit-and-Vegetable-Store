@@ -1193,8 +1193,6 @@ const handleReviewSubmit = async reviewData => {
     // 刷新订单详情
     await loadOrderDetail()
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('❌ 评价失败:', error)
     const errorMsg =
       error.response?.data?.message || error.message || '评价提交失败，请重试'
     ElMessage.error(errorMsg)

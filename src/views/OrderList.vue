@@ -704,9 +704,7 @@ const loadAllOrders = async (showLoading = false) => {
 
     // 强制更新页面
     forceUpdate()
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('加载所有订单失败:', error)
+  } catch {
     ElMessage.error('加载订单失败')
   }
   // 注意: loading 是计算属性，不需要手动设置
@@ -756,9 +754,6 @@ const loadOrders = async () => {
     // 强制更新页面
     forceUpdate()
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('加载订单列表失败:', error)
-
     // 更详细的错误提示
     let errorMsg = '加载订单列表失败'
 
@@ -868,12 +863,7 @@ const handleSearch = async () => {
       page_size: pageSize.value,
     }
 
-    console.log('🔍 开始搜索:', params)
     const result = await orderStore.searchOrders(params)
-    console.log('🔍 搜索结果:', result)
-    console.log('🔍 订单列表:', orders.value)
-    console.log('🔍 isSearching:', isSearching.value)
-    console.log('🔍 filteredOrders 长度:', filteredOrders.value?.length)
 
     // 更新总数
     if (result.total !== undefined) {
@@ -896,7 +886,6 @@ const handleSearch = async () => {
       })
     }
   } catch (error) {
-    console.error('❌ 搜索失败:', error)
     ElMessage.error(error.message || '搜索失败')
   }
 }
@@ -981,8 +970,6 @@ const handleCancelOrder = async (orderId, event) => {
     await loadOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
-      // eslint-disable-next-line no-console
-      console.error('❌ 取消订单失败:', error)
       const errorMsg =
         error.response?.data?.message || error.message || '取消订单失败'
       ElMessage.error(errorMsg)
@@ -1036,8 +1023,6 @@ const handleConfirmOrder = async (orderId, event) => {
     await loadOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
-      // eslint-disable-next-line no-console
-      console.error('❌ 确认收货失败:', error)
       const errorMsg =
         error.response?.data?.message || error.message || '确认收货失败'
       ElMessage.error(errorMsg)
@@ -1090,8 +1075,6 @@ const handleDeleteOrder = async (orderId, event) => {
     await loadOrders()
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
-      // eslint-disable-next-line no-console
-      console.error('❌ 删除订单失败:', error)
       const errorMsg =
         error.response?.data?.message || error.message || '删除订单失败'
       ElMessage.error(errorMsg)
@@ -1125,9 +1108,7 @@ const handleReview = async (orderId, event) => {
     // 设置当前评价订单并显示对话框
     currentReviewOrder.value = order
     reviewDialogVisible.value = true
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('❌ 打开评价对话框失败:', error)
+  } catch {
     ElMessage.error('打开评价对话框失败')
   }
 }
@@ -1174,8 +1155,6 @@ const handleReviewSubmit = async reviewData => {
     // 刷新列表 - 根据当前标签加载订单
     await loadOrders()
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('❌ 评价失败:', error)
     const errorMsg =
       error.response?.data?.message || error.message || '评价失败'
     ElMessage.error(errorMsg)
@@ -1201,9 +1180,7 @@ const handleViewReview = async (orderId, event) => {
     currentReviewOrderId.value = orderId
     currentReviewOrder.value = order
     reviewDetailDialogVisible.value = true
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('打开评价详情失败:', error)
+  } catch {
     ElMessage.error('打开评价详情失败')
   }
 }
@@ -1260,9 +1237,7 @@ const handleTrackOrder = async (orderId, event) => {
         borderRadius: '12px',
       },
     })
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('❌ 查看物流失败:', error)
+  } catch {
     ElMessage.error('查看物流信息失败')
   }
 }
@@ -1311,8 +1286,6 @@ const handleBuyAgain = async (orderId, event) => {
       ElMessage.warning('订单中的商品已下架或库存不足')
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('❌ 再次购买失败:', error)
     const errorMsg =
       error.response?.data?.message || error.message || '再次购买失败'
     ElMessage.error(errorMsg)
@@ -1383,8 +1356,6 @@ const handlePaymentConfirm = async paymentMethod => {
     // 刷新列表 - 根据当前标签加载订单
     await loadOrders()
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('❌ 支付失败:', error)
     const errorMsg =
       error.response?.data?.message || error.message || '支付失败'
 
@@ -1477,8 +1448,6 @@ const handleContactSeller = async (orderId, event) => {
     )
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
-      // eslint-disable-next-line no-console
-      console.error('❌ 联系商家失败:', error)
       ElMessage.error('联系商家失败')
     }
   }
