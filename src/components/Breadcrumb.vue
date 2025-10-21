@@ -189,6 +189,40 @@
           </span>
         </button>
 
+        <!-- 主题切换按钮 -->
+        <button
+          class="action-btn theme-btn"
+          @click="toggleTheme"
+          :title="themeStore.isDark() ? '切换到明亮模式' : '切换到暗黑模式'"
+        >
+          <!-- 明亮模式显示月亮图标 -->
+          <svg
+            v-if="!themeStore.isDark()"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            fill="currentColor"
+            viewBox="0 0 256 256"
+          >
+            <path
+              d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"
+            ></path>
+          </svg>
+          <!-- 暗黑模式显示太阳图标 -->
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            fill="currentColor"
+            viewBox="0 0 256 256"
+          >
+            <path
+              d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"
+            ></path>
+          </svg>
+        </button>
+
         <!-- 用户菜单 -->
         <div class="user-menu-container">
           <button
@@ -328,6 +362,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
 import { useSearchStore } from '@/stores/searchStore'
 import { useCartStore } from '@/stores/cartStore'
+import { useThemeStore } from '@/stores/themeStore'
 import { getFavoritesCount } from '@/api/favorites'
 
 // 定义 props
@@ -343,6 +378,7 @@ const route = useRoute()
 const userStore = useUserStore()
 const searchStore = useSearchStore()
 const cartStore = useCartStore()
+const themeStore = useThemeStore()
 
 // 判断是否为首页
 const isHomePage = computed(() => {
@@ -550,12 +586,20 @@ const handleLogout = async () => {
     // 用户取消
   }
 }
+
+// 切换主题
+const toggleTheme = () => {
+  themeStore.toggleTheme()
+  ElMessage.success(
+    themeStore.isDark() ? '已切换到暗黑模式' : '已切换到明亮模式'
+  )
+}
 </script>
 
 <style scoped>
 .breadcrumb-container {
-  background-color: #ecf0f3;
-  border-bottom: 1px solid #e5e5e5;
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-light);
   margin-bottom: 24px;
 }
 
@@ -574,7 +618,7 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   flex: 1;
   line-height: 1.5;
 }
@@ -596,7 +640,7 @@ const handleLogout = async () => {
 }
 
 .leaf-icon {
-  color: #2d5a27;
+  color: var(--primary-dark);
   display: flex;
   align-items: center;
   line-height: 1;
@@ -609,7 +653,7 @@ const handleLogout = async () => {
 
 .brand-name {
   font-weight: 600;
-  color: #000000;
+  color: var(--text-color);
   font-size: 16px;
   line-height: 1.4;
 }
@@ -622,7 +666,7 @@ const handleLogout = async () => {
 }
 
 .nav-link {
-  color: #000000;
+  color: var(--text-color);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -632,7 +676,7 @@ const handleLogout = async () => {
 }
 
 .nav-link:hover {
-  color: #2d5a27;
+  color: var(--primary-dark);
 }
 
 .breadcrumb-item {
@@ -644,12 +688,12 @@ const handleLogout = async () => {
 }
 
 .back-item {
-  color: #618961;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
 .back-item:hover {
-  color: #4a6b4a;
+  color: var(--primary-dark);
 }
 
 .back-item svg {
@@ -661,22 +705,22 @@ const handleLogout = async () => {
 }
 
 .breadcrumb a {
-  color: #618961;
+  color: var(--primary-color);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .breadcrumb a:hover {
-  color: #4a6b4a;
+  color: var(--primary-dark);
 }
 
 .breadcrumb .separator {
   margin: 0 8px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .breadcrumb .current {
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
@@ -695,8 +739,8 @@ const handleLogout = async () => {
 .search-bar {
   display: flex;
   align-items: center;
-  background-color: #f9fafb;
-  border: 1px solid #e8eaed;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-light);
   border-radius: 20px;
   padding: 6px 12px;
   min-width: 200px;
@@ -704,20 +748,20 @@ const handleLogout = async () => {
 }
 
 .search-bar:focus-within {
-  background-color: #ffffff;
-  border-color: #4a8157;
+  background-color: var(--bg-card);
+  border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(74, 129, 87, 0.15);
 }
 
 .search-icon {
-  color: #999;
+  color: var(--text-light);
   cursor: pointer;
   margin-right: 8px;
   transition: color 0.2s ease;
 }
 
 .search-icon:hover {
-  color: #618961;
+  color: var(--primary-color);
 }
 
 .search-bar input {
@@ -726,17 +770,17 @@ const handleLogout = async () => {
   background: transparent;
   flex: 1;
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .search-bar input::placeholder {
-  color: #999;
+  color: var(--text-light);
 }
 
 .clear-btn {
   background: none;
   border: none;
-  color: #999;
+  color: var(--text-light);
   cursor: pointer;
   font-size: 18px;
   padding: 0;
@@ -745,7 +789,7 @@ const handleLogout = async () => {
 }
 
 .clear-btn:hover {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* 搜索建议下拉框 */
@@ -754,10 +798,10 @@ const handleLogout = async () => {
   top: 100%;
   left: 0;
   right: 0;
-  background: #f0f2f5;
-  border: 1px solid #e5e5e5;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   z-index: 1000;
   margin-top: 4px;
 }
@@ -772,21 +816,21 @@ const handleLogout = async () => {
   align-items: center;
   padding: 8px 12px;
   font-size: 12px;
-  color: #999;
-  border-bottom: 1px solid #f0f0f0;
+  color: var(--text-light);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .clear-history-btn {
   background: none;
   border: none;
-  color: #999;
+  color: var(--text-light);
   cursor: pointer;
   font-size: 12px;
   transition: color 0.2s ease;
 }
 
 .clear-history-btn:hover {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .suggestion-item {
@@ -797,28 +841,28 @@ const handleLogout = async () => {
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
   border-radius: 6px;
   margin: 0 4px;
 }
 
 .suggestion-item:hover {
   background-color: rgba(74, 129, 87, 0.1);
-  color: #4a8157;
+  color: var(--primary-color);
   transform: translateX(4px);
   padding-left: 16px;
 }
 
 .suggestion-item:hover svg {
-  color: #4a8157;
+  color: var(--primary-color);
 }
 
 .suggestion-item.hot {
-  color: #618961;
+  color: var(--primary-color);
 }
 
 .suggestion-item.hot:hover {
-  color: #4a8157;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
@@ -834,13 +878,26 @@ const handleLogout = async () => {
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #666;
+  color: var(--text-secondary);
   position: relative;
 }
 
 .action-btn:hover {
-  background-color: #f5f5f5;
-  color: #618961;
+  background-color: var(--bg-input);
+  color: var(--primary-color);
+}
+
+/* 主题切换按钮 */
+.theme-btn {
+  transition: all 0.3s ease;
+}
+
+.theme-btn:hover {
+  transform: scale(1.1);
+}
+
+.theme-btn svg {
+  transition: transform 0.3s ease;
 }
 
 /* 用户头像样式 */
@@ -862,9 +919,9 @@ const handleLogout = async () => {
   right: 6px;
   width: 8px;
   height: 8px;
-  background-color: #ff4757;
+  background-color: var(--error-color);
   border-radius: 50%;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--bg-card);
 }
 
 /* 购物车徽章 */
@@ -874,8 +931,8 @@ const handleLogout = async () => {
   right: 2px;
   min-width: 16px;
   height: 16px;
-  background-color: #ff4757;
-  color: white;
+  background-color: var(--error-color);
+  color: var(--text-inverse);
   border-radius: 8px;
   font-size: 10px;
   font-weight: 600;
@@ -896,10 +953,10 @@ const handleLogout = async () => {
   position: absolute;
   top: 100%;
   right: 0;
-  background: #f0f2f5;
-  border: 1px solid #e5e5e5;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   z-index: 1000;
   margin-top: 8px;
   min-width: 200px;
@@ -914,12 +971,12 @@ const handleLogout = async () => {
 }
 
 .greeting-text {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .username {
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
   font-size: 14px;
 }
@@ -934,27 +991,27 @@ const handleLogout = async () => {
   align-items: center;
   gap: 8px;
   padding: 8px 0;
-  color: #333;
+  color: var(--text-color);
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s ease;
 }
 
 .user-menu-item:hover {
-  color: #618961;
+  color: var(--primary-color);
 }
 
 .user-menu-item.logout {
-  color: #ff4757;
+  color: var(--error-color);
 }
 
 .user-menu-item.logout:hover {
-  color: #ff3742;
+  color: var(--error-color);
 }
 
 .favorites-count {
-  background-color: #ff4757;
-  color: white;
+  background-color: var(--error-color);
+  color: var(--text-inverse);
   font-size: 10px;
   font-weight: bold;
   padding: 2px 6px;
@@ -967,7 +1024,7 @@ const handleLogout = async () => {
 
 .menu-divider {
   height: 1px;
-  background-color: #f0f0f0;
+  background-color: var(--border-light);
   margin: 8px 0;
 }
 
@@ -977,14 +1034,14 @@ const handleLogout = async () => {
 }
 
 .login-prompt {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 12px;
 }
 
 .login-btn {
-  background-color: #618961;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--text-inverse);
   border: none;
   border-radius: 6px;
   padding: 8px 16px;
@@ -994,7 +1051,7 @@ const handleLogout = async () => {
 }
 
 .login-btn:hover {
-  background-color: #4a6b4a;
+  background-color: var(--primary-dark);
 }
 
 /* ============================================

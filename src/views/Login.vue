@@ -631,7 +631,7 @@ const handleAlipayLogin = () => {
 }
 
 .logo-icon {
-  color: #67c23a;
+  color: var(--primary-color);
   margin-bottom: 16px;
   filter: drop-shadow(0 4px 8px rgba(103, 194, 58, 0.4));
   animation: logoFloat 3s ease-in-out infinite;
@@ -670,7 +670,7 @@ const handleAlipayLogin = () => {
 
 .auth-subtitle {
   font-size: 14px;
-  color: #909399;
+  color: var(--text-light);
   font-weight: 400;
 }
 
@@ -683,13 +683,13 @@ const handleAlipayLogin = () => {
 
 .tabs :deep(.el-segmented) {
   --el-border-radius-base: 12px;
-  background-color: #f5f7fa;
+  background-color: var(--bg-input);
   padding: 4px;
 }
 
 .tabs :deep(.el-segmented__item-selected) {
   background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
-  color: #fff;
+  color: var(--bg-card);
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
 }
@@ -735,7 +735,7 @@ const handleAlipayLogin = () => {
 
 .form-content :deep(.el-form-item__label) {
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color);
   margin-bottom: 8px;
 }
 
@@ -757,13 +757,13 @@ const handleAlipayLogin = () => {
 
 .switch-text {
   text-align: center;
-  color: #606266;
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 16px 0;
 }
 
 .divider-text {
-  color: #909399;
+  color: var(--text-light);
   font-size: 13px;
 }
 

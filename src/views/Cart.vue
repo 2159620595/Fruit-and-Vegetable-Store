@@ -410,7 +410,7 @@ const reloadCart = async () => {
 }
 
 .cart-page {
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   min-height: 100vh;
 }
 
@@ -429,9 +429,9 @@ const reloadCart = async () => {
   align-items: center;
   justify-content: space-between;
   white-space: nowrap;
-  border-bottom: 1px solid #c5cbd3;
+  border-bottom: 1px solid var(--border-color);
   padding: 12px 40px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
 }
 
 .header-left {
@@ -444,17 +444,17 @@ const reloadCart = async () => {
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 .nav-logo {
   width: 16px;
   height: 16px;
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 .nav h2 {
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
@@ -468,7 +468,7 @@ const reloadCart = async () => {
 }
 
 .nav-links a {
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.5;
@@ -500,10 +500,10 @@ const reloadCart = async () => {
 }
 
 .search-icon {
-  color: #4a8157;
+  color: var(--primary-color);
   display: flex;
   border: none;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   align-items: center;
   justify-content: center;
   padding-left: 16px;
@@ -520,10 +520,10 @@ const reloadCart = async () => {
   resize: none;
   overflow: hidden;
   border-radius: 8px;
-  color: #2c3e50;
+  color: var(--text-color);
   outline: none;
   border: none;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   height: 100%;
   padding: 0 16px 0 8px;
   font-size: 16px;
@@ -535,7 +535,7 @@ const reloadCart = async () => {
 }
 
 .search-input::placeholder {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .cart-btn {
@@ -549,8 +549,8 @@ const reloadCart = async () => {
   border-radius: 8px;
   height: 40px;
   padding: 0 16px;
-  background-color: #4a8157;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--text-inverse);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.5;
@@ -581,14 +581,14 @@ const reloadCart = async () => {
   align-items: center;
   gap: 12px;
   padding: 20px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .page-title p {
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 32px;
   font-weight: 700;
   line-height: 1.2;
@@ -610,12 +610,12 @@ const reloadCart = async () => {
 }
 
 .loading-state p {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
 .error-state p {
-  color: #dc3545;
+  color: var(--error-color);
   font-size: 16px;
   margin-bottom: 16px;
 }
@@ -626,7 +626,7 @@ const reloadCart = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 60px 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -639,7 +639,7 @@ const reloadCart = async () => {
 }
 
 .empty-icon {
-  color: #d3dce6;
+  color: var(--text-light);
   margin-bottom: 24px;
   animation: float 3s ease-in-out infinite;
 }
@@ -657,13 +657,13 @@ const reloadCart = async () => {
 .empty-title {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-color);
   margin-bottom: 12px;
 }
 
 .empty-description {
   font-size: 16px;
-  color: #909399;
+  color: var(--text-light);
   margin-bottom: 32px;
   line-height: 1.6;
 }
@@ -695,8 +695,8 @@ const reloadCart = async () => {
   display: flex;
   overflow: hidden;
   border-radius: 12px;
-  border: 1px solid #c5cbd3;
-  background-color: #f0f2f5;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
@@ -707,13 +707,13 @@ const reloadCart = async () => {
 }
 
 .cart-table thead tr {
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
 }
 
 .cart-table th {
   padding: 12px 16px;
   text-align: left;
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.5;
@@ -728,7 +728,7 @@ const reloadCart = async () => {
   cursor: pointer;
   width: 18px;
   height: 18px;
-  accent-color: #4a8157;
+  accent-color: var(--primary-color);
 }
 
 .col-product {
@@ -752,16 +752,16 @@ const reloadCart = async () => {
 }
 
 .cart-row {
-  border-top: 1px solid #c5cbd3;
+  border-top: 1px solid var(--border-color);
   transition: background-color 0.2s;
 }
 
 .cart-row.selected {
-  background-color: #e8f5e8;
+  background-color: rgba(74, 129, 87, 0.08);
 }
 
 .cart-row:hover {
-  background-color: #f5f7f9;
+  background-color: rgba(74, 129, 87, 0.04);
 }
 
 .cart-table td {
@@ -789,13 +789,13 @@ const reloadCart = async () => {
 }
 
 .product-name {
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 .col-price,
 .col-quantity,
 .col-subtotal {
-  color: #4a8157;
+  color: var(--primary-color);
 }
 
 /* 数量控件 */
@@ -808,11 +808,11 @@ const reloadCart = async () => {
 .quantity-controls .quantity-btn {
   width: 28px;
   height: 28px;
-  border: 1px solid #c5cbd3;
-  background-color: #e8ebef;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
   border-radius: 4px;
   cursor: pointer;
-  color: #4a8157;
+  color: var(--primary-color);
   font-size: 16px;
   font-weight: 600;
   display: flex;
@@ -823,9 +823,9 @@ const reloadCart = async () => {
 }
 
 .quantity-controls .quantity-btn:hover:not(:disabled) {
-  background-color: #4a8157;
-  border-color: #4a8157;
-  color: white;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-inverse);
   transform: scale(1.05);
 }
 
@@ -838,10 +838,10 @@ const reloadCart = async () => {
   width: 50px;
   height: 28px;
   text-align: center;
-  border: 1px solid #c5cbd3;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #e8ebef;
-  color: #2c3e50;
+  background-color: var(--bg-tertiary);
+  color: var(--text-color);
   font-size: 14px;
   font-weight: 500;
   padding: 0 4px;
@@ -849,7 +849,7 @@ const reloadCart = async () => {
 }
 
 .quantity-controls input[type='number']:focus {
-  border-color: #4a8157;
+  border-color: var(--primary-color);
 }
 
 /* 隐藏数字输入框的上下箭头 */
@@ -869,7 +869,7 @@ const reloadCart = async () => {
 .remove-btn {
   background-color: transparent;
   border: none;
-  color: #f56c6c;
+  color: var(--error-color);
   cursor: pointer;
   font-size: 14px;
   display: inline-flex;
@@ -879,7 +879,7 @@ const reloadCart = async () => {
 }
 
 .remove-btn:hover {
-  color: #f56c6c;
+  color: var(--error-color);
   transform: scale(1.05);
 }
 
@@ -894,10 +894,10 @@ const reloadCart = async () => {
 
 .summary-card {
   border-radius: 12px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  border: 1px solid #c5cbd3;
+  border: 1px solid var(--border-color);
 }
 
 .summary-header {
@@ -907,7 +907,7 @@ const reloadCart = async () => {
 }
 
 .summary-title {
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
@@ -926,14 +926,14 @@ const reloadCart = async () => {
 }
 
 .summary-label {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
 }
 
 .summary-value {
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
@@ -949,7 +949,7 @@ const reloadCart = async () => {
 
 .shipping-tip {
   font-size: 12px;
-  color: #4a8157;
+  color: var(--primary-color);
   font-weight: 500;
   margin: 0;
   animation: pulse 2s ease-in-out infinite;
@@ -973,13 +973,13 @@ const reloadCart = async () => {
 .total-row .summary-label {
   font-size: 18px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 .total-row .total-value {
   font-size: 24px;
   font-weight: 700;
-  color: #4a8157;
+  color: var(--primary-color);
 }
 
 /* 按钮组 */
@@ -990,10 +990,10 @@ const reloadCart = async () => {
   gap: 16px;
   padding: 20px;
   margin-top: 20px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  border: 1px solid #c5cbd3;
+  border: 1px solid var(--border-color);
 }
 
 /* 面包屑导航样式 */
@@ -1002,26 +1002,26 @@ const reloadCart = async () => {
   align-items: center;
   margin-bottom: 20px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .breadcrumb a {
-  color: #4a8157;
+  color: var(--primary-color);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .breadcrumb a:hover {
-  color: #3a6b47;
+  color: var(--primary-dark);
 }
 
 .breadcrumb .separator {
   margin: 0 8px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .breadcrumb .current {
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
@@ -1107,16 +1107,16 @@ const reloadCart = async () => {
 
   .cart-table tr {
     display: block;
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e8ebef;
+    border: 1px solid var(--bg-tertiary);
   }
 
   .cart-table tr.selected {
-    border-color: #4a8157;
+    border-color: var(--primary-color);
     background: rgba(74, 129, 87, 0.02);
   }
 
@@ -1130,7 +1130,7 @@ const reloadCart = async () => {
   .cart-table td::before {
     content: attr(data-label);
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--text-color);
     display: inline-block;
     width: 80px;
     margin-right: 12px;
@@ -1190,7 +1190,7 @@ const reloadCart = async () => {
   .col-actions {
     text-align: center;
     padding-top: 12px;
-    border-top: 1px solid #e8ebef;
+    border-top: 1px solid var(--bg-tertiary);
     margin-top: 8px;
   }
 
@@ -1209,7 +1209,7 @@ const reloadCart = async () => {
     flex-direction: column;
     gap: 12px;
     padding: 16px;
-    background: #f0f2f5;
+    background: var(--bg-secondary);
     border-radius: 12px;
   }
 

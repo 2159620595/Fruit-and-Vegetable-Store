@@ -210,7 +210,7 @@ const handleClose = () => {
 .amount-value {
   font-size: 32px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--bg-card);
   font-family: 'Arial', sans-serif;
 }
 
@@ -221,28 +221,28 @@ const handleClose = () => {
   justify-content: center;
   gap: 8px;
   padding: 12px 16px;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   border-radius: 8px;
   margin-bottom: 20px;
 }
 
 .balance-icon {
-  color: #67c23a;
+  color: var(--primary-color);
 }
 
 .balance-text {
   font-size: 14px;
-  color: #606266;
+  color: var(--text-secondary);
 }
 
 .balance-amount {
   font-size: 16px;
   font-weight: 600;
-  color: #67c23a;
+  color: var(--primary-color);
 }
 
 .balance-amount.insufficient {
-  color: #f56c6c;
+  color: var(--error-color);
 }
 
 /* 余额不足提示 */
@@ -252,7 +252,7 @@ const handleClose = () => {
 
 .dialog-tip {
   font-size: 15px;
-  color: #606266;
+  color: var(--text-secondary);
   margin-bottom: 16px;
   text-align: center;
 }
@@ -263,27 +263,27 @@ const handleClose = () => {
 
 :deep(.payment-select .el-input__wrapper) {
   padding: 12px 16px;
-  background-color: #e8ebef;
-  border: 1px solid #e5e5e5;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   transition: all 0.2s;
   box-shadow: none;
 }
 
 :deep(.payment-select .el-input__wrapper:hover) {
-  background-color: #f0f0f0;
-  border-color: #d0d0d0;
+  background-color: var(--bg-input);
+  border-color: var(--border-color);
 }
 
 :deep(.payment-select.is-focused .el-input__wrapper) {
-  background-color: #ffffff;
-  border-color: #67c23a;
+  background-color: var(--bg-card);
+  border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(103, 194, 58, 0.1);
 }
 
 :deep(.payment-select .el-input__inner) {
   font-size: 15px;
-  color: #333333;
+  color: var(--text-color);
 }
 
 /* 支付选项内容样式 */
@@ -302,32 +302,32 @@ const handleClose = () => {
 }
 
 .wechat-icon {
-  color: #07c160;
+  color: var(--success-color);
 }
 
 .alipay-icon {
-  color: #1677ff;
+  color: var(--info-color);
 }
 
 .card-icon {
-  color: #f5222d;
+  color: var(--error-color);
 }
 
 .balance-icon-opt {
-  color: #67c23a;
+  color: var(--primary-color);
 }
 
 .payment-name {
   font-size: 15px;
-  color: #333333;
+  color: var(--text-color);
   font-weight: 500;
   flex: 1;
 }
 
 .insufficient-tag {
   font-size: 12px;
-  color: #f56c6c;
-  background-color: #fef0f0;
+  color: var(--error-color);
+  background-color: rgba(245, 34, 45, 0.1);
   padding: 2px 8px;
   border-radius: 4px;
   margin-left: auto;
@@ -340,13 +340,13 @@ const handleClose = () => {
 }
 
 :deep(.el-select-dropdown__item.selected) {
-  color: #67c23a;
+  color: var(--primary-color);
   font-weight: 600;
-  background-color: #f0f9ff;
+  background-color: rgba(74, 129, 87, 0.1);
 }
 
 :deep(.el-select-dropdown__item:hover) {
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
 }
 
 .dialog-footer {

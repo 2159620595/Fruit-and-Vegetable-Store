@@ -375,15 +375,15 @@ const closeAddressForm = () => {
 .section-title {
   font-size: 18px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-color) 333;
   margin: 0;
 }
 
 .add-address-btn {
   padding: 8px 16px;
-  background-color: #f0f2f5;
-  color: #2d5a27;
-  border: 1px solid #2d5a27;
+  background-color: var(--bg-secondary);
+  color: var(--primary-dark);
+  border: 1px solid var(--primary-dark);
   border-radius: 4px;
   font-size: 14px;
   cursor: pointer;
@@ -394,8 +394,8 @@ const closeAddressForm = () => {
 }
 
 .add-address-btn:hover {
-  background-color: #2d5a27;
-  color: #ffffff;
+  background-color: var(--primary-dark);
+  color: var(--bg-card);
 }
 
 .plus-icon {
@@ -413,8 +413,8 @@ const closeAddressForm = () => {
 .address-item {
   position: relative;
   padding: 16px;
-  background-color: #e8ebef;
-  border: 2px solid #e5e5e5;
+  background-color: var(--bg-tertiary);
+  border: 2px solid var(--border-light);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -424,13 +424,13 @@ const closeAddressForm = () => {
 }
 
 .address-item:hover {
-  border-color: #2d5a27;
-  background-color: #f0f7ee;
+  border-color: var(--primary-dark);
+  background-color: rgba(74, 129, 87, 0.05);
 }
 
 .address-item.selected {
-  border-color: #2d5a27;
-  background-color: #f0f7ee;
+  border-color: var(--primary-dark);
+  background-color: rgba(74, 129, 87, 0.05);
 }
 
 .address-content {
@@ -448,33 +448,33 @@ const closeAddressForm = () => {
 .recipient-name {
   font-size: 16px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-color) 333;
 }
 
 .phone {
   font-size: 14px;
-  color: #666666;
+  color: var(--text-secondary) 666;
 }
 
 .default-tag {
   padding: 2px 8px;
-  background-color: #ff4d4f;
-  color: #ffffff;
+  background-color: var(--error-color);
+  color: var(--bg-card);
   border-radius: 4px;
   font-size: 12px;
 }
 
 .label-tag {
   padding: 2px 8px;
-  background-color: #2d5a27;
-  color: #ffffff;
+  background-color: var(--primary-dark);
+  color: var(--bg-card);
   border-radius: 4px;
   font-size: 12px;
 }
 
 .address-detail {
   font-size: 14px;
-  color: #666666;
+  color: var(--text-secondary) 666;
   line-height: 1.5;
 }
 
@@ -490,19 +490,19 @@ const closeAddressForm = () => {
   border: 1px solid #d9d9d9;
   border-radius: 4px;
   font-size: 13px;
-  color: #666666;
+  color: var(--text-secondary) 666;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .action-btn:hover {
-  border-color: #2d5a27;
-  color: #2d5a27;
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
 }
 
 .action-btn.delete:hover {
-  border-color: #ff4d4f;
-  color: #ff4d4f;
+  border-color: var(--error-color);
+  color: var(--error-color);
 }
 
 .selected-icon {
@@ -511,8 +511,8 @@ const closeAddressForm = () => {
   right: 8px;
   width: 24px;
   height: 24px;
-  background-color: #2d5a27;
-  color: #ffffff;
+  background-color: var(--primary-dark);
+  color: var(--bg-card);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -524,9 +524,9 @@ const closeAddressForm = () => {
 .no-address {
   padding: 40px;
   text-align: center;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   border-radius: 8px;
-  color: #999999;
+  color: var(--text-light) 999;
 }
 
 /* 地址表单弹窗 */
@@ -544,7 +544,7 @@ const closeAddressForm = () => {
 }
 
 .modal-content {
-  background-color: #f0f2f5;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
@@ -554,7 +554,7 @@ const closeAddressForm = () => {
 
 .modal-header {
   padding: 20px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -564,14 +564,14 @@ const closeAddressForm = () => {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-color) 333;
 }
 
 .close-btn {
   background: none;
   border: none;
   font-size: 28px;
-  color: #999999;
+  color: var(--text-light) 999;
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -583,7 +583,7 @@ const closeAddressForm = () => {
 }
 
 .close-btn:hover {
-  color: #333333;
+  color: var(--text-color) 333;
 }
 
 .modal-body {
@@ -599,7 +599,7 @@ const closeAddressForm = () => {
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #333333;
+  color: var(--text-color) 333;
 }
 
 .form-input,
@@ -616,16 +616,16 @@ const closeAddressForm = () => {
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #2d5a27;
+  border-color: var(--primary-dark);
 }
 
 .form-input.error,
 .form-textarea.error {
-  border-color: #ff4d4f;
+  border-color: var(--error-color);
 }
 
 .error-text {
-  color: #ff4d4f;
+  color: var(--error-color);
   font-size: 12px;
   margin-top: 4px;
 }
@@ -637,24 +637,24 @@ const closeAddressForm = () => {
 
 .label-option {
   padding: 8px 20px;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   border: 1px solid #d9d9d9;
   border-radius: 4px;
   font-size: 14px;
-  color: #666666;
+  color: var(--text-secondary) 666;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .label-option:hover {
-  border-color: #2d5a27;
-  color: #2d5a27;
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
 }
 
 .label-option.active {
-  background-color: #2d5a27;
-  border-color: #2d5a27;
-  color: #ffffff;
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: var(--bg-card);
 }
 
 .checkbox-group {
@@ -678,7 +678,7 @@ const closeAddressForm = () => {
 
 .modal-footer {
   padding: 16px 20px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border-light);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -695,21 +695,21 @@ const closeAddressForm = () => {
 }
 
 .cancel-btn {
-  background-color: #e8ebef;
-  color: #666666;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary) 666;
 }
 
 .cancel-btn:hover {
-  background-color: #e5e5e5;
+  background-color: var(--border-light);
 }
 
 .submit-btn {
-  background-color: #2d5a27;
-  color: #ffffff;
+  background-color: var(--primary-dark);
+  color: var(--bg-card);
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #1e3d1a;
+  background-color: var(--primary-color);
 }
 
 .submit-btn:disabled {

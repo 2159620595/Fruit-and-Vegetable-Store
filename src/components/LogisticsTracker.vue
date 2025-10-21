@@ -338,7 +338,7 @@ const copyTrackingNumber = async () => {
   try {
     await navigator.clipboard.writeText(props.trackingNumber)
     ElMessage.success('快递单号已复制到剪贴板')
-  } catch (err) {
+  } catch {
     ElMessage.error('复制失败，请手动复制')
   }
 }
@@ -434,7 +434,7 @@ onUnmounted(() => {
 }
 
 .logistics-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
@@ -443,7 +443,7 @@ onUnmounted(() => {
 /* 头部信息 */
 .logistics-header {
   background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
-  color: white;
+  color: var(--text-inverse);
   padding: 24px;
 }
 
@@ -498,7 +498,7 @@ onUnmounted(() => {
   border: none;
   border-radius: 4px;
   padding: 4px 8px;
-  color: white;
+  color: var(--text-inverse);
   cursor: pointer;
   font-size: 12px;
   transition: background 0.2s;
@@ -520,7 +520,7 @@ onUnmounted(() => {
   border: none;
   border-radius: 6px;
   padding: 8px 16px;
-  color: white;
+  color: var(--text-inverse);
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -578,7 +578,7 @@ onUnmounted(() => {
 .indicator-dot {
   width: 6px;
   height: 6px;
-  background: #4ade80;
+  background: var(--success-color);
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -597,14 +597,14 @@ onUnmounted(() => {
 .delivery-address {
   padding: 20px 24px;
   border-bottom: 1px solid #f0f0f0;
-  background: #fafafa;
+  background: var(--bg-input);
 }
 
 /* 发货地址 */
 .origin-address {
   padding: 20px 24px;
   border-bottom: 1px solid #f0f0f0;
-  background: #f0f9ff;
+  background: rgba(74, 129, 87, 0.05);
 }
 
 .address-header {
@@ -621,7 +621,7 @@ onUnmounted(() => {
 .address-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 .address-content {
@@ -643,17 +643,17 @@ onUnmounted(() => {
 .recipient-name {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 .recipient-phone {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .address-detail {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -661,7 +661,7 @@ onUnmounted(() => {
 .current-status {
   padding: 20px 24px;
   border-bottom: 1px solid #f0f0f0;
-  background: #f8f9ff;
+  background: rgba(74, 129, 87, 0.05);
 }
 
 .status-header {
@@ -678,7 +678,7 @@ onUnmounted(() => {
 .status-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 .status-content {
@@ -688,20 +688,20 @@ onUnmounted(() => {
 .status-text {
   font-size: 18px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-color);
   margin-bottom: 6px;
 }
 
 .status-description {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 6px;
   line-height: 1.4;
 }
 
 .status-time {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-light);
   font-weight: 500;
 }
 
@@ -724,7 +724,7 @@ onUnmounted(() => {
 .timeline-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 .timeline-content {
@@ -754,13 +754,13 @@ onUnmounted(() => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #e2e8f0;
-  border: 3px solid #ffffff;
+  background: var(--border-color);
+  border: 3px solid var(--bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 2;
@@ -768,13 +768,13 @@ onUnmounted(() => {
 }
 
 .timeline-step.completed .step-icon {
-  background: #4ade80;
-  color: white;
+  background: var(--success-color);
+  color: var(--text-inverse);
 }
 
 .timeline-step.current .step-icon {
-  background: #5a7a98;
-  color: white;
+  background: var(--secondary-color);
+  color: var(--text-inverse);
   animation: pulse-current 2s infinite;
 }
 
@@ -791,51 +791,51 @@ onUnmounted(() => {
 .step-line {
   width: 2px;
   height: 40px;
-  background: #e2e8f0;
+  background: var(--border-color);
   margin-top: 8px;
 }
 
 .timeline-step.completed .step-line {
-  background: #4ade80;
+  background: var(--success-color);
 }
 
 .step-content {
   flex: 1;
   padding: 12px 16px;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   transition: all 0.3s;
 }
 
 .timeline-step.completed .step-content {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
+  background: rgba(82, 196, 26, 0.05);
+  border-color: rgba(82, 196, 26, 0.3);
 }
 
 .timeline-step.current .step-content {
-  background: #f0f9ff;
-  border-color: #bae6fd;
+  background: rgba(74, 129, 87, 0.05);
+  border-color: rgba(24, 144, 255, 0.3);
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
 .step-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .step-description {
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 6px;
   line-height: 1.4;
 }
 
 .step-time {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-light);
   margin-bottom: 4px;
   font-weight: 500;
 }
@@ -845,12 +845,12 @@ onUnmounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .location-icon {
   font-size: 12px;
-  color: #5a7a98;
+  color: var(--secondary-color);
 }
 
 /* 状态样式 */
@@ -873,7 +873,7 @@ onUnmounted(() => {
 
 .loading-text {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .error-icon {
@@ -883,13 +883,13 @@ onUnmounted(() => {
 
 .error-text {
   font-size: 14px;
-  color: #ef4444;
+  color: var(--error-color);
   margin-bottom: 16px;
 }
 
 .retry-btn {
-  background: #5a7a98;
-  color: white;
+  background: var(--secondary-color);
+  color: var(--text-inverse);
   border: none;
   border-radius: 6px;
   padding: 8px 16px;
@@ -899,7 +899,7 @@ onUnmounted(() => {
 }
 
 .retry-btn:hover {
-  background: #5a67d8;
+  background: var(--info-color);
 }
 
 .empty-icon {
@@ -910,19 +910,19 @@ onUnmounted(() => {
 .empty-text {
   font-size: 16px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
 .empty-description {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-light);
 }
 
 /* 温馨提示 */
 .tips-section {
   padding: 16px 24px;
-  background: #fef3c7;
+  background: rgba(250, 173, 20, 0.05);
   border-top: 1px solid #f59e0b;
 }
 
@@ -938,7 +938,7 @@ onUnmounted(() => {
 
 .tips-text {
   font-size: 13px;
-  color: #92400e;
+  color: var(--warning-color);
 }
 
 /* 响应式设计 */

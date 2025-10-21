@@ -444,14 +444,14 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #67c23a;
+  border-top: 4px solid var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20px;
 }
 
 .loading-text {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 16px;
   margin: 0;
 }
@@ -471,7 +471,7 @@ onMounted(() => {
   top: 12px;
   right: 12px;
   background-color: rgba(255, 107, 107, 0.9);
-  color: white;
+  color: var(--text-inverse);
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -494,7 +494,7 @@ onMounted(() => {
 
 .favorites-page {
   min-height: 100vh;
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -524,13 +524,13 @@ onMounted(() => {
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 8px 0;
 }
 
 .page-subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -550,18 +550,18 @@ onMounted(() => {
 }
 
 .network-status.checking {
-  background-color: #f3f4f6;
-  color: #6b7280;
+  background-color: var(--bg-input);
+  color: var(--text-secondary);
 }
 
 .network-status.online {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: rgba(82, 196, 26, 0.1);
+  color: var(--success-color);
 }
 
 .network-status.offline {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(245, 34, 45, 0.1);
+  color: var(--error-color);
 }
 
 .status-dot {
@@ -586,7 +586,7 @@ onMounted(() => {
 }
 
 .favorites-content {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -603,7 +603,7 @@ onMounted(() => {
 
 .total-count {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .toolbar-right {
@@ -631,7 +631,7 @@ onMounted(() => {
 }
 
 .product-card.selected {
-  border-color: #67c23a;
+  border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(103, 194, 58, 0.2);
 }
 
@@ -686,19 +686,19 @@ onMounted(() => {
 .product-name {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 8px 0;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .product-name:hover {
-  color: #67c23a;
+  color: var(--primary-color);
 }
 
 .product-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 12px 0;
   line-height: 1.4;
   display: -webkit-box;
@@ -715,12 +715,12 @@ onMounted(() => {
 .current-price {
   font-size: 18px;
   font-weight: 700;
-  color: #e6a23c;
+  color: var(--warning-color);
 }
 
 .original-price {
   font-size: 14px;
-  color: #999;
+  color: var(--text-light);
   text-decoration: line-through;
   margin-left: 8px;
 }
@@ -738,7 +738,7 @@ onMounted(() => {
 
 .sales-count {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .product-actions {
@@ -762,13 +762,13 @@ onMounted(() => {
 .empty-title {
   font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 8px 0;
 }
 
 .empty-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 24px 0;
 }
 

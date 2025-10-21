@@ -1426,34 +1426,34 @@ const handleContactSeller = async (orderId, event) => {
     await ElMessageBox.alert(
       `
         <div style="text-align: left;">
-          <h3 style="margin-bottom: 16px; color: #333;">联系商家</h3>
+          <h3 style="margin-bottom: 16px; color: var(--text-color);">联系商家</h3>
           <div style="margin-bottom: 12px;">
             <strong>订单号：</strong>${order.order_number}
           </div>
           <div style="margin-bottom: 12px;">
             <strong>订单状态：</strong>
-            <span style="color: #67C23A; font-weight: bold;">${getStatusText(order.status)}</span>
+            <span style="color: var(--primary-color); font-weight: bold;">${getStatusText(order.status)}</span>
           </div>
           <div style="border-top: 1px solid #eee; padding-top: 16px; margin-top: 16px;">
-            <h4 style="margin-bottom: 12px; color: #666;">联系方式</h4>
+            <h4 style="margin-bottom: 12px; color: var(--text-secondary);">联系方式</h4>
             <div style="margin-bottom: 8px;">
               <strong>客服热线：</strong>
-              <span style="color: #409EFF; font-weight: bold;">400-888-8888</span>
+              <span style="color: var(--info-color); font-weight: bold;">400-888-8888</span>
             </div>
             <div style="margin-bottom: 8px;">
               <strong>在线客服：</strong>
-              <span style="color: #409EFF; font-weight: bold;">点击进入</span>
+              <span style="color: var(--info-color); font-weight: bold;">点击进入</span>
             </div>
             <div style="margin-bottom: 8px;">
               <strong>微信客服：</strong>
-              <span style="color: #409EFF; font-weight: bold;">fresh_harvest_service</span>
+              <span style="color: var(--info-color); font-weight: bold;">fresh_harvest_service</span>
             </div>
             <div style="margin-bottom: 12px;">
               <strong>服务时间：</strong>
-              <span style="color: #666;">9:00-21:00（全年无休）</span>
+              <span style="color: var(--text-secondary);">9:00-21:00（全年无休）</span>
             </div>
-            <div style="background: #f0f9ff; padding: 12px; border-radius: 4px; border-left: 4px solid #409EFF;">
-              <div style="font-size: 13px; color: #666; line-height: 1.5;">
+            <div style="background: rgba(74, 129, 87, 0.05); padding: 12px; border-radius: 4px; border-left: 4px solid var(--info-color);">
+              <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
                 <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
                   <el-icon :size="16" color="#409EFF"><component :is="ElementPlusIconsVue.InfoFilled" /></el-icon>
                   <strong>温馨提示：</strong>
@@ -1658,13 +1658,13 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(240, 242, 245, 0.85);
+  background: var(--bg-primary);
   z-index: 1;
 }
 
 .order-list-page {
   min-height: 100vh;
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
 }
 
 .container {
@@ -1679,7 +1679,7 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 24px;
   padding: 20px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
@@ -1687,7 +1687,7 @@ onUnmounted(() => {
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-color);
   margin: 0;
 }
 
@@ -1714,17 +1714,41 @@ onUnmounted(() => {
 
 /* 订单标签页 */
 .order-tabs {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 16px 24px 0;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
+/* 标签项字体颜色 */
+.order-tabs :deep(.el-tabs__item) {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.order-tabs :deep(.el-tabs__item:hover) {
+  color: var(--text-color);
+}
+
+.order-tabs :deep(.el-tabs__item.is-active) {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.order-tabs :deep(.el-tabs__active-bar) {
+  background-color: var(--primary-color);
+}
+
+.order-tabs :deep(.el-tabs__nav-wrap::after) {
+  background-color: var(--border-light);
+}
+
 .tab-label {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: inherit;
 }
 
 .tab-badge {
@@ -1739,7 +1763,7 @@ onUnmounted(() => {
 
 .tab-badge :deep(.el-badge__content) {
   background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-  border: 2px solid #fff;
+  border: 2px solid var(--bg-card);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-weight: 600;
   /* 固定内容尺寸，数字切换不改变布局 */
@@ -1782,7 +1806,7 @@ onUnmounted(() => {
 
 /* 加载状态 */
 .loading-container {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -1795,7 +1819,7 @@ onUnmounted(() => {
 }
 
 .order-card {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -1819,7 +1843,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding-bottom: 16px;
-  border-bottom: 1px solid #c5cbd3;
+  border-bottom: 1px solid var(--border-color);
   margin-bottom: 16px;
 }
 
@@ -1832,12 +1856,12 @@ onUnmounted(() => {
 .order-number {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 .order-date {
   font-size: 13px;
-  color: #999;
+  color: var(--text-light);
 }
 
 /* 订单商品 */
@@ -1852,7 +1876,7 @@ onUnmounted(() => {
 }
 
 .order-items:hover {
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
 }
 
 .order-products {
@@ -1876,12 +1900,12 @@ onUnmounted(() => {
   height: 48px;
   border-radius: 6px;
   overflow: hidden;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid #c5cbd3;
+  border: 1px solid var(--border-color);
 }
 
 .product-image {
@@ -1892,15 +1916,15 @@ onUnmounted(() => {
 
 .product-image-placeholder {
   font-size: 20px;
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 .product-image-more {
   width: 48px;
   height: 48px;
   border-radius: 6px;
-  background-color: #e8ebef;
-  border: 1px solid #c5cbd3;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1910,7 +1934,7 @@ onUnmounted(() => {
 .more-count {
   font-size: 12px;
   font-weight: 600;
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 .product-names {
@@ -1919,7 +1943,7 @@ onUnmounted(() => {
 
 .product-names-text {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
@@ -1936,16 +1960,16 @@ onUnmounted(() => {
 }
 
 .summary-item .label {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .summary-item .value {
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
 .summary-item .remark-text {
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 400;
   font-style: italic;
   max-width: 400px;
@@ -1964,19 +1988,19 @@ onUnmounted(() => {
 
 .total-label {
   font-size: 13px;
-  color: #999;
+  color: var(--text-light);
   margin-bottom: 4px;
 }
 
 .total-amount {
   font-size: 24px;
   font-weight: 700;
-  color: #618961;
+  color: var(--primary-color);
 }
 
 .shipping-fee {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
   margin-top: 4px;
 }
 
@@ -1987,7 +2011,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   padding-top: 16px;
-  border-top: 1px solid #c5cbd3;
+  border-top: 1px solid var(--border-color);
 }
 
 .order-actions .el-button {
@@ -2000,7 +2024,7 @@ onUnmounted(() => {
   justify-content: center;
   margin-top: 32px;
   padding: 24px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
@@ -2011,26 +2035,26 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 20px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .breadcrumb a {
-  color: #618961;
+  color: var(--primary-color);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .breadcrumb a:hover {
-  color: #4a6b4a;
+  color: var(--primary-dark);
 }
 
 .breadcrumb .separator {
   margin: 0 8px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .breadcrumb .current {
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
@@ -2164,7 +2188,7 @@ onUnmounted(() => {
     justify-content: flex-start;
     align-items: stretch;
     padding-top: 12px;
-    border-top: 1px solid #e8ebef;
+    border-top: 1px solid var(--bg-tertiary);
   }
 
   .order-actions .el-button {
@@ -2256,15 +2280,15 @@ onUnmounted(() => {
 
   /* 统一按钮样式 */
   .order-actions .el-button--default {
-    background: #f0f2f5;
-    border-color: #d0d5dd;
-    color: #2c3e50;
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-color);
   }
 
   .order-actions .el-button--default:hover {
-    background: #e8ebef;
-    border-color: #4a8157;
-    color: #4a8157;
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
   }
 
   .order-actions .el-button--primary {
@@ -2278,15 +2302,15 @@ onUnmounted(() => {
   }
 
   .order-actions .el-button--info {
-    background: #f0f2f5;
-    border-color: #d0d5dd;
-    color: #5a7a98;
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--secondary-color);
   }
 
   .order-actions .el-button--info:hover {
-    background: #e8ebef;
-    border-color: #5a7a98;
-    color: #5a7a98;
+    background: var(--bg-tertiary);
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
   }
 
   .header-actions .el-button {

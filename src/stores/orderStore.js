@@ -73,6 +73,12 @@ function parseOrderData(order) {
     }
   }
 
+  // 确保 is_reviewed 字段存在
+  if (order.is_reviewed === undefined || order.is_reviewed === null) {
+    // 从缓存中检查是否已评价
+    order.is_reviewed = reviewedOrders.value.includes(order.id)
+  }
+
   return order
 }
 

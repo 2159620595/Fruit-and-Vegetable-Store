@@ -198,7 +198,7 @@ const emit = defineEmits(['loaded'])
 
 /* 卡片骨架屏 */
 .skeleton-card {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -248,7 +248,7 @@ const emit = defineEmits(['loaded'])
 
 /* 商品卡片骨架屏 */
 .skeleton-product {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -278,7 +278,7 @@ const emit = defineEmits(['loaded'])
 
 /* 列表骨架屏 */
 .skeleton-list {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -302,7 +302,7 @@ const emit = defineEmits(['loaded'])
 
 /* 表格骨架屏 */
 .skeleton-table {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -310,7 +310,7 @@ const emit = defineEmits(['loaded'])
 
 .skeleton-table-header {
   display: flex;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -411,20 +411,20 @@ const emit = defineEmits(['loaded'])
   .skeleton-card,
   .skeleton-list,
   .skeleton-table {
-    background: #1a1a1a;
+    background: var(--bg-secondary);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .skeleton-table-header {
-    background: #2a2a2a;
+    background: var(--bg-tertiary);
   }
 
   .skeleton-list-item {
-    border-bottom-color: #3a3a3a;
+    border-bottom-color: var(--border-color);
   }
 
   .skeleton-table-row {
-    border-bottom-color: #3a3a3a;
+    border-bottom-color: var(--border-color);
   }
 }
 </style>

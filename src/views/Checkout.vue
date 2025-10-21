@@ -400,6 +400,7 @@ onMounted(async () => {
   try {
     await userStore.fetchUserBalance()
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('获取用户余额失败:', error)
   }
 })
@@ -572,6 +573,7 @@ const submitOrder = async () => {
           ElMessage.error(resultData.message || '支付失败，请重试')
         }
       } catch (payError) {
+        // eslint-disable-next-line no-console
         console.error('支付错误:', payError)
 
         // 如果是余额不足的错误
@@ -598,8 +600,11 @@ const submitOrder = async () => {
         throw error
       }
     }
-  } catch {
-    ElMessage.error('提交订单失败，请重试')
+  } catch (error) {
+    // 只有非取消操作才显示错误提示
+    if (error !== 'cancel' && error !== 'close') {
+      ElMessage.error('提交订单失败，请重试')
+    }
     submitting.value = false
   }
 }
@@ -616,12 +621,12 @@ const formatPrice = price => {
 :deep(.payment-confirm-dialog .el-message-box__title) {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 :deep(.payment-confirm-dialog .el-message-box__content) {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
   padding: 20px 0;
 }
 
@@ -636,14 +641,14 @@ const formatPrice = price => {
 }
 
 :deep(.payment-confirm-dialog .el-button--default) {
-  background: #f5f7fa;
-  color: #606266;
+  background: var(--bg-input);
+  color: var(--text-secondary);
   border: 1px solid #dcdfe6;
 }
 
 .checkout-page {
   min-height: 100vh;
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -656,8 +661,8 @@ const formatPrice = price => {
 
 /* Header Styles */
 .header {
-  background-color: #e8ebef;
-  border-bottom: 1px solid #e5e5e5;
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-light);
   padding: 16px 0;
 }
 
@@ -678,13 +683,13 @@ const formatPrice = price => {
 
 .leaf-icon {
   font-size: 16px;
-  color: #2d5a27;
+  color: var(--primary-dark);
 }
 
 .brand-name {
   font-size: 18px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-color);
 }
 
 .nav-links {
@@ -693,7 +698,7 @@ const formatPrice = price => {
 }
 
 .nav-link {
-  color: #333333;
+  color: var(--text-color);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -701,7 +706,7 @@ const formatPrice = price => {
 }
 
 .nav-link:hover {
-  color: #2d5a27;
+  color: var(--primary-dark);
 }
 
 .header-actions {
@@ -711,8 +716,8 @@ const formatPrice = price => {
 }
 
 .cart-btn {
-  background-color: #e8f5e8;
-  color: #2d5a27;
+  background-color: rgba(74, 129, 87, 0.1);
+  color: var(--primary-dark);
   border: none;
   padding: 8px 16px;
   border-radius: 20px;
@@ -723,7 +728,7 @@ const formatPrice = price => {
 }
 
 .cart-btn:hover {
-  background-color: #d4edda;
+  background-color: rgba(74, 129, 87, 0.15);
 }
 
 .profile-pic {
@@ -750,18 +755,18 @@ const formatPrice = price => {
 }
 
 .breadcrumb-link {
-  color: #2d5a27;
+  color: var(--primary-dark);
   text-decoration: none;
   font-size: 14px;
 }
 
 .breadcrumb-separator {
-  color: #333333;
+  color: var(--text-color);
   font-size: 14px;
 }
 
 .breadcrumb-current {
-  color: #333333;
+  color: var(--text-color);
   font-size: 14px;
 }
 
@@ -771,7 +776,7 @@ const formatPrice = price => {
   padding: 80px 20px;
   max-width: 500px;
   margin: 40px auto;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -786,13 +791,13 @@ const formatPrice = price => {
 .empty-cart-message h2 {
   font-size: 24px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-color);
   margin-bottom: 12px;
 }
 
 .empty-cart-message p {
   font-size: 16px;
-  color: #666666;
+  color: var(--text-secondary);
   margin-bottom: 32px;
 }
 
@@ -812,13 +817,13 @@ const formatPrice = price => {
 .checkout-title {
   font-size: 32px;
   font-weight: 700;
-  color: #333333;
+  color: var(--text-color);
   margin: 0 0 32px 0;
 }
 
 .form-section {
   margin-bottom: 32px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -827,7 +832,7 @@ const formatPrice = price => {
 .section-title {
   font-size: 18px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-color);
   margin: 0 0 16px 0;
 }
 
@@ -839,25 +844,25 @@ const formatPrice = price => {
 
 .form-input {
   padding: 12px 16px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 14px;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   transition: border-color 0.2s;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #2d5a27;
+  border-color: var(--primary-dark);
 }
 
 .form-input.error {
-  border-color: #dc3545;
-  background-color: #ffe5e5;
+  border-color: var(--error-color);
+  background-color: rgba(245, 34, 45, 0.1);
 }
 
 .error-message {
-  color: #dc3545;
+  color: var(--error-color);
   font-size: 12px;
   margin-top: -12px;
   margin-bottom: 12px;
@@ -883,27 +888,27 @@ const formatPrice = price => {
   display: flex;
   align-items: center;
   padding: 16px;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-light);
 }
 
 .radio-option:hover {
-  background-color: #f0f0f0;
+  background-color: var(--bg-input);
 }
 
 .radio-option.selected {
-  background-color: #f0f0f0;
-  border-color: #2d5a27;
+  background-color: var(--bg-input);
+  border-color: var(--primary-dark);
 }
 
 .radio-option input[type='radio'] {
   margin-right: 12px;
   width: 16px;
   height: 16px;
-  accent-color: #2d5a27;
+  accent-color: var(--primary-dark);
 }
 
 .radio-content {
@@ -913,13 +918,13 @@ const formatPrice = price => {
 .radio-title {
   font-size: 16px;
   font-weight: 500;
-  color: #333333;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .radio-description {
   font-size: 14px;
-  color: #666666;
+  color: var(--text-secondary);
 }
 
 .payment-fields {
@@ -933,27 +938,28 @@ const formatPrice = price => {
 
 :deep(.payment-select .el-input__wrapper) {
   padding: 12px 16px;
-  background-color: #e8ebef;
-  border: 1px solid #e5e5e5;
+  background-color: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-light) !important;
   border-radius: 8px;
   transition: all 0.2s;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 :deep(.payment-select .el-input__wrapper:hover) {
-  background-color: #f0f0f0;
-  border-color: #d0d0d0;
+  background-color: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
 }
 
 :deep(.payment-select.is-focused .el-input__wrapper) {
-  background-color: #f0f2f5;
-  border-color: #2d5a27;
-  box-shadow: 0 0 0 2px rgba(45, 90, 39, 0.1);
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--primary-dark) !important;
+  box-shadow: 0 0 0 2px rgba(45, 90, 39, 0.1) !important;
 }
 
 :deep(.payment-select .el-input__inner) {
   font-size: 15px;
-  color: #333333;
+  color: var(--text-color) !important;
+  background-color: transparent !important;
 }
 
 /* 支付选项内容样式 */
@@ -972,32 +978,32 @@ const formatPrice = price => {
 }
 
 .wechat-icon {
-  color: #07c160;
+  color: var(--success-color);
 }
 
 .alipay-icon {
-  color: #1677ff;
+  color: var(--info-color);
 }
 
 .card-icon {
-  color: #f5222d;
+  color: var(--error-color);
 }
 
 .balance-icon-opt {
-  color: #67c23a;
+  color: var(--primary-color);
 }
 
 .payment-name {
   font-size: 15px;
-  color: #333333;
+  color: var(--text-color);
   font-weight: 500;
   flex: 1;
 }
 
 .insufficient-tag {
   font-size: 12px;
-  color: #f56c6c;
-  background-color: #fef0f0;
+  color: var(--error-color);
+  background-color: rgba(245, 34, 45, 0.1);
   padding: 2px 8px;
   border-radius: 4px;
   margin-left: auto;
@@ -1012,27 +1018,27 @@ const formatPrice = price => {
   background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
   border-radius: 8px;
   margin-bottom: 16px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-light);
 }
 
 .balance-info-box .balance-icon {
-  color: #67c23a;
+  color: var(--primary-color);
 }
 
 .balance-info-box .balance-text {
   font-size: 14px;
-  color: #606266;
+  color: var(--text-secondary);
 }
 
 .balance-info-box .balance-amount {
   font-size: 18px;
   font-weight: 600;
-  color: #67c23a;
+  color: var(--primary-color);
   flex: 1;
 }
 
 .balance-info-box .balance-amount.insufficient {
-  color: #f56c6c;
+  color: var(--error-color);
 }
 
 .recharge-link {
@@ -1040,8 +1046,8 @@ const formatPrice = price => {
   align-items: center;
   gap: 4px;
   padding: 4px 12px;
-  background-color: #67c23a;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--text-inverse);
   border-radius: 4px;
   text-decoration: none;
   font-size: 13px;
@@ -1050,7 +1056,7 @@ const formatPrice = price => {
 }
 
 .recharge-link:hover {
-  background-color: #85ce61;
+  background-color: var(--primary-dark);
   transform: translateY(-1px);
 }
 
@@ -1060,25 +1066,51 @@ const formatPrice = price => {
 }
 
 /* 下拉面板样式 */
+:deep(.el-select-dropdown) {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+}
+
+:deep(.el-select-dropdown__list) {
+  background-color: var(--bg-secondary);
+}
+
 :deep(.el-select-dropdown__item) {
   padding: 12px 16px;
   font-size: 15px;
+  color: var(--text-color);
+  background-color: transparent;
 }
 
 :deep(.el-select-dropdown__item.selected) {
-  color: #2d5a27;
+  color: var(--primary-dark);
   font-weight: 600;
-  background-color: #f0f8f0;
+  background-color: rgba(74, 129, 87, 0.1);
+}
+
+:deep(.el-select-dropdown__item.is-hovering) {
+  background-color: var(--bg-tertiary);
+  color: var(--text-color);
 }
 
 :deep(.el-select-dropdown__item:hover) {
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
+  color: var(--text-color);
+}
+
+:deep(.el-popper) {
+  background-color: var(--bg-secondary);
+}
+
+:deep(.el-popper.is-light) {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
 }
 
 /* Right Section - Order Summary */
 .order-summary-section {
-  background-color: #f0f2f5;
-  border: 1px solid #e5e5e5;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   padding: 24px;
   height: fit-content;
@@ -1089,7 +1121,7 @@ const formatPrice = price => {
 .summary-title {
   font-size: 20px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-color);
   margin: 0 0 24px 0;
 }
 
@@ -1114,7 +1146,7 @@ const formatPrice = price => {
   height: 60px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1141,7 +1173,7 @@ const formatPrice = price => {
 .product-name {
   font-size: 14px;
   font-weight: 500;
-  color: #333333;
+  color: var(--text-color);
   margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -1150,19 +1182,19 @@ const formatPrice = price => {
 
 .product-quantity {
   font-size: 13px;
-  color: #666666;
+  color: var(--text-secondary);
 }
 
 .product-price {
   font-size: 14px;
   font-weight: 600;
-  color: #2d5a27;
+  color: var(--primary-color);
   flex-shrink: 0;
 }
 
 /* Cost Breakdown */
 .cost-breakdown {
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border-light);
   padding-top: 16px;
 }
 
@@ -1178,14 +1210,14 @@ const formatPrice = price => {
 }
 
 .cost-row.total {
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border-light);
   padding-top: 12px;
   margin-top: 12px;
 }
 
 .cost-label {
   font-size: 14px;
-  color: #333333;
+  color: var(--text-color);
 }
 
 .cost-row.total .cost-label {
@@ -1195,7 +1227,7 @@ const formatPrice = price => {
 .cost-value {
   font-size: 14px;
   font-weight: 500;
-  color: #333333;
+  color: var(--text-color);
 }
 
 .cost-row.total .cost-value {
@@ -1204,19 +1236,19 @@ const formatPrice = price => {
 }
 
 .cost-value.discount {
-  color: #dc3545;
+  color: var(--error-color);
 }
 
 /* Order Tips */
 .order-tips {
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border-light);
 }
 
 .tip-item {
   font-size: 13px;
-  color: #666666;
+  color: var(--text-secondary);
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -1230,17 +1262,17 @@ const formatPrice = price => {
 /* 运费提示特殊样式 */
 .tip-item.shipping-tip {
   padding: 8px 12px;
-  background-color: #fff3cd;
-  border-left: 3px solid #c49563;
+  background-color: rgba(196, 149, 99, 0.1);
+  border-left: 3px solid var(--gold-color);
   border-radius: 4px;
-  color: #856404;
+  color: var(--warning-color);
   font-weight: 500;
 }
 
 .tip-item.shipping-tip.success {
-  background-color: #d4edda;
-  border-left-color: #28a745;
-  color: #155724;
+  background-color: rgba(82, 196, 26, 0.1);
+  border-left-color: var(--success-color);
+  color: var(--success-color);
 }
 
 /* Responsive Design */

@@ -206,7 +206,7 @@ const handleClose = () => {
   align-items: center;
   justify-content: center;
   padding: 40px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .loading-container .el-icon {
@@ -221,7 +221,7 @@ const handleClose = () => {
 
 .review-item {
   padding: 20px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 8px;
   margin-bottom: 16px;
 }
@@ -252,12 +252,12 @@ const handleClose = () => {
 .user-name {
   font-weight: 600;
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .review-time {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .product-info {
@@ -266,12 +266,12 @@ const handleClose = () => {
 }
 
 .product-info .label {
-  color: #666;
+  color: var(--text-secondary);
   margin-right: 4px;
 }
 
 .product-info .value {
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
@@ -281,7 +281,7 @@ const handleClose = () => {
 
 .review-content p {
   line-height: 1.6;
-  color: #333;
+  color: var(--text-color);
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
@@ -318,11 +318,11 @@ const handleClose = () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
 .likes .el-icon {
-  color: #ff6b6b;
+  color: var(--error-color);
 }
 </style>

@@ -9,10 +9,15 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useUserStore } from './stores/userStore'
+import { useThemeStore } from './stores/themeStore'
 
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 
 onMounted(() => {
+  // 初始化主题
+  themeStore.loadTheme()
+
   // 如果有token，尝试获取用户信息
   if (userStore.token) {
     userStore.fetchProfile().catch(() => {

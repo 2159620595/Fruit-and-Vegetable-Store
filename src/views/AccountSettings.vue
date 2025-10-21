@@ -448,7 +448,7 @@ onMounted(() => {
 <style scoped>
 .account-settings-page {
   min-height: 100vh;
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -466,13 +466,13 @@ onMounted(() => {
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 8px 0;
 }
 
 .page-subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -483,7 +483,7 @@ onMounted(() => {
 }
 
 .settings-section {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -498,13 +498,13 @@ onMounted(() => {
 .section-title {
   font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 8px 0;
 }
 
 .section-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -514,7 +514,7 @@ onMounted(() => {
 
 .form-tip {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
   margin-left: 8px;
 }
 
@@ -531,7 +531,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 8px;
 }
 
@@ -542,13 +542,13 @@ onMounted(() => {
 .item-title {
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .item-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .privacy-actions {

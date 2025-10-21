@@ -46,7 +46,7 @@
 
 <style scoped>
 .footer {
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   padding: 3rem 0 1rem;
   margin-top: 4rem;
 }
@@ -72,19 +72,19 @@
 }
 
 .footer-section a {
-  color: #666;
+  color: var(--text-secondary);
   text-decoration: none;
 }
 
 .footer-section a:hover {
-  color: #4a8157;
+  color: var(--primary-color);
 }
 
 .footer-bottom {
   text-align: center;
   padding-top: 1rem;
   border-top: 1px solid #ddd;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .social-links {

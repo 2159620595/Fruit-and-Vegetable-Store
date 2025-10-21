@@ -111,16 +111,27 @@
             申请售后
           </el-button>
 
-          <!-- 评价订单 -->
-          <el-button
-            v-if="order.status === 'delivered'"
-            type="success"
-            plain
-            @click="handleReview"
-            :icon="Edit"
-          >
-            评价订单
-          </el-button>
+          <!-- 评价订单 / 查看评价 -->
+          <template v-if="['delivered', 'completed'].includes(order.status)">
+            <el-button
+              v-if="!order.is_reviewed"
+              type="success"
+              plain
+              @click="handleReview"
+              :icon="Edit"
+            >
+              评价订单
+            </el-button>
+            <el-button
+              v-else
+              type="info"
+              plain
+              @click="handleViewReview"
+              :icon="View"
+            >
+              查看我的评价
+            </el-button>
+          </template>
 
           <!-- 查看物流 -->
           <el-button
@@ -408,24 +419,6 @@
         </div>
       </div>
 
-      <!-- Logistics Information -->
-      <div
-        v-if="['shipped', 'in_transit', 'delivered'].includes(order.status)"
-        class="logistics-info"
-      >
-        <h2 class="section-title">物流信息</h2>
-        <LogisticsTracker
-          :order-id="order.id"
-          :tracking-number="order.tracking_number"
-          :carrier="order.carrier"
-          :order-status="order.status"
-          :auto-refresh="true"
-          :refresh-interval="30000"
-          @update="handleLogisticsUpdate"
-          @error="handleLogisticsError"
-        />
-      </div>
-
       <!-- Order Remark -->
       <div v-if="order.remark" class="order-remark">
         <h2 class="section-title">订单备注</h2>
@@ -457,6 +450,19 @@
       @confirm="handlePaymentConfirm"
       @cancel="handlePaymentCancel"
     />
+
+    <!-- 评价对话框 -->
+    <OrderReviewDialog
+      v-model="reviewDialogVisible"
+      :order="order"
+      @submit="handleReviewSubmit"
+    />
+
+    <!-- 查看评价对话框 -->
+    <ReviewDetailDialog
+      v-model="reviewDetailDialogVisible"
+      :order="currentReviewData"
+    />
   </div>
 </template>
 
@@ -477,6 +483,7 @@ import {
   QuestionFilled,
   Wallet,
   Edit,
+  View,
   ShoppingCart,
   Close,
   Checked,
@@ -503,9 +510,10 @@ import {
 import { useOrderStore } from '@/stores/orderStore'
 import { useUserStore } from '@/stores/userStore'
 import { useLogisticsStore } from '@/stores/logisticsStore'
-import LogisticsTracker from '@/components/LogisticsTracker.vue'
 import LogisticsDialog from '@/components/LogisticsDialog.vue'
 import PaymentDialog from '@/components/PaymentDialog.vue'
+import OrderReviewDialog from '@/components/OrderReviewDialog.vue'
+import ReviewDetailDialog from '@/components/ReviewDetailDialog.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()
@@ -524,6 +532,11 @@ const paymentDialogVisible = ref(false)
 const paymentAmount = computed(() => {
   return order.value ? parseFloat(order.value.total_amount) || 0 : 0
 })
+
+// 评价对话框状态
+const reviewDialogVisible = ref(false)
+const reviewDetailDialogVisible = ref(false)
+const currentReviewData = ref(null)
 
 // Computed properties
 const orderSteps = computed(() => {
@@ -1124,11 +1137,85 @@ const handlePaymentCancel = () => {
   // 什么也不做，只是关闭对话框
 }
 
+// 评价订单
 const handleReview = () => {
-  ElMessageBox.alert('评价功能开发中，敬请期待！', '评价订单', {
-    confirmButtonText: '确定',
-    type: 'info',
-  })
+  if (!order.value) {
+    ElMessage.error('订单信息不存在')
+    return
+  }
+
+  // 检查订单状态
+  if (
+    order.value.status !== 'delivered' &&
+    order.value.status !== 'completed'
+  ) {
+    ElMessage.warning('只有已送达或已完成的订单可以评价')
+    return
+  }
+
+  // 打开评价对话框
+  reviewDialogVisible.value = true
+}
+
+// 处理评价提交
+const handleReviewSubmit = async reviewData => {
+  try {
+    const loadingMsg = ElMessage({
+      message: '正在提交评价...',
+      type: 'info',
+      duration: 0,
+      icon: 'Loading',
+    })
+
+    // 调用评价API
+    const result = await orderStore.reviewOrder(order.value.id, reviewData)
+
+    loadingMsg.close()
+
+    // 检查是否是已评价的情况
+    if (result && result.alreadyReviewed) {
+      ElMessage.warning({
+        message: '您已评价过此商品',
+        duration: 3000,
+        showClose: true,
+      })
+    } else {
+      ElMessage.success({
+        message: '评价提交成功！感谢您的反馈',
+        duration: 3000,
+        showClose: true,
+      })
+    }
+
+    // 关闭对话框
+    reviewDialogVisible.value = false
+
+    // 刷新订单详情
+    await loadOrderDetail()
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('❌ 评价失败:', error)
+    const errorMsg =
+      error.response?.data?.message || error.message || '评价提交失败，请重试'
+    ElMessage.error(errorMsg)
+  }
+}
+
+// 查看评价
+const handleViewReview = () => {
+  if (!order.value) {
+    ElMessage.error('订单信息不存在')
+    return
+  }
+
+  if (!order.value.is_reviewed) {
+    ElMessage.warning('该订单还未评价')
+    return
+  }
+
+  // 设置当前评价数据并打开对话框
+  currentReviewData.value = order.value
+  reviewDetailDialogVisible.value = true
 }
 
 const handleTrackOrder = async () => {
@@ -1309,15 +1396,6 @@ const shareOrder = () => {
   ElMessage.success('分享成功')
 }
 
-// 物流更新事件处理
-const handleLogisticsUpdate = () => {
-  // 可以在这里更新订单状态或显示通知
-}
-
-const handleLogisticsError = () => {
-  ElMessage.error('获取物流信息失败')
-}
-
 // Load order detail
 const loadOrderDetail = async () => {
   loading.value = true
@@ -1405,6 +1483,9 @@ const validateAndNormalizeOrderData = orderData => {
     user_id: orderData.user_id || null,
     user_name: orderData.user_name || '用户',
 
+    // 评价状态
+    is_reviewed: orderData.is_reviewed || false,
+
     // 备注信息
     notes: orderData.notes || '',
     remark: orderData.remark || '',
@@ -1440,7 +1521,7 @@ onUnmounted(() => {
 <style scoped>
 .order-detail-page {
   min-height: 100vh;
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -1453,30 +1534,30 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #f0f2f5;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
   margin-top: 16px;
 }
 
 .breadcrumb-link {
-  color: #618961;
+  color: var(--primary-color);
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s;
 }
 
 .breadcrumb-link:hover {
-  color: #4a6d4a;
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
 .breadcrumb-separator {
-  color: #999;
+  color: var(--text-light);
   font-size: 14px;
 }
 
 .breadcrumb-current {
-  color: #333;
+  color: var(--text-color);
   font-size: 14px;
   font-weight: 500;
 }
@@ -1493,7 +1574,7 @@ onUnmounted(() => {
   width: 60px;
   height: 60px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #618961;
+  border-top: 4px solid var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px;
@@ -1510,7 +1591,7 @@ onUnmounted(() => {
 
 .loading-text {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* Error State */
@@ -1519,26 +1600,26 @@ onUnmounted(() => {
   margin: 60px auto;
   padding: 60px 24px;
   text-align: center;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .error-icon {
-  color: #f56c6c;
+  color: var(--error-color);
   margin-bottom: 20px;
 }
 
 .error-title {
   font-size: 24px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 12px 0;
 }
 
 .error-message {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 32px 0;
   line-height: 1.6;
 }
@@ -1555,26 +1636,26 @@ onUnmounted(() => {
   margin: 60px auto;
   padding: 60px 24px;
   text-align: center;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .empty-icon {
-  color: #909399;
+  color: var(--text-light);
   margin-bottom: 20px;
 }
 
 .empty-title {
   font-size: 24px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 12px 0;
 }
 
 .empty-message {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 32px 0;
   line-height: 1.6;
 }
@@ -1594,42 +1675,12 @@ onUnmounted(() => {
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
-  color: white;
   transition: all 0.3s ease;
 }
 
 .status-icon {
   font-size: 18px;
   margin-right: 4px;
-}
-
-/* Status Colors */
-.status-pending {
-  background-color: #f56c6c !important;
-}
-
-.status-processing {
-  background-color: #e6a23c !important;
-}
-
-.status-shipped {
-  background-color: #409eff !important;
-}
-
-.status-transit {
-  background-color: #67c23a !important;
-}
-
-.status-delivered {
-  background-color: #67c23a !important;
-}
-
-.status-cancelled {
-  background-color: #909399 !important;
-}
-
-.status-default {
-  background-color: #909399 !important;
 }
 
 /* Main Content */
@@ -1644,7 +1695,7 @@ onUnmounted(() => {
 
 /* Order Header */
 .order-header {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1669,7 +1720,7 @@ onUnmounted(() => {
 .order-number {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-color);
   margin: 0;
 }
 
@@ -1691,7 +1742,7 @@ onUnmounted(() => {
   gap: 6px;
   padding: 6px 12px;
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-  color: white;
+  color: var(--text-inverse);
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
@@ -1715,41 +1766,68 @@ onUnmounted(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: 1px solid transparent;
 }
 
+/* 待支付 - 橙红色 */
 .status-pending {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: rgba(255, 149, 0, 0.2);
+  color: #ffb84d;
+  border-color: rgba(255, 149, 0, 0.5);
+  font-weight: 700;
 }
 
+/* 待发货 - 橙色 */
 .status-processing {
-  background-color: #d1ecf1;
-  color: #0c5460;
+  background-color: rgba(250, 173, 20, 0.2);
+  color: #ffc53d;
+  border-color: rgba(250, 173, 20, 0.5);
+  font-weight: 700;
 }
 
+/* 已发货 - 绿色 */
 .status-shipped {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: rgba(82, 196, 26, 0.2);
+  color: #73d13d;
+  border-color: rgba(82, 196, 26, 0.5);
+  font-weight: 700;
 }
 
+/* 运输中 - 蓝色 */
 .status-transit {
-  background-color: #cce5ff;
-  color: #004085;
+  background-color: rgba(24, 144, 255, 0.2);
+  color: #40a9ff;
+  border-color: rgba(24, 144, 255, 0.5);
+  font-weight: 700;
 }
 
+/* 已送达 - 深绿色 */
 .status-delivered {
-  background-color: #d1ecf1;
-  color: #0c5460;
+  background-color: rgba(82, 196, 26, 0.2);
+  color: #95de64;
+  border-color: rgba(82, 196, 26, 0.5);
+  font-weight: 700;
 }
 
+/* 已取消 - 灰色 */
 .status-cancelled {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: rgba(144, 147, 153, 0.2);
+  color: #bfbfbf;
+  border-color: rgba(144, 147, 153, 0.5);
+  font-weight: 700;
+}
+
+/* 已完成 - 主题绿色 */
+.status-completed {
+  background-color: rgba(74, 129, 87, 0.2);
+  color: #6aaa77;
+  border-color: rgba(74, 129, 87, 0.5);
+  font-weight: 700;
 }
 
 .order-date {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .order-actions {
@@ -1762,13 +1840,13 @@ onUnmounted(() => {
 .section-title {
   font-size: 20px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-color);
   margin: 0 0 20px 0;
 }
 
 /* Order Progress */
 .order-progress {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1797,7 +1875,7 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     height: 2px;
-    background-color: #e5e5e5;
+    background-color: var(--border-light);
     z-index: 0;
   }
 
@@ -1850,7 +1928,7 @@ onUnmounted(() => {
     top: 0;
     bottom: 0;
     width: 2px;
-    background-color: #e5e5e5;
+    background-color: var(--border-light);
   }
 
   .timeline-item {
@@ -1882,12 +1960,12 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #ffffff;
-  border: 2px solid #e5e5e5;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666666;
+  color: var(--text-secondary) 666;
   transition: all 0.3s ease;
 }
 
@@ -1896,22 +1974,22 @@ onUnmounted(() => {
 }
 
 .timeline-item.completed .icon-circle {
-  border-color: #28a745;
-  background-color: #28a745;
-  color: #ffffff;
+  border-color: var(--success-color);
+  background-color: var(--success-color);
+  color: var(--bg-card);
 }
 
 .timeline-item.current .icon-circle {
-  border-color: #007bff;
-  background-color: #007bff;
-  color: #ffffff;
+  border-color: var(--info-color);
+  background-color: var(--info-color);
+  color: var(--bg-card);
   animation: pulse 2s infinite;
 }
 
 .timeline-item.active .icon-circle {
-  border-color: #c49563;
-  background-color: #c49563;
-  color: #000000;
+  border-color: var(--gold-color);
+  background-color: var(--gold-color);
+  color: var(--text-inverse);
 }
 
 @keyframes pulse {
@@ -1933,25 +2011,25 @@ onUnmounted(() => {
 .timeline-status {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .timeline-date {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
 .timeline-description {
   font-size: 13px;
-  color: #888;
+  color: var(--text-light);
   line-height: 1.4;
 }
 
 /* Order Items */
 .order-items {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1969,13 +2047,13 @@ onUnmounted(() => {
   gap: 20px;
   align-items: center;
   padding: 20px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   transition: all 0.2s;
 }
 
 .order-item:hover {
-  border-color: #618961;
+  border-color: var(--primary-color);
   box-shadow: 0 2px 8px rgba(97, 137, 97, 0.1);
 }
 
@@ -1984,7 +2062,7 @@ onUnmounted(() => {
   height: 80px;
   border-radius: 8px;
   overflow: hidden;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2002,8 +2080,8 @@ onUnmounted(() => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  color: #999;
-  background: #f5f5f5;
+  color: var(--text-light);
+  background: var(--bg-input);
 }
 
 .item-details {
@@ -2013,13 +2091,13 @@ onUnmounted(() => {
 .item-name {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-color);
   margin: 0 0 8px 0;
 }
 
 .item-spec {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 8px 0;
 }
 
@@ -2032,12 +2110,12 @@ onUnmounted(() => {
 .current-price {
   font-size: 16px;
   font-weight: 600;
-  color: #e74c3c;
+  color: var(--error-color);
 }
 
 .original-price {
   font-size: 14px;
-  color: #999;
+  color: var(--text-light);
   text-decoration: line-through;
 }
 
@@ -2049,7 +2127,7 @@ onUnmounted(() => {
 .quantity-label,
 .total-label {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
   display: block;
   margin-bottom: 4px;
 }
@@ -2058,12 +2136,12 @@ onUnmounted(() => {
 .total-value {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-color);
 }
 
 /* Order Summary */
 .order-summary {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2085,21 +2163,21 @@ onUnmounted(() => {
 }
 
 .summary-row:hover {
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
 }
 
 .summary-row.discount {
-  background-color: #f0fdf4;
+  background-color: rgba(82, 196, 26, 0.1);
 }
 
 .summary-row.discount .summary-label,
 .summary-row.discount .summary-value {
-  color: #16a34a;
+  color: var(--success-color);
 }
 
 .summary-row.total {
-  background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
-  border: 2px solid #fecaca;
+  background: rgba(245, 34, 45, 0.05);
+  border: 2px solid rgba(245, 34, 45, 0.2);
   padding: 10px 12px;
   margin-top: 8px;
   font-size: 18px;
@@ -2108,17 +2186,18 @@ onUnmounted(() => {
 }
 
 .summary-row.total .summary-label {
-  color: #991b1b;
+  color: var(--text-color);
+  font-weight: 700;
 }
 
 .summary-row.total .summary-value {
-  color: #dc2626;
+  color: var(--error-color);
   font-size: 20px;
 }
 
 .summary-row.info-row {
-  background-color: #f8fafc;
-  border-left: 3px solid #618961;
+  background-color: var(--bg-input);
+  border-left: 3px solid var(--primary-color);
 }
 
 .summary-divider {
@@ -2133,35 +2212,35 @@ onUnmounted(() => {
 
 .divider-text {
   position: absolute;
-  background: white;
+  background: var(--bg-card);
   padding: 0 12px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
   letter-spacing: 1px;
 }
 
 .summary-label {
   font-size: 14px;
-  color: #4b5563;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
 .summary-label .el-icon {
-  color: #618961;
+  color: var(--primary-color);
 }
 
 .summary-value {
   font-size: 14px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-color);
 }
 
 /* Order Timeline Info */
 .order-timeline-info {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2178,13 +2257,13 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: linear-gradient(to right, #e8ebef 0%, #f0f2f5 100%);
+  background: var(--bg-input);
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .timeline-row:hover {
-  background: linear-gradient(to right, #e8f4ff 0%, #ffffff 100%);
+  background: var(--bg-tertiary);
   transform: translateX(4px);
 }
 
@@ -2194,18 +2273,18 @@ onUnmounted(() => {
   gap: 8px;
   font-size: 15px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color);
 }
 
 .timeline-value {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 400;
 }
 
 /* Delivery Info */
 .delivery-info {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2223,47 +2302,47 @@ onUnmounted(() => {
   padding: 10px 12px;
   border-radius: 6px;
   transition: all 0.2s;
-  background-color: #f9fafb;
+  background-color: var(--bg-input);
   border-left: 3px solid transparent;
 }
 
 .delivery-row:hover {
-  background-color: #f0f9ff;
-  border-left-color: #618961;
+  background-color: var(--bg-tertiary);
+  border-left-color: var(--primary-color);
   transform: translateX(2px);
 }
 
 .delivery-row.address-row {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-left-color: #f59e0b;
+  background: rgba(250, 173, 20, 0.1);
+  border-left-color: var(--warning-color);
   padding: 12px;
 }
 
 .delivery-row.address-row:hover {
-  background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+  background: rgba(250, 173, 20, 0.15);
 }
 
 .delivery-row.tracking-row {
-  background-color: #ede9fe;
-  border-left-color: #8b5cf6;
+  background-color: rgba(139, 92, 246, 0.1);
+  border-left-color: rgba(139, 92, 246, 0.8);
 }
 
 .delivery-row.tracking-row:hover {
-  background-color: #ddd6fe;
+  background-color: rgba(139, 92, 246, 0.15);
 }
 
 .delivery-row.carrier-row {
-  background-color: #dbeafe;
-  border-left-color: #3b82f6;
+  background-color: rgba(24, 144, 255, 0.1);
+  border-left-color: var(--info-color);
 }
 
 .delivery-row.carrier-row:hover {
-  background-color: #bfdbfe;
+  background-color: rgba(24, 144, 255, 0.15);
 }
 
 .delivery-label {
   font-size: 14px;
-  color: #4b5563;
+  color: var(--text-secondary);
   min-width: 100px;
   display: flex;
   align-items: center;
@@ -2272,12 +2351,12 @@ onUnmounted(() => {
 }
 
 .delivery-label .el-icon {
-  color: #618961;
+  color: var(--primary-color);
 }
 
 .delivery-value {
   font-size: 14px;
-  color: #1f2937;
+  color: var(--text-color);
   flex: 1;
   font-weight: 500;
 }
@@ -2285,21 +2364,13 @@ onUnmounted(() => {
 .tracking-number {
   font-family: 'Courier New', monospace;
   font-weight: 600;
-  color: #7c3aed;
+  color: var(--info-color);
   letter-spacing: 1px;
-}
-
-/* Logistics Info */
-.logistics-info {
-  background: #f0f2f5;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* Order Remark */
 .order-remark {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2307,14 +2378,14 @@ onUnmounted(() => {
 
 .remark-content {
   padding: 16px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 8px;
-  border-left: 4px solid #618961;
+  border-left: 4px solid var(--primary-color);
 }
 
 .remark-text {
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
   line-height: 1.6;
   margin: 0;
   word-wrap: break-word;

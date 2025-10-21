@@ -846,13 +846,13 @@ onUnmounted(() => {
 }
 
 .home {
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   min-height: 100vh;
   position: relative;
 }
 
 .home {
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   min-height: 100vh;
 }
 
@@ -871,7 +871,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   white-space: nowrap;
-  border-bottom: 1px solid #f0f4f0;
+  border-bottom: 1px solid var(--border-light);
   padding: 12px 40px;
 }
 
@@ -879,17 +879,17 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #111811;
+  color: var(--text-color);
 }
 
 .nav-logo {
   width: 16px;
   height: 16px;
-  color: #111811;
+  color: var(--text-color);
 }
 
 .nav h2 {
-  color: #111811;
+  color: var(--text-color);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
@@ -910,7 +910,7 @@ onUnmounted(() => {
 }
 
 .nav-right-items a {
-  color: #111811;
+  color: var(--text-color);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.5;
@@ -920,7 +920,7 @@ onUnmounted(() => {
 }
 
 .nav-right-items a:hover {
-  color: #4a8157;
+  color: var(--primary-color);
 }
 
 .nav-right-btns {
@@ -938,8 +938,8 @@ onUnmounted(() => {
   overflow: hidden;
   border-radius: 8px;
   height: 40px;
-  background-color: #f0f4f0;
-  color: #111811;
+  background-color: var(--bg-input);
+  color: var(--text-color);
   gap: 8px;
   font-size: 14px;
   font-weight: 700;
@@ -973,9 +973,9 @@ onUnmounted(() => {
 
 .banner {
   padding: 12px;
-  background: #f0f2f5;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
 }
 
 .banner-wrapper {
@@ -990,7 +990,7 @@ onUnmounted(() => {
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden;
-  background-color: #f5f5f5;
+  background-color: var(--bg-input);
   border-radius: 8px;
   min-height: 320px;
   position: relative;
@@ -1037,7 +1037,7 @@ onUnmounted(() => {
 }
 
 .banner-title {
-  color: #ffffff;
+  color: var(--bg-card);
   font-size: 28px;
   font-weight: 700;
   line-height: 1.3;
@@ -1046,7 +1046,7 @@ onUnmounted(() => {
 }
 
 .banner-description {
-  color: #ffffff;
+  color: var(--bg-card);
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
@@ -1068,11 +1068,11 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 3;
   transition: all 0.3s ease;
-  color: #111811;
+  color: var(--text-color);
 }
 
 .banner-arrow:hover {
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   transform: translateY(-50%) scale(1.1);
 }
 
@@ -1096,7 +1096,7 @@ onUnmounted(() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   opacity: 0.5;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1117,14 +1117,14 @@ onUnmounted(() => {
 .bar {
   padding-bottom: 12px;
   margin: 16px;
-  background: #f0f2f5;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
 }
 
 .bar-item {
   display: flex;
-  border-bottom: 1px solid #dbe6db;
+  border-bottom: 1px solid var(--border-light);
   padding: 0 16px;
   gap: 32px;
 }
@@ -1135,7 +1135,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   border-bottom: 3px solid transparent;
-  color: #618961;
+  color: var(--primary-color);
   gap: 4px;
   padding-bottom: 7px;
   padding-top: 10px;
@@ -1143,8 +1143,8 @@ onUnmounted(() => {
 }
 
 .bar-items.active {
-  border-bottom-color: #111811;
-  color: #111811;
+  border-bottom-color: var(--text-color);
+  color: var(--text-color);
 }
 
 .bar-items p {
@@ -1156,14 +1156,14 @@ onUnmounted(() => {
 
 /* 标题 */
 .title {
-  color: #111811;
+  color: var(--text-color);
   font-size: 22px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.015em;
   padding: 16px;
   margin: 20px 16px 12px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 8px;
 }
 
@@ -1172,10 +1172,10 @@ onUnmounted(() => {
   overflow-y: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  background: #f0f2f5;
+  background: var(--bg-card);
   border-radius: 12px;
   margin: 0 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
 }
 
 .product::-webkit-scrollbar {
@@ -1218,7 +1218,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   position: relative;
-  background-color: #f5f5f5;
+  background-color: var(--bg-input);
   opacity: 0;
   transition: opacity 0.3s ease-in;
 }
@@ -1228,14 +1228,14 @@ onUnmounted(() => {
 }
 
 .product-name {
-  color: #111811;
+  color: var(--text-color);
   font-size: 16px;
   font-weight: 500;
   line-height: 1.5;
 }
 
 .product-price {
-  color: #618961;
+  color: var(--primary-color);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
@@ -1247,7 +1247,7 @@ onUnmounted(() => {
   grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
   gap: 12px;
   padding: 16px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   margin: 0 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -1277,7 +1277,7 @@ onUnmounted(() => {
   background-size: cover;
   border-radius: 8px;
   position: relative;
-  background-color: #f5f5f5;
+  background-color: var(--bg-input);
   opacity: 0;
   transition: opacity 0.3s ease-in;
 }
@@ -1310,7 +1310,7 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 20px;
   overflow-x: hidden;
-  background-color: #f0f2f5;
+  background-color: var(--bg-secondary);
   padding: 20px;
   margin: 0 16px;
   border-radius: 12px;
@@ -1321,7 +1321,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -1351,7 +1351,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   position: relative;
-  background-color: #f5f5f5;
+  background-color: var(--bg-input);
   opacity: 0;
   transition: opacity 0.3s ease-in;
   overflow: hidden;
@@ -1369,7 +1369,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4a8157;
+  color: var(--primary-color);
   padding: 4px;
   background: rgba(74, 129, 87, 0.1);
   border-radius: 4px;
@@ -1382,14 +1382,14 @@ onUnmounted(() => {
 }
 
 .comment-list-item-user-info-name {
-  color: #111811;
+  color: var(--text-color);
   font-size: 16px;
   font-weight: 500;
   line-height: 1.5;
 }
 
 .comment-list-item-user-info-date {
-  color: #618961;
+  color: var(--primary-color);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
@@ -1398,11 +1398,11 @@ onUnmounted(() => {
 .comment-list-item-star {
   display: flex;
   gap: 2px;
-  color: #111811;
+  color: var(--text-color);
 }
 
 .comment-list-item-content {
-  color: #111811;
+  color: var(--text-color);
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
@@ -1417,13 +1417,13 @@ onUnmounted(() => {
 
 /* 故事 */
 .story {
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 16px;
   font-weight: 400;
   line-height: 1.8;
   padding: 24px;
   margin: 0 16px 20px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   text-align: justify;
@@ -1431,8 +1431,8 @@ onUnmounted(() => {
 
 /* 底部 - 简化版 */
 .footer {
-  background: #5a7a98;
-  color: white;
+  background: var(--secondary-color);
+  color: var(--text-inverse);
   margin-top: auto;
   margin: 20px 16px 16px;
   border-radius: 12px;
@@ -1484,7 +1484,7 @@ onUnmounted(() => {
 }
 
 .icp-info a:hover {
-  color: white;
+  color: var(--text-inverse);
 }
 
 /* 响应式设计 */
@@ -1837,7 +1837,7 @@ onUnmounted(() => {
   grid-column: 1 / -1;
   text-align: center;
   padding: 40px;
-  color: #999;
+  color: var(--text-light);
   font-size: 14px;
 }
 
@@ -1845,8 +1845,8 @@ onUnmounted(() => {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #ff4757;
-  color: white;
+  background: var(--error-color);
+  color: var(--text-inverse);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -1857,8 +1857,8 @@ onUnmounted(() => {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #4a8157;
-  color: white;
+  background: var(--primary-color);
+  color: var(--text-inverse);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -1877,7 +1877,7 @@ onUnmounted(() => {
 }
 
 .original-price {
-  color: #999;
+  color: var(--text-light);
   font-size: 12px;
   text-decoration: line-through;
 }

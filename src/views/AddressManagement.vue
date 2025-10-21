@@ -580,7 +580,7 @@ onMounted(() => {
 <style scoped>
 .address-management-page {
   min-height: 100vh;
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -598,18 +598,18 @@ onMounted(() => {
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 8px 0;
 }
 
 .page-subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .addresses-content {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -626,7 +626,7 @@ onMounted(() => {
 
 .total-count {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .addresses-grid {
@@ -649,7 +649,7 @@ onMounted(() => {
 }
 
 .address-card.default {
-  border-color: #67c23a;
+  border-color: var(--primary-color);
   background: linear-gradient(
     135deg,
     rgba(103, 194, 58, 0.05) 0%,
@@ -671,20 +671,20 @@ onMounted(() => {
 .receiver-name {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin-bottom: 8px;
 }
 
 .phone {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin-left: 12px;
   font-weight: normal;
 }
 
 .address-label {
   font-size: 12px;
-  color: #67c23a;
+  color: var(--primary-color);
   background: rgba(103, 194, 58, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
@@ -693,7 +693,7 @@ onMounted(() => {
 
 .address-detail {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -704,8 +704,8 @@ onMounted(() => {
 }
 
 .default-badge {
-  background: #67c23a;
-  color: white;
+  background: var(--primary-color);
+  color: var(--text-inverse);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -720,9 +720,9 @@ onMounted(() => {
   grid-column: 1 / -1;
   text-align: center;
   padding: 40px 20px;
-  background: #f9f9f9;
+  background: var(--bg-input);
   border-radius: 8px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .no-addresses p {
@@ -736,13 +736,13 @@ onMounted(() => {
 .empty-title {
   font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 8px 0;
 }
 
 .empty-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 24px 0;
 }
 

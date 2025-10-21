@@ -1746,7 +1746,7 @@ onMounted(async () => {
 <style scoped>
 .profile-page {
   min-height: 100vh;
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -1760,13 +1760,14 @@ onMounted(async () => {
 
 /* User Profile Section */
 .user-profile-section {
-  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 16px;
   padding: 32px;
   margin-bottom: 32px;
-  color: white;
+  color: var(--text-inverse);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
 }
 
 .user-profile-section::before {
@@ -1776,7 +1777,7 @@ onMounted(async () => {
   right: -20%;
   width: 200px;
   height: 200px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
 }
 
@@ -1794,7 +1795,7 @@ onMounted(async () => {
   height: 80px;
   border-radius: 50%;
   overflow: visible;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1830,13 +1831,13 @@ onMounted(async () => {
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 8px 0;
-  color: white;
+  color: var(--text-inverse);
 }
 
 .member-since {
   font-size: 16px;
   margin: 0 0 16px 0;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-inverse);
 }
 
 .user-stats {
@@ -1853,13 +1854,15 @@ onMounted(async () => {
   display: block;
   font-size: 20px;
   font-weight: 700;
-  color: white;
+  color: var(--text-inverse);
   margin-bottom: 4px;
 }
 
-.stat-label {
+/* 用户统计区域的标签（紫色背景） */
+.user-stats .stat-label {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #ffffff !important;
+  opacity: 1;
 }
 
 /* Quick Actions Section */
@@ -1870,7 +1873,7 @@ onMounted(async () => {
 .section-title {
   font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 20px 0;
 }
 
@@ -1881,7 +1884,7 @@ onMounted(async () => {
 }
 
 .action-card {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -1896,7 +1899,7 @@ onMounted(async () => {
 .action-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #67c23a;
+  border-color: var(--primary-color);
 }
 
 .action-icon {
@@ -1907,7 +1910,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--text-inverse);
   flex-shrink: 0;
 }
 
@@ -1918,23 +1921,23 @@ onMounted(async () => {
 .action-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 4px 0;
 }
 
 .action-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .action-arrow {
-  color: #999;
+  color: var(--text-light);
   transition: all 0.2s;
 }
 
 .action-card:hover .action-arrow {
-  color: #67c23a;
+  color: var(--primary-color);
   transform: translateX(4px);
 }
 
@@ -1961,23 +1964,33 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s;
+}
+
+.account-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-icon {
   width: 40px;
   height: 40px;
-  background: #f3f4f6;
+  background: linear-gradient(135deg, #67c23a, #85ce61);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--text-inverse);
   flex-shrink: 0;
 }
 
 .btn-icon.logout {
-  background: #fef2f2;
-  color: #ef4444;
+  background: linear-gradient(135deg, #f56c6c, #ff7875);
+  color: var(--text-inverse);
 }
 
 .btn-content {
@@ -1988,13 +2001,13 @@ onMounted(async () => {
   display: block;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color);
   margin-bottom: 2px;
 }
 
 .btn-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* Responsive Design */
@@ -2188,7 +2201,7 @@ onMounted(async () => {
 
 .default-avatar-icon {
   font-size: 48px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .preview-avatar,
@@ -2202,7 +2215,7 @@ onMounted(async () => {
 .preview-tip {
   margin: 12px 0 0 0;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2210,7 +2223,7 @@ onMounted(async () => {
 }
 
 .preview-tip {
-  color: #67c23a;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
@@ -2233,14 +2246,14 @@ onMounted(async () => {
   width: 100%;
   padding: 32px 20px;
   border-radius: 12px;
-  border: 2px dashed #d9d9d9;
-  background-color: #fafafa;
+  border: 2px dashed var(--border-color);
+  background-color: var(--bg-input);
   transition: all 0.3s;
 }
 
 .avatar-uploader :deep(.el-upload-dragger:hover) {
-  border-color: #67c23a;
-  background-color: #f0f9ff;
+  border-color: var(--primary-color);
+  background-color: rgba(74, 129, 87, 0.05);
 }
 
 .upload-trigger {
@@ -2252,31 +2265,31 @@ onMounted(async () => {
 
 .upload-icon {
   font-size: 32px;
-  color: #67c23a;
+  color: var(--primary-color);
 }
 
 .upload-text {
   font-size: 15px;
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
 .upload-hint {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
   margin-top: 4px;
 }
 
 .new-avatar-preview {
   text-align: center;
   padding: 16px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 12px;
   width: 100%;
 }
 
 .new-avatar-preview .avatar-preview-wrapper {
-  border-color: #67c23a;
+  border-color: var(--primary-color);
   box-shadow: 0 2px 12px rgba(103, 194, 58, 0.2);
 }
 
@@ -2343,7 +2356,7 @@ onMounted(async () => {
 /* 会员功能样式 */
 .action-icon.membership {
   background: linear-gradient(135deg, #ffd700, #ffed4e);
-  color: #b8860b;
+  color: var(--gold-color);
 }
 
 /* 会员对话框样式 */
@@ -2357,10 +2370,12 @@ onMounted(async () => {
 }
 
 .current-membership {
-  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .membership-header {
@@ -2378,7 +2393,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #b8860b;
+  color: var(--gold-color);
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
 }
 
@@ -2389,13 +2404,13 @@ onMounted(async () => {
 .membership-level {
   font-size: 24px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 4px 0;
 }
 
 .membership-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -2406,23 +2421,31 @@ onMounted(async () => {
 }
 
 .stat-card {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 16px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
 }
 
 .stat-value {
   font-size: 20px;
   font-weight: 700;
-  color: #67c23a;
+  color: var(--primary-color);
   margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .membership-levels {
@@ -2432,7 +2455,7 @@ onMounted(async () => {
 .levels-title {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 16px 0;
 }
 
@@ -2448,15 +2471,15 @@ onMounted(async () => {
   gap: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border: 2px solid transparent;
   transition: all 0.2s;
 }
 
 .level-item.active {
-  background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);
-  border-color: #67c23a;
-  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.2);
+  background: rgba(103, 194, 58, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
 }
 
 .level-icon {
@@ -2472,27 +2495,28 @@ onMounted(async () => {
 .level-name {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin-bottom: 2px;
 }
 
 .level-requirement {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 2px;
 }
 
 .level-benefits {
   font-size: 12px;
-  color: #67c23a;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
 .upgrade-tip {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border: 1px solid #ffeaa7;
+  background: rgba(250, 173, 20, 0.1);
+  border: 1px solid rgba(250, 173, 20, 0.3);
   border-radius: 8px;
   padding: 16px;
+  box-shadow: 0 2px 8px rgba(250, 173, 20, 0.15);
 }
 
 .tip-content {
@@ -2502,7 +2526,7 @@ onMounted(async () => {
 }
 
 .tip-icon {
-  color: #f39c12;
+  color: var(--warning-color);
   font-size: 20px;
 }
 
@@ -2513,13 +2537,13 @@ onMounted(async () => {
 .tip-title {
   font-size: 14px;
   font-weight: 600;
-  color: #856404;
+  color: var(--warning-color);
   margin-bottom: 2px;
 }
 
 .tip-desc {
   font-size: 12px;
-  color: #856404;
+  color: var(--warning-color);
 }
 
 /* 充值对话框样式 */
@@ -2533,10 +2557,12 @@ onMounted(async () => {
 }
 
 .current-status {
-  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .status-info {
@@ -2558,12 +2584,12 @@ onMounted(async () => {
 .level-name {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 .current-balance {
   font-size: 16px;
-  color: #67c23a;
+  color: var(--primary-color);
   font-weight: 600;
 }
 
@@ -2577,7 +2603,7 @@ onMounted(async () => {
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0 0 12px 0;
 }
 
@@ -2588,7 +2614,7 @@ onMounted(async () => {
 }
 
 .amount-card {
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   padding: 16px;
@@ -2598,26 +2624,26 @@ onMounted(async () => {
 }
 
 .amount-card:hover {
-  border-color: #67c23a;
-  background: #f0f9ff;
+  border-color: var(--primary-color);
+  background: rgba(74, 129, 87, 0.05);
 }
 
 .amount-card.active {
-  border-color: #67c23a;
-  background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);
-  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.2);
+  border-color: var(--primary-color);
+  background: rgba(103, 194, 58, 0.1);
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
 }
 
 .amount-value {
   font-size: 18px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .amount-bonus {
   font-size: 12px;
-  color: #67c23a;
+  color: var(--primary-color);
   font-weight: 500;
 }
 
@@ -2626,10 +2652,11 @@ onMounted(async () => {
 }
 
 .upgrade-preview {
-  background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);
-  border: 1px solid #67c23a;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--primary-color);
   border-radius: 8px;
   padding: 16px;
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.15);
 }
 
 .preview-content {
@@ -2646,18 +2673,18 @@ onMounted(async () => {
 
 .preview-label {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .preview-value {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 .preview-value.highlight {
-  color: #2e7d32;
+  color: var(--success-color);
   font-size: 16px;
 }
 
@@ -2674,7 +2701,7 @@ onMounted(async () => {
 }
 
 .preview-value.diamond {
-  color: #00bcd4;
+  color: #b9f2ff;
 }
 
 .upgrade-notice {
@@ -2689,15 +2716,15 @@ onMounted(async () => {
 }
 
 .upgrade-notice.success {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border: 1px solid #ffeaa7;
-  color: #856404;
+  background: rgba(250, 173, 20, 0.1);
+  border: 1px solid rgba(250, 173, 20, 0.3);
+  color: var(--warning-color);
 }
 
 .upgrade-notice.info {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  border: 1px solid #bbdefb;
-  color: #1565c0;
+  background: rgba(24, 144, 255, 0.1);
+  border: 1px solid rgba(24, 144, 255, 0.3);
+  color: var(--info-color);
 }
 
 .upgrade-notice strong {
@@ -2711,7 +2738,7 @@ onMounted(async () => {
 }
 
 .payment-card {
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   padding: 16px;
@@ -2724,57 +2751,45 @@ onMounted(async () => {
 }
 
 .payment-card:hover {
-  border-color: #67c23a;
-  background: #f0f9ff;
+  border-color: var(--primary-color);
+  background: rgba(74, 129, 87, 0.05);
 }
 
 .payment-card.active {
-  border-color: #67c23a;
-  background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);
-  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.2);
+  border-color: var(--primary-color);
+  background: rgba(103, 194, 58, 0.1);
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
 }
 
 .payment-name {
   font-size: 12px;
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
 /* 会员等级颜色主题 */
 .membership-bronze {
-  color: #cd7f32 !important;
-  background: linear-gradient(135deg, #cd7f32, #b8860b) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  text-shadow: 0 0 10px rgba(205, 127, 50, 0.3) !important;
+  color: #e59a5a !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 15px rgba(229, 154, 90, 0.5) !important;
 }
 
 .membership-silver {
-  color: #c0c0c0 !important;
-  background: linear-gradient(135deg, #c0c0c0, #a8a8a8) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  text-shadow: 0 0 10px rgba(192, 192, 192, 0.3) !important;
+  color: #d4d4d4 !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 15px rgba(212, 212, 212, 0.5) !important;
 }
 
 .membership-gold {
   color: #ffd700 !important;
-  background: linear-gradient(135deg, #ffd700, #ffb347) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  text-shadow: 0 0 15px rgba(255, 215, 0, 0.4) !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
 }
 
 .membership-diamond {
   color: #b9f2ff !important;
-  background: linear-gradient(135deg, #b9f2ff, #87ceeb, #4169e1) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  text-shadow: 0 0 20px rgba(185, 242, 255, 0.5) !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 25px rgba(185, 242, 255, 0.7) !important;
   animation: diamond-shine 2s ease-in-out infinite alternate !important;
 }
 
@@ -2791,50 +2806,54 @@ onMounted(async () => {
 .member-since.membership-bronze {
   background: linear-gradient(
     135deg,
-    rgba(205, 127, 50, 0.1),
-    rgba(184, 134, 11, 0.1)
+    rgba(229, 154, 90, 0.15),
+    rgba(205, 127, 50, 0.15)
   );
-  border: 1px solid rgba(205, 127, 50, 0.3);
+  border: 1px solid rgba(229, 154, 90, 0.4);
   border-radius: 20px;
   padding: 4px 12px;
   display: inline-block;
+  box-shadow: 0 0 15px rgba(229, 154, 90, 0.2);
 }
 
 .member-since.membership-silver {
   background: linear-gradient(
     135deg,
-    rgba(192, 192, 192, 0.1),
-    rgba(168, 168, 168, 0.1)
+    rgba(212, 212, 212, 0.15),
+    rgba(192, 192, 192, 0.15)
   );
-  border: 1px solid rgba(192, 192, 192, 0.3);
+  border: 1px solid rgba(212, 212, 212, 0.4);
   border-radius: 20px;
   padding: 4px 12px;
   display: inline-block;
+  box-shadow: 0 0 15px rgba(212, 212, 212, 0.2);
 }
 
 .member-since.membership-gold {
   background: linear-gradient(
     135deg,
-    rgba(255, 215, 0, 0.1),
-    rgba(255, 179, 71, 0.1)
+    rgba(255, 215, 0, 0.15),
+    rgba(255, 179, 71, 0.15)
   );
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  border: 1px solid rgba(255, 215, 0, 0.5);
   border-radius: 20px;
   padding: 4px 12px;
   display: inline-block;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
 }
 
 .member-since.membership-diamond {
   background: linear-gradient(
     135deg,
-    rgba(185, 242, 255, 0.1),
-    rgba(135, 206, 235, 0.1),
-    rgba(65, 105, 225, 0.1)
+    rgba(185, 242, 255, 0.15),
+    rgba(135, 206, 235, 0.15),
+    rgba(65, 105, 225, 0.15)
   );
-  border: 1px solid rgba(185, 242, 255, 0.3);
+  border: 1px solid rgba(185, 242, 255, 0.5);
   border-radius: 20px;
   padding: 4px 12px;
   display: inline-block;
+  box-shadow: 0 0 25px rgba(185, 242, 255, 0.4);
   animation: diamond-bg-shine 3s ease-in-out infinite alternate;
 }
 
@@ -2859,7 +2878,7 @@ onMounted(async () => {
   gap: 12px;
   margin-bottom: 20px;
   padding: 16px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 8px;
   align-items: center;
   flex-wrap: wrap;
@@ -2872,34 +2891,36 @@ onMounted(async () => {
   margin-bottom: 24px;
 }
 
-.stat-card {
-  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
+.history-stats .stat-card {
+  background: var(--bg-tertiary);
   border-radius: 12px;
   padding: 20px;
   text-align: center;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-color);
   transition: all 0.3s;
 }
 
-.stat-card:hover {
+.history-stats .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
 }
 
 .stat-card .stat-label {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 8px;
+  display: block;
 }
 
 .stat-card .stat-value {
   font-size: 24px;
   font-weight: 700;
-  color: #333;
+  color: var(--primary-color);
 }
 
 .stat-card .stat-value.bonus {
-  color: #f56c6c;
+  color: var(--error-color);
 }
 
 .stat-card .stat-value.bronze {
@@ -2928,7 +2949,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--text-secondary);
   gap: 12px;
 }
 
@@ -2942,7 +2963,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .empty-state p {
@@ -2958,13 +2979,14 @@ onMounted(async () => {
 .records-table table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #f0f2f5;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
   overflow: hidden;
 }
 
 .records-table thead {
-  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
+  background: var(--bg-tertiary);
+  border-bottom: 2px solid var(--border-color);
 }
 
 .records-table th {
@@ -2972,14 +2994,14 @@ onMounted(async () => {
   text-align: left;
   font-size: 13px;
   font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #e5e5e5;
+  color: var(--text-color);
+  border-bottom: 2px solid var(--border-light);
 }
 
 .records-table td {
   padding: 14px 16px;
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -2988,7 +3010,7 @@ onMounted(async () => {
 }
 
 .record-row:hover {
-  background-color: #e8ebef;
+  background-color: var(--bg-tertiary);
 }
 
 .amount-cell,
@@ -2998,25 +3020,25 @@ onMounted(async () => {
 }
 
 .amount-value {
-  color: #333;
+  color: var(--text-color);
 }
 
 .bonus-value {
-  color: #67c23a;
+  color: var(--primary-color);
   font-weight: 600;
 }
 
 .no-bonus {
-  color: #999;
+  color: var(--text-light);
 }
 
 .total-value {
-  color: #333;
+  color: var(--text-color);
   font-size: 14px;
 }
 
 .payment-method {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .pagination {
@@ -3031,19 +3053,19 @@ onMounted(async () => {
 }
 
 .record-detail-dialog .amount-highlight {
-  color: #409eff;
+  color: var(--info-color);
   font-weight: 600;
   font-size: 16px;
 }
 
 .record-detail-dialog .bonus-highlight {
-  color: #f56c6c;
+  color: var(--error-color);
   font-weight: 600;
   font-size: 16px;
 }
 
 .record-detail-dialog .total-highlight {
-  color: #67c23a;
+  color: var(--primary-color);
   font-weight: 600;
   font-size: 16px;
 }
@@ -3051,7 +3073,7 @@ onMounted(async () => {
 .record-detail-dialog .balance-change-info {
   margin-top: 24px;
   padding: 16px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 8px;
 }
 
@@ -3072,22 +3094,22 @@ onMounted(async () => {
 
 .record-detail-dialog .balance-item .label {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .record-detail-dialog .balance-item .value {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
 }
 
 .record-detail-dialog .balance-item .value.success {
-  color: #67c23a;
+  color: var(--primary-color);
 }
 
 .record-detail-dialog .arrow {
   font-size: 24px;
-  color: #409eff;
+  color: var(--info-color);
   font-weight: bold;
 }
 

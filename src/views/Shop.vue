@@ -1166,7 +1166,7 @@ watch(
 
 <style scoped>
 .shop {
-  background-color: #dfe3e8;
+  background-color: var(--bg-primary);
   min-height: 100vh;
 }
 
@@ -1181,21 +1181,21 @@ watch(
 
 h1 {
   margin-bottom: 20px;
-  color: #333;
+  color: var(--text-color);
 }
 
 /* 搜索信息 */
 .search-info {
-  background: #eef6ee;
+  background: rgba(74, 129, 87, 0.1);
   padding: 12px 20px;
   border-radius: 8px;
   margin-bottom: 20px;
-  border-left: 4px solid #618961;
+  border-left: 4px solid var(--primary-color);
 }
 
 .search-info p {
   margin: 0;
-  color: #333;
+  color: var(--text-color);
   font-size: 14px;
   display: flex;
   align-items: center;
@@ -1203,7 +1203,7 @@ h1 {
 }
 
 .search-info strong {
-  color: #2d5a27;
+  color: var(--primary-dark);
 }
 
 .shop-layout {
@@ -1214,7 +1214,7 @@ h1 {
 }
 
 .filters {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   padding: 0;
   border-radius: 12px;
   height: fit-content;
@@ -1231,7 +1231,7 @@ h1 {
   justify-content: space-between;
   padding: 20px;
   background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
-  color: white;
+  color: var(--text-inverse);
 }
 
 .filter-header h2 {
@@ -1255,7 +1255,7 @@ h1 {
 .filter-group h3 {
   margin: 0 0 15px 0;
   font-size: 15px;
-  color: #333;
+  color: var(--text-color);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -1263,11 +1263,11 @@ h1 {
 }
 
 .filter-group h3 svg {
-  color: #5a7a98;
+  color: var(--secondary-color);
 }
 
 .filter-group .no-data {
-  color: #999;
+  color: var(--text-light);
   font-size: 14px;
   padding: 10px 0;
   text-align: center;
@@ -1288,29 +1288,29 @@ h1 {
   cursor: pointer;
   transition: all 0.2s;
   border: 1px solid transparent;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
 }
 
 .category-item:hover {
-  background: #e8f5e9;
-  border-color: #c8e6c9;
+  background: rgba(74, 129, 87, 0.1);
+  border-color: rgba(74, 129, 87, 0.3);
 }
 
 .category-item.active {
   background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
-  border-color: #5a7a98;
-  color: white;
+  border-color: var(--secondary-color);
+  color: var(--text-inverse);
 }
 
 .category-item input[type='checkbox'] {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #5a7a98;
+  accent-color: var(--secondary-color);
 }
 
 .category-item.active input[type='checkbox'] {
-  accent-color: white;
+  accent-color: var(--text-inverse);
 }
 
 .category-name {
@@ -1321,15 +1321,15 @@ h1 {
 
 .category-count {
   font-size: 12px;
-  color: #999;
-  background: #e8ebef;
+  color: var(--text-light);
+  background: var(--bg-tertiary);
   padding: 2px 8px;
   border-radius: 10px;
 }
 
 .category-item.active .category-count {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--text-inverse);
 }
 
 .price-range {
@@ -1349,11 +1349,11 @@ h1 {
 
 .price-input:focus {
   outline: none;
-  border-color: #618961;
+  border-color: var(--primary-color);
 }
 
 .price-range span {
-  color: #999;
+  color: var(--text-light);
 }
 
 .price-slider {
@@ -1363,14 +1363,14 @@ h1 {
 }
 
 .price-label {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   text-align: center;
   margin-top: 8px;
 }
 
 .products-area {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -1382,14 +1382,14 @@ h1 {
   align-items: center;
   margin-bottom: 24px;
   padding: 16px 20px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .products-header p {
   margin: 0;
-  color: #333;
+  color: var(--text-color);
   font-size: 15px;
   font-weight: 500;
 }
@@ -1398,20 +1398,20 @@ h1 {
   padding: 8px 16px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   cursor: pointer;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   transition: all 0.2s;
   outline: none;
 }
 
 .products-header select:hover {
-  border-color: #5a7a98;
+  border-color: var(--secondary-color);
 }
 
 .products-header select:focus {
-  border-color: #5a7a98;
+  border-color: var(--secondary-color);
   box-shadow: 0 0 0 3px rgba(90, 122, 152, 0.1);
 }
 
@@ -1422,14 +1422,14 @@ h1 {
 }
 
 .product-card {
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1444,7 +1444,7 @@ h1 {
   width: 100%;
   height: 200px;
   overflow: hidden;
-  background: #f5f5f5;
+  background: var(--bg-input);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1496,7 +1496,7 @@ h1 {
 .product-info h3 {
   margin: 0;
   font-size: 16px;
-  color: #333;
+  color: var(--text-color);
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -1516,7 +1516,7 @@ h1 {
 }
 
 .price {
-  color: #2d5a27;
+  color: var(--primary-dark);
   font-size: 20px;
   font-weight: bold;
   margin: 0;
@@ -1524,14 +1524,14 @@ h1 {
 }
 
 .unit {
-  color: #999;
+  color: var(--text-light);
   font-size: 14px;
   margin: 0;
   line-height: 1;
 }
 
 .description {
-  color: #666 !important;
+  color: var(--text-secondary) !important;
   font-size: 13px !important;
   line-height: 1.5 !important;
   margin: 8px 0 !important;
@@ -1555,7 +1555,7 @@ h1 {
 .loading-state {
   text-align: center;
   padding: 80px 20px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .spinner {
@@ -1563,7 +1563,7 @@ h1 {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #618961;
+  border-top: 4px solid var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -1586,7 +1586,7 @@ h1 {
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--text-light);
 }
 
 .empty-state svg {
@@ -1600,14 +1600,14 @@ h1 {
 }
 
 .empty-state .suggestion {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .link-btn {
   background: none;
   border: none;
-  color: #618961;
+  color: var(--primary-color);
   text-decoration: underline;
   cursor: pointer;
   font-size: 14px;
@@ -1615,7 +1615,7 @@ h1 {
 }
 
 .link-btn:hover {
-  color: #2d5a27;
+  color: var(--primary-dark);
 }
 
 /* 骨架屏样式 */
@@ -1683,7 +1683,7 @@ h1 {
     align-items: stretch;
     gap: 12px;
     padding: 16px;
-    background: #f0f2f5;
+    background: var(--bg-secondary);
     border-radius: 12px;
     margin-bottom: 16px;
   }
@@ -1872,26 +1872,26 @@ h1 {
   gap: 8px;
   padding: 10px 0 20px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .breadcrumb a {
-  color: #618961;
+  color: var(--primary-color);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .breadcrumb a:hover {
-  color: #2d5a27;
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
 .breadcrumb .separator {
-  color: #ccc;
+  color: var(--text-light);
 }
 
 .breadcrumb .current {
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
@@ -1906,20 +1906,20 @@ h1 {
 .page-header h1 {
   margin: 0 0 5px 0;
   font-size: 28px;
-  color: #2d5a27;
+  color: var(--primary-dark);
 }
 
 .page-header .subtitle {
   margin: 0;
   font-size: 14px;
-  color: #999;
+  color: var(--text-light);
 }
 
 /* 视图切换 */
 .view-toggle {
   display: flex;
   gap: 8px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   padding: 4px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -2014,18 +2014,18 @@ h1 {
 }
 
 .badge-new {
-  background: #ff6b6b;
-  color: white;
+  background: var(--error-color);
+  color: var(--text-inverse);
 }
 
 .badge-discount {
-  background: #ffd43b;
-  color: #333;
+  background: var(--warning-color);
+  color: var(--text-color);
 }
 
 .badge-hot {
-  background: #ff6b6b;
-  color: white;
+  background: var(--error-color);
+  color: var(--text-inverse);
 }
 
 /* 评分样式 */
@@ -2045,23 +2045,23 @@ h1 {
 }
 
 .star {
-  color: #ddd;
+  color: var(--text-light);
   font-size: 16px;
   line-height: 1;
 }
 
 .star.filled {
-  color: #c49563;
+  color: var(--gold-color);
 }
 
 .rating-value {
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
   line-height: 1;
 }
 
 .review-count {
-  color: #999;
+  color: var(--text-light);
   font-size: 12px;
   line-height: 1;
 }
@@ -2076,7 +2076,7 @@ h1 {
 
 .price {
   font-size: 20px;
-  color: #618961;
+  color: var(--primary-color);
   font-weight: bold;
   margin: 0;
   line-height: 1;
@@ -2084,7 +2084,7 @@ h1 {
 
 .original-price {
   font-size: 14px;
-  color: #999;
+  color: var(--text-light);
   text-decoration: line-through;
   margin: 0;
   line-height: 1;
@@ -2093,10 +2093,10 @@ h1 {
 /* 库存信息 */
 .stock-info {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
   padding: 4px 8px;
-  background: #f5f5f5;
+  background: var(--bg-input);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -2106,8 +2106,8 @@ h1 {
 }
 
 .stock-info.low-stock {
-  color: #ff6b6b;
-  background: #ffe5e5;
+  color: var(--error-color);
+  background: rgba(245, 34, 45, 0.1);
 }
 
 /* 分页样式 */
@@ -2122,7 +2122,7 @@ h1 {
 
 .page-info {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* Toast 提示 */
@@ -2130,7 +2130,7 @@ h1 {
   position: fixed;
   top: 80px;
   right: 20px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   padding: 16px 24px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -2144,16 +2144,16 @@ h1 {
 
 .toast.success {
   border-left: 4px solid #4caf50;
-  color: #4caf50;
+  color: var(--success-color);
 }
 
 .toast.error {
   border-left: 4px solid #f44336;
-  color: #f44336;
+  color: var(--error-color);
 }
 
 .toast span {
-  color: #333;
+  color: var(--text-color);
   font-size: 14px;
 }
 
@@ -2206,11 +2206,11 @@ h1 {
 }
 
 .rating-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-input);
 }
 
 .rating-item.active {
-  background-color: #e8f5e8;
+  background-color: rgba(74, 129, 87, 0.1);
   border: 1px solid #4a6b4a;
 }
 
@@ -2224,22 +2224,22 @@ h1 {
 }
 
 .star {
-  color: #ddd;
+  color: var(--text-light);
   font-size: 14px;
 }
 
 .star.filled {
-  color: #c49563;
+  color: var(--gold-color);
 }
 
 .rating-text {
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .rating-count {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
   margin-left: auto;
 }
 
@@ -2261,11 +2261,11 @@ h1 {
 }
 
 .stock-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-input);
 }
 
 .stock-item.active {
-  background-color: #e8f5e8;
+  background-color: rgba(74, 129, 87, 0.1);
   border: 1px solid #4a6b4a;
 }
 
@@ -2275,7 +2275,7 @@ h1 {
 
 .stock-count {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
   margin-left: auto;
 }
 
@@ -2297,11 +2297,11 @@ h1 {
 }
 
 .brand-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-input);
 }
 
 .brand-item.active {
-  background-color: #e8f5e8;
+  background-color: rgba(74, 129, 87, 0.1);
   border: 1px solid #4a6b4a;
 }
 
@@ -2311,12 +2311,12 @@ h1 {
 
 .brand-name {
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .brand-count {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
   margin-left: auto;
 }
 
@@ -2324,13 +2324,13 @@ h1 {
 .price-presets {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border-light);
 }
 
 .price-presets h4 {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -2356,7 +2356,7 @@ h1 {
 }
 
 .category-search-input:focus {
-  border-color: #4a6b4a;
+  border-color: var(--primary-dark);
 }
 
 /* 分类排序样式 */
@@ -2369,23 +2369,23 @@ h1 {
 .sort-btn {
   padding: 4px 8px;
   border: 1px solid #ddd;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 4px;
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .sort-btn:hover {
-  border-color: #4a6b4a;
-  color: #4a6b4a;
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
 }
 
 .sort-btn.active {
-  background: #4a6b4a;
-  border-color: #4a6b4a;
-  color: white;
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: var(--text-inverse);
 }
 
 /* 分类列表样式 */
@@ -2406,22 +2406,22 @@ h1 {
 }
 
 .category-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-input);
 }
 
 .category-item.active {
-  background-color: #e8f5e8;
+  background-color: rgba(74, 129, 87, 0.1);
   border: 1px solid #4a6b4a;
 }
 
 .category-name {
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .category-count {
   font-size: 12px;
-  color: #999;
+  color: var(--text-light);
   margin-left: auto;
 }
 
@@ -2430,24 +2430,24 @@ h1 {
   display: flex;
   gap: 8px;
   padding-top: 12px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border-light);
 }
 
 .action-btn {
   flex: 1;
   padding: 6px 12px;
   border: 1px solid #ddd;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 4px;
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .action-btn:hover:not(:disabled) {
-  border-color: #4a6b4a;
-  color: #4a6b4a;
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
 }
 
 .action-btn:disabled {
@@ -2466,9 +2466,9 @@ h1 {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
   cursor: pointer;
   outline: none;
   transition: border-color 0.2s ease;
@@ -2476,7 +2476,7 @@ h1 {
 }
 
 .sort-select:focus {
-  border-color: #4a6b4a;
+  border-color: var(--primary-dark);
 }
 
 .sort-indicator {
@@ -2485,28 +2485,28 @@ h1 {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: #f5f5f5;
+  background: var(--bg-input);
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 .sort-indicator svg {
-  color: #666;
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
 .sort-indicator .sort-asc {
   transform: rotate(180deg);
-  color: #4a6b4a;
+  color: var(--primary-dark);
 }
 
 .sort-indicator .sort-desc {
-  color: #4a6b4a;
+  color: var(--primary-dark);
 }
 
 /* 搜索信息图标 */
 .search-info svg {
-  color: #618961;
+  color: var(--primary-color);
   flex-shrink: 0;
 }
 
@@ -2571,7 +2571,7 @@ h1 {
   position: absolute;
   width: 100%;
   height: 6px;
-  background: #e0e0e0;
+  background: var(--border-color);
   border-radius: 3px;
   z-index: 1;
 }
@@ -2591,8 +2591,8 @@ h1 {
 .price-label {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
-  background: #e8ebef;
+  color: var(--text-color);
+  background: var(--bg-tertiary);
   padding: 8px 16px;
   border-radius: 20px;
   display: inline-block;
@@ -2624,7 +2624,7 @@ h1 {
 .slider-min::-webkit-slider-track,
 .slider-max::-webkit-slider-track {
   height: 6px;
-  background: #e0e0e0;
+  background: var(--border-color);
   border-radius: 3px;
 }
 
@@ -2634,7 +2634,7 @@ h1 {
   appearance: none;
   width: 20px;
   height: 20px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border: 3px solid #5a7a98;
   border-radius: 50%;
   cursor: pointer;
@@ -2674,7 +2674,7 @@ h1 {
 .price-tag {
   padding: 6px 12px;
   background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
-  color: white;
+  color: var(--text-inverse);
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
@@ -2694,6 +2694,6 @@ h1 {
 /* 筛选操作 */
 .filter-actions {
   padding: 20px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
 }
 </style>

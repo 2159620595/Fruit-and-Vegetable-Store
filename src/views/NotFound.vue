@@ -54,14 +54,14 @@ const goBack = () => {
 .content {
   text-align: center;
   max-width: 600px;
-  background: white;
+  background: var(--bg-card);
   padding: 60px 40px;
   border-radius: 20px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
 .icon {
-  color: #4caf50;
+  color: var(--success-color);
   margin-bottom: 30px;
   animation: bounce 2s infinite;
 }
@@ -79,7 +79,7 @@ const goBack = () => {
 .title {
   font-size: 120px;
   font-weight: 800;
-  color: #333;
+  color: var(--text-color);
   margin: 0;
   line-height: 1;
   background: linear-gradient(135deg, #4a8157 0%, #5a7a98 100%);
@@ -91,13 +91,13 @@ const goBack = () => {
 .subtitle {
   font-size: 32px;
   font-weight: 600;
-  color: #555;
+  color: var(--text-secondary);
   margin: 20px 0 10px;
 }
 
 .description {
   font-size: 16px;
-  color: #777;
+  color: var(--text-light);
   margin-bottom: 40px;
   line-height: 1.6;
 }

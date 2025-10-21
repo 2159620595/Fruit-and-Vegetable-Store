@@ -241,19 +241,19 @@ const handleSubmit = async () => {
 .order-info {
   margin-bottom: 20px;
   padding: 16px;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 6px;
 }
 
 .order-info h4 {
   margin: 0 0 12px 0;
-  color: #333;
+  color: var(--text-color);
   font-size: 16px;
 }
 
 .order-info p {
   margin: 6px 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -263,7 +263,7 @@ const handleSubmit = async () => {
 
 .product-list h4 {
   margin: 0 0 12px 0;
-  color: #333;
+  color: var(--text-color);
   font-size: 16px;
 }
 
@@ -290,11 +290,11 @@ const handleSubmit = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e8ebef;
+  background: var(--bg-tertiary);
   border-radius: 4px;
   margin-right: 12px;
   font-size: 24px;
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 .product-info {
@@ -303,13 +303,13 @@ const handleSubmit = async () => {
 
 .product-name {
   font-weight: 500;
-  color: #333;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .product-spec {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .product-reviews {
@@ -320,7 +320,7 @@ const handleSubmit = async () => {
 
 .product-reviews h4 {
   margin: 0 0 16px 0;
-  color: #333;
+  color: var(--text-color);
   font-size: 16px;
 }
 
@@ -352,7 +352,7 @@ const handleSubmit = async () => {
 
 .product-review-name {
   font-size: 14px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .dialog-footer {
