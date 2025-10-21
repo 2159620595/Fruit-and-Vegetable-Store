@@ -7,7 +7,7 @@
           <h4>Fresh Harvest</h4>
           <p>Fresh, organic produce delivered to your door</p>
         </div>
-        
+
         <div class="footer-section">
           <h4>Quick Links</h4>
           <ul>
@@ -17,7 +17,7 @@
             <li><router-link to="/privacy">Privacy Policy</router-link></li>
           </ul>
         </div>
-        
+
         <div class="footer-section">
           <h4>Customer Service</h4>
           <ul>
@@ -26,7 +26,7 @@
             <li><router-link to="/terms">Terms of Service</router-link></li>
           </ul>
         </div>
-        
+
         <div class="footer-section">
           <h4>Follow Us</h4>
           <div class="social-links">
@@ -36,7 +36,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p>&copy; 2024 Fresh Harvest. All rights reserved.</p>
       </div>
@@ -46,7 +46,7 @@
 
 <style scoped>
 .footer {
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   padding: 3rem 0 1rem;
   margin-top: 4rem;
 }
@@ -77,7 +77,7 @@
 }
 
 .footer-section a:hover {
-  color: #00c853;
+  color: #4a8157;
 }
 
 .footer-bottom {

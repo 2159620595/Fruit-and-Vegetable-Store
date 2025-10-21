@@ -20,7 +20,10 @@
           <Wallet />
         </el-icon>
         <span class="balance-text">当前余额：</span>
-        <span class="balance-amount" :class="{ 'insufficient': userBalance < amount }">
+        <span
+          class="balance-amount"
+          :class="{ insufficient: userBalance < amount }"
+        >
           ¥{{ userBalance.toFixed(2) }}
         </span>
       </div>
@@ -38,7 +41,9 @@
               <Wallet />
             </el-icon>
             <span class="payment-name">余额支付</span>
-            <span v-if="userBalance < amount" class="insufficient-tag">余额不足</span>
+            <span v-if="userBalance < amount" class="insufficient-tag">
+              余额不足
+            </span>
           </span>
         </el-option>
         <el-option value="wechat" label="微信支付">
@@ -68,7 +73,10 @@
       </el-select>
 
       <!-- 余额不足提示 -->
-      <div v-if="selectedPayment === 'balance' && userBalance < amount" class="insufficient-warning">
+      <div
+        v-if="selectedPayment === 'balance' && userBalance < amount"
+        class="insufficient-warning"
+      >
         <el-alert
           title="余额不足，请充值后再试或选择其他支付方式"
           type="warning"
@@ -84,7 +92,10 @@
         <el-button
           type="primary"
           @click="handleConfirm"
-          :disabled="!selectedPayment || (selectedPayment === 'balance' && userBalance < amount)"
+          :disabled="
+            !selectedPayment ||
+            (selectedPayment === 'balance' && userBalance < amount)
+          "
         >
           确认支付
         </el-button>
@@ -127,7 +138,7 @@ watch(
     if (newVal) {
       // 对话框打开时刷新用户余额并重置为默认值
       await userStore.fetchUserBalance()
-      
+
       // 如果余额充足，默认选择余额支付；否则选择微信支付
       if (userBalance.value >= props.amount) {
         selectedPayment.value = 'balance'
@@ -147,7 +158,7 @@ const handleConfirm = () => {
   if (selectedPayment.value === 'balance' && userBalance.value < props.amount) {
     return
   }
-  
+
   emit('confirm', selectedPayment.value)
   visible.value = false
 }
@@ -169,7 +180,7 @@ const handleClose = () => {
 
 /* 订单金额显示 */
 .payment-amount {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -196,7 +207,7 @@ const handleClose = () => {
   justify-content: center;
   gap: 8px;
   padding: 12px 16px;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border-radius: 8px;
   margin-bottom: 20px;
 }
@@ -238,7 +249,7 @@ const handleClose = () => {
 
 :deep(.payment-select .el-input__wrapper) {
   padding: 12px 16px;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   transition: all 0.2s;
@@ -321,7 +332,7 @@ const handleClose = () => {
 }
 
 :deep(.el-select-dropdown__item:hover) {
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
 }
 
 .dialog-footer {

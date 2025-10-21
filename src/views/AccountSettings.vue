@@ -448,7 +448,7 @@ onMounted(() => {
 <style scoped>
 .account-settings-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #dfe3e8;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -483,7 +483,7 @@ onMounted(() => {
 }
 
 .settings-section {
-  background: white;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -531,7 +531,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 8px;
 }
 

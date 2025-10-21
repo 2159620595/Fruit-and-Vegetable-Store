@@ -1746,7 +1746,7 @@ onMounted(async () => {
 <style scoped>
 .profile-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #dfe3e8;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -1881,7 +1881,7 @@ onMounted(async () => {
 }
 
 .action-card {
-  background: white;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -2158,7 +2158,7 @@ onMounted(async () => {
 .new-avatar-preview {
   text-align: center;
   padding: 16px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 12px;
   width: 100%;
 }
@@ -2245,7 +2245,7 @@ onMounted(async () => {
 }
 
 .current-membership {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
@@ -2294,7 +2294,7 @@ onMounted(async () => {
 }
 
 .stat-card {
-  background: white;
+  background: #f0f2f5;
   border-radius: 8px;
   padding: 16px;
   text-align: center;
@@ -2336,7 +2336,7 @@ onMounted(async () => {
   gap: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border: 2px solid transparent;
   transition: all 0.2s;
 }
@@ -2421,7 +2421,7 @@ onMounted(async () => {
 }
 
 .current-status {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 24px;
@@ -2476,7 +2476,7 @@ onMounted(async () => {
 }
 
 .amount-card {
-  background: #f8f9fa;
+  background: #e8ebef;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   padding: 16px;
@@ -2599,7 +2599,7 @@ onMounted(async () => {
 }
 
 .payment-card {
-  background: #f8f9fa;
+  background: #e8ebef;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   padding: 16px;
@@ -2747,7 +2747,7 @@ onMounted(async () => {
   gap: 12px;
   margin-bottom: 20px;
   padding: 16px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 8px;
   align-items: center;
   flex-wrap: wrap;
@@ -2761,7 +2761,7 @@ onMounted(async () => {
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
   border-radius: 12px;
   padding: 20px;
   text-align: center;
@@ -2846,13 +2846,13 @@ onMounted(async () => {
 .records-table table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: #f0f2f5;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .records-table thead {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
 }
 
 .records-table th {
@@ -2876,7 +2876,7 @@ onMounted(async () => {
 }
 
 .record-row:hover {
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
 }
 
 .amount-cell,
@@ -2939,7 +2939,7 @@ onMounted(async () => {
 .record-detail-dialog .balance-change-info {
   margin-top: 24px;
   padding: 16px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 8px;
 }
 

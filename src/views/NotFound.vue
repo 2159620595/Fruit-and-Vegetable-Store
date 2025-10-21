@@ -82,7 +82,7 @@ const goBack = () => {
   color: #333;
   margin: 0;
   line-height: 1;
-  background: linear-gradient(135deg, #4caf50 0%, #2196f3 100%);
+  background: linear-gradient(135deg, #4a8157 0%, #5a7a98 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

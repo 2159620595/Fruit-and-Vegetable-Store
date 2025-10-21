@@ -1712,7 +1712,7 @@ onUnmounted(() => {
 
 /* 订单标签页 */
 .order-tabs {
-  background: white;
+  background: #f0f2f5;
   border-radius: 8px;
   padding: 16px 24px 0;
   margin-bottom: 20px;
@@ -1780,7 +1780,7 @@ onUnmounted(() => {
 
 /* 加载状态 */
 .loading-container {
-  background: white;
+  background: #f0f2f5;
   border-radius: 8px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1794,7 +1794,7 @@ onUnmounted(() => {
 }
 
 .order-card {
-  background: white;
+  background: #f0f2f5;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1868,7 +1868,7 @@ onUnmounted(() => {
   height: 48px;
   border-radius: 6px;
   overflow: hidden;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1891,7 +1891,7 @@ onUnmounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 6px;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border: 1px solid #e9ecef;
   display: flex;
   align-items: center;
@@ -1987,7 +1987,7 @@ onUnmounted(() => {
   justify-content: center;
   margin-top: 32px;
   padding: 24px;
-  background: white;
+  background: #f0f2f5;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }

@@ -442,7 +442,7 @@ onUnmounted(() => {
 
 /* 头部信息 */
 .logistics-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
   color: white;
   padding: 24px;
 }
@@ -773,7 +773,7 @@ onUnmounted(() => {
 }
 
 .timeline-step.current .step-icon {
-  background: #667eea;
+  background: #5a7a98;
   color: white;
   animation: pulse-current 2s infinite;
 }
@@ -850,7 +850,7 @@ onUnmounted(() => {
 
 .location-icon {
   font-size: 12px;
-  color: #667eea;
+  color: #5a7a98;
 }
 
 /* 状态样式 */
@@ -865,7 +865,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid #e2e8f0;
-  border-top: 3px solid #667eea;
+  border-top: 3px solid #5a7a98;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
@@ -888,7 +888,7 @@ onUnmounted(() => {
 }
 
 .retry-btn {
-  background: #667eea;
+  background: #5a7a98;
   color: white;
   border: none;
   border-radius: 6px;

@@ -198,7 +198,7 @@ const emit = defineEmits(['loaded'])
 
 /* 卡片骨架屏 */
 .skeleton-card {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -248,7 +248,7 @@ const emit = defineEmits(['loaded'])
 
 /* 商品卡片骨架屏 */
 .skeleton-product {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -278,7 +278,7 @@ const emit = defineEmits(['loaded'])
 
 /* 列表骨架屏 */
 .skeleton-list {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -302,7 +302,7 @@ const emit = defineEmits(['loaded'])
 
 /* 表格骨架屏 */
 .skeleton-table {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -310,7 +310,7 @@ const emit = defineEmits(['loaded'])
 
 .skeleton-table-header {
   display: flex;
-  background: #f8f9fa;
+  background: #e8ebef;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
 }

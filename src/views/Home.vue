@@ -822,13 +822,13 @@ onUnmounted(() => {
 }
 
 .home {
-  background-color: #ffffff;
+  background-color: #dfe3e8;
   min-height: 100vh;
   position: relative;
 }
 
 .home {
-  background-color: #ffffff;
+  background-color: #dfe3e8;
   min-height: 100vh;
 }
 
@@ -937,10 +937,15 @@ onUnmounted(() => {
 /* 轮播图 */
 .banner-container {
   container-type: inline-size;
+  padding: 0 16px;
+  margin-top: 16px;
 }
 
 .banner {
-  padding: 12px 16px;
+  padding: 12px;
+  background: #f0f2f5;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .banner-wrapper {
@@ -1081,6 +1086,10 @@ onUnmounted(() => {
 /* 分类栏 */
 .bar {
   padding-bottom: 12px;
+  margin: 16px;
+  background: #f0f2f5;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .bar-item {
@@ -1122,8 +1131,10 @@ onUnmounted(() => {
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.015em;
-  padding: 0 16px 12px;
-  margin-top: 20px;
+  padding: 16px;
+  margin: 20px 16px 12px;
+  background: #e8ebef;
+  border-radius: 8px;
 }
 
 /* 产品列表 */
@@ -1131,6 +1142,10 @@ onUnmounted(() => {
   overflow-y: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  background: #f0f2f5;
+  border-radius: 12px;
+  margin: 0 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .product::-webkit-scrollbar {
@@ -1193,6 +1208,10 @@ onUnmounted(() => {
   grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
   gap: 12px;
   padding: 16px;
+  background: #f0f2f5;
+  border-radius: 12px;
+  margin: 0 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .grid-item {
@@ -1241,17 +1260,31 @@ onUnmounted(() => {
 .comment-list {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 20px;
   overflow-x: hidden;
-  background-color: #ffffff;
-  padding: 16px;
+  background-color: #f0f2f5;
+  padding: 20px;
+  margin: 0 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .comment-list-item {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background-color: #ffffff;
+  background-color: #e8ebef;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.comment-list-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
 .comment-list-item-user {
@@ -1319,18 +1352,26 @@ onUnmounted(() => {
 
 /* 故事 */
 .story {
-  color: #111811;
+  color: #2c3e50;
   font-size: 16px;
   font-weight: 400;
-  line-height: 1.5;
-  padding: 4px 16px 12px;
+  line-height: 1.8;
+  padding: 24px;
+  margin: 0 16px 20px;
+  background: #f0f2f5;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: justify;
 }
 
 /* 底部 - 简化版 */
 .footer {
-  background: #2d5a27;
+  background: #5a7a98;
   color: white;
   margin-top: auto;
+  margin: 20px 16px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .footer-bottom {
@@ -1456,6 +1497,10 @@ onUnmounted(() => {
     gap: 8px;
   }
 
+  .product {
+    margin: 0 12px;
+  }
+
   .product-list-item {
     min-width: 160px;
   }
@@ -1464,11 +1509,21 @@ onUnmounted(() => {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
     padding: 12px;
+    margin: 0 12px;
   }
 
   .title {
     font-size: 20px;
-    padding: 0 12px 12px;
+    padding: 16px;
+    margin: 20px 12px 10px;
+  }
+
+  .bar {
+    margin: 12px;
+  }
+
+  .banner-container {
+    padding: 0 12px;
   }
 
   .bar-item {
@@ -1481,19 +1536,24 @@ onUnmounted(() => {
   }
 
   .comment-list {
-    padding: 12px;
+    padding: 16px;
+    margin: 0 12px;
   }
 
   .comment-list-item {
     padding: 16px;
     border-radius: 8px;
-    background: #f8f9fa;
   }
 
   .story {
-    padding: 4px 12px 12px;
+    padding: 20px;
+    margin: 0 12px 16px;
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.7;
+  }
+
+  .footer {
+    margin: 16px 12px 12px;
   }
 }
 
@@ -1557,19 +1617,34 @@ onUnmounted(() => {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     padding: 8px;
+    margin: 0 8px;
   }
 
   .title {
     font-size: 18px;
-    padding: 0 8px 8px;
+    padding: 12px;
+    margin: 16px 8px 8px;
+  }
+
+  .product {
+    margin: 0 8px;
+  }
+
+  .bar {
+    margin: 8px;
+  }
+
+  .banner-container {
+    padding: 0 8px;
   }
 
   .comment-list {
-    padding: 8px;
+    padding: 12px;
+    margin: 0 8px;
   }
 
   .comment-list-item {
-    padding: 12px;
+    padding: 14px;
   }
 
   .comment-list-item-user-avatar {
@@ -1590,8 +1665,14 @@ onUnmounted(() => {
   }
 
   .story {
-    padding: 4px 8px 8px;
+    padding: 16px;
+    margin: 0 8px 12px;
     font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .footer {
+    margin: 12px 8px 8px;
   }
 }
 
@@ -1632,10 +1713,34 @@ onUnmounted(() => {
   .grid-container {
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
+    margin: 0 6px;
   }
 
   .title {
     font-size: 16px;
+    padding: 10px;
+    margin: 12px 6px 6px;
+  }
+
+  .product {
+    margin: 0 6px;
+  }
+
+  .bar {
+    margin: 6px;
+  }
+
+  .banner-container {
+    padding: 0 6px;
+  }
+
+  .comment-list {
+    padding: 10px;
+    margin: 0 6px;
+  }
+
+  .comment-list-item {
+    padding: 12px;
   }
 
   .comment-list-item-user-avatar {
@@ -1649,6 +1754,17 @@ onUnmounted(() => {
 
   .comment-list-item-content {
     font-size: 13px;
+  }
+
+  .story {
+    padding: 14px;
+    margin: 0 6px 10px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .footer {
+    margin: 10px 6px 6px;
   }
 }
 
@@ -1676,7 +1792,7 @@ onUnmounted(() => {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #4caf50;
+  background: #4a8157;
   color: white;
   padding: 4px 8px;
   border-radius: 4px;

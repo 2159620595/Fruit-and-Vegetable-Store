@@ -554,7 +554,7 @@ const handleLogout = async () => {
 
 <style scoped>
 .breadcrumb-container {
-  background-color: #ffffff;
+  background-color: #e8ebef;
   border-bottom: 1px solid #e5e5e5;
 }
 
@@ -702,8 +702,8 @@ const handleLogout = async () => {
 }
 
 .search-bar:focus-within {
-  background-color: #ffffff;
-  box-shadow: 0 0 0 2px #618961;
+  background-color: #e8ebef;
+  box-shadow: 0 0 0 2px #4a8157;
 }
 
 .search-icon {
@@ -751,7 +751,7 @@ const handleLogout = async () => {
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
+  background: #f0f2f5;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -879,7 +879,7 @@ const handleLogout = async () => {
   position: absolute;
   top: 100%;
   right: 0;
-  background: white;
+  background: #f0f2f5;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

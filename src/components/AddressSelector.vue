@@ -3,7 +3,8 @@
     <div class="address-header">
       <h2 class="section-title">收货地址</h2>
       <button class="add-address-btn" @click="showAddressForm = true">
-        <span class="plus-icon">+</span> 新增地址
+        <span class="plus-icon">+</span>
+        新增地址
       </button>
     </div>
 
@@ -21,7 +22,9 @@
             <span class="recipient-name">{{ address.recipient_name }}</span>
             <span class="phone">{{ address.phone }}</span>
             <span v-if="address.is_default" class="default-tag">默认</span>
-            <span v-if="address.label" class="label-tag">{{ address.label }}</span>
+            <span v-if="address.label" class="label-tag">
+              {{ address.label }}
+            </span>
           </div>
           <div class="address-detail">
             <span v-if="address.region">{{ address.region }}</span>
@@ -29,10 +32,19 @@
           </div>
         </div>
         <div class="address-actions">
-          <button class="action-btn edit" @click.stop="editAddress(address)">编辑</button>
-          <button class="action-btn delete" @click.stop="deleteAddress(address.id)">删除</button>
+          <button class="action-btn edit" @click.stop="editAddress(address)">
+            编辑
+          </button>
+          <button
+            class="action-btn delete"
+            @click.stop="deleteAddress(address.id)"
+          >
+            删除
+          </button>
         </div>
-        <div v-if="selectedAddressId === address.id" class="selected-icon">✓</div>
+        <div v-if="selectedAddressId === address.id" class="selected-icon">
+          ✓
+        </div>
       </div>
     </div>
 
@@ -42,7 +54,11 @@
     </div>
 
     <!-- 新增/编辑地址弹窗 -->
-    <div v-if="showAddressForm" class="address-modal" @click.self="closeAddressForm">
+    <div
+      v-if="showAddressForm"
+      class="address-modal"
+      @click.self="closeAddressForm"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <h3>{{ editingAddress ? '编辑地址' : '新增地址' }}</h3>
@@ -73,7 +89,9 @@
               class="form-input"
               :class="{ error: formErrors.phone }"
             />
-            <div v-if="formErrors.phone" class="error-text">{{ formErrors.phone }}</div>
+            <div v-if="formErrors.phone" class="error-text">
+              {{ formErrors.phone }}
+            </div>
           </div>
 
           <div class="form-group">
@@ -120,7 +138,11 @@
 
         <div class="modal-footer">
           <button class="cancel-btn" @click="closeAddressForm">取消</button>
-          <button class="submit-btn" @click="submitAddress" :disabled="submitting">
+          <button
+            class="submit-btn"
+            @click="submitAddress"
+            :disabled="submitting"
+          >
             {{ submitting ? '保存中...' : '保存' }}
           </button>
         </div>
@@ -179,15 +201,15 @@ const labelOptions = ['家', '公司', '学校']
 // 监听 props 变化
 watch(
   () => props.modelValue,
-  (newVal) => {
+  newVal => {
     selectedAddressId.value = newVal
-  },
+  }
 )
 
 // 监听选中地址变化
-watch(selectedAddressId, (newVal) => {
+watch(selectedAddressId, newVal => {
   emit('update:modelValue', newVal)
-  const address = addressStore.addresses.find((addr) => addr.id === newVal)
+  const address = addressStore.addresses.find(addr => addr.id === newVal)
   emit('change', address)
 })
 
@@ -202,12 +224,12 @@ onMounted(async () => {
 })
 
 // 选择地址
-const selectAddress = (id) => {
+const selectAddress = id => {
   selectedAddressId.value = id
 }
 
 // 编辑地址
-const editAddress = (address) => {
+const editAddress = address => {
   editingAddress.value = address
   addressForm.value = {
     recipient_name: address.recipient_name,
@@ -221,7 +243,7 @@ const editAddress = (address) => {
 }
 
 // 删除地址
-const deleteAddress = async (id) => {
+const deleteAddress = async id => {
   try {
     await ElMessageBox.confirm('确定要删除该地址吗？', '提示', {
       confirmButtonText: '确定',
@@ -295,7 +317,10 @@ const submitAddress = async () => {
   try {
     if (editingAddress.value) {
       // 编辑地址
-      await addressStore.updateAddress(editingAddress.value.id, addressForm.value)
+      await addressStore.updateAddress(
+        editingAddress.value.id,
+        addressForm.value
+      )
     } else {
       // 新增地址
       const result = await addressStore.addAddress(addressForm.value)
@@ -356,7 +381,7 @@ const closeAddressForm = () => {
 
 .add-address-btn {
   padding: 8px 16px;
-  background-color: #ffffff;
+  background-color: #f0f2f5;
   color: #2d5a27;
   border: 1px solid #2d5a27;
   border-radius: 4px;
@@ -388,7 +413,7 @@ const closeAddressForm = () => {
 .address-item {
   position: relative;
   padding: 16px;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border: 2px solid #e5e5e5;
   border-radius: 8px;
   cursor: pointer;
@@ -499,7 +524,7 @@ const closeAddressForm = () => {
 .no-address {
   padding: 40px;
   text-align: center;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border-radius: 8px;
   color: #999999;
 }
@@ -519,7 +544,7 @@ const closeAddressForm = () => {
 }
 
 .modal-content {
-  background-color: #ffffff;
+  background-color: #f0f2f5;
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
@@ -612,7 +637,7 @@ const closeAddressForm = () => {
 
 .label-option {
   padding: 8px 20px;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border: 1px solid #d9d9d9;
   border-radius: 4px;
   font-size: 14px;
@@ -670,7 +695,7 @@ const closeAddressForm = () => {
 }
 
 .cancel-btn {
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   color: #666666;
 }
 

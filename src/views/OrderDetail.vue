@@ -1440,7 +1440,7 @@ onUnmounted(() => {
 <style scoped>
 .order-detail-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #dfe3e8;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -1453,7 +1453,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #fff;
+  background-color: #f0f2f5;
   border-radius: 8px;
   margin-top: 16px;
 }
@@ -1519,7 +1519,7 @@ onUnmounted(() => {
   margin: 60px auto;
   padding: 60px 24px;
   text-align: center;
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -1555,7 +1555,7 @@ onUnmounted(() => {
   margin: 60px auto;
   padding: 60px 24px;
   text-align: center;
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -1644,7 +1644,7 @@ onUnmounted(() => {
 
 /* Order Header */
 .order-header {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1768,7 +1768,7 @@ onUnmounted(() => {
 
 /* Order Progress */
 .order-progress {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1909,8 +1909,8 @@ onUnmounted(() => {
 }
 
 .timeline-item.active .icon-circle {
-  border-color: #ffc107;
-  background-color: #ffc107;
+  border-color: #c49563;
+  background-color: #c49563;
   color: #000000;
 }
 
@@ -1951,7 +1951,7 @@ onUnmounted(() => {
 
 /* Order Items */
 .order-items {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1984,7 +1984,7 @@ onUnmounted(() => {
   height: 80px;
   border-radius: 8px;
   overflow: hidden;
-  background: #f8f9fa;
+  background: #e8ebef;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2063,7 +2063,7 @@ onUnmounted(() => {
 
 /* Order Summary */
 .order-summary {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2085,7 +2085,7 @@ onUnmounted(() => {
 }
 
 .summary-row:hover {
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
 }
 
 .summary-row.discount {
@@ -2161,7 +2161,7 @@ onUnmounted(() => {
 
 /* Order Timeline Info */
 .order-timeline-info {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2178,7 +2178,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: linear-gradient(to right, #f8f9fa 0%, #ffffff 100%);
+  background: linear-gradient(to right, #e8ebef 0%, #f0f2f5 100%);
   border-radius: 8px;
   transition: all 0.3s ease;
 }
@@ -2205,7 +2205,7 @@ onUnmounted(() => {
 
 /* Delivery Info */
 .delivery-info {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2291,7 +2291,7 @@ onUnmounted(() => {
 
 /* Logistics Info */
 .logistics-info {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2299,7 +2299,7 @@ onUnmounted(() => {
 
 /* Order Remark */
 .order-remark {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2307,7 +2307,7 @@ onUnmounted(() => {
 
 .remark-content {
   padding: 16px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 8px;
   border-left: 4px solid #618961;
 }

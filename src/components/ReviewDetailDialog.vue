@@ -221,7 +221,7 @@ const handleClose = () => {
 
 .review-item {
   padding: 20px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 8px;
   margin-bottom: 16px;
 }

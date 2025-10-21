@@ -238,7 +238,7 @@ const handleSubmit = async () => {
 .order-info {
   margin-bottom: 20px;
   padding: 16px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 6px;
 }
 
@@ -287,7 +287,7 @@ const handleSubmit = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 4px;
   margin-right: 12px;
   font-size: 24px;

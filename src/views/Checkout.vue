@@ -643,7 +643,7 @@ const formatPrice = price => {
 
 .checkout-page {
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #dfe3e8;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -656,7 +656,7 @@ const formatPrice = price => {
 
 /* Header Styles */
 .header {
-  background-color: #ffffff;
+  background-color: #e8ebef;
   border-bottom: 1px solid #e5e5e5;
   padding: 16px 0;
 }
@@ -770,7 +770,10 @@ const formatPrice = price => {
   text-align: center;
   padding: 80px 20px;
   max-width: 500px;
-  margin: 0 auto;
+  margin: 40px auto;
+  background: #f0f2f5;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .empty-icon {
@@ -803,7 +806,7 @@ const formatPrice = price => {
 
 /* Left Section - Checkout Form */
 .checkout-form-section {
-  background-color: #ffffff;
+  background-color: transparent;
 }
 
 .checkout-title {
@@ -815,6 +818,10 @@ const formatPrice = price => {
 
 .form-section {
   margin-bottom: 32px;
+  background: #f0f2f5;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .section-title {
@@ -835,7 +842,7 @@ const formatPrice = price => {
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   font-size: 14px;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   transition: border-color 0.2s;
 }
 
@@ -846,7 +853,7 @@ const formatPrice = price => {
 
 .form-input.error {
   border-color: #dc3545;
-  background-color: #fff5f5;
+  background-color: #ffe5e5;
 }
 
 .error-message {
@@ -876,7 +883,7 @@ const formatPrice = price => {
   display: flex;
   align-items: center;
   padding: 16px;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -926,7 +933,7 @@ const formatPrice = price => {
 
 :deep(.payment-select .el-input__wrapper) {
   padding: 12px 16px;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   transition: all 0.2s;
@@ -939,7 +946,7 @@ const formatPrice = price => {
 }
 
 :deep(.payment-select.is-focused .el-input__wrapper) {
-  background-color: #ffffff;
+  background-color: #f0f2f5;
   border-color: #2d5a27;
   box-shadow: 0 0 0 2px rgba(45, 90, 39, 0.1);
 }
@@ -1002,7 +1009,7 @@ const formatPrice = price => {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #e8ebef 0%, #dfe3e8 100%);
   border-radius: 8px;
   margin-bottom: 16px;
   border: 1px solid #e5e5e5;
@@ -1065,12 +1072,12 @@ const formatPrice = price => {
 }
 
 :deep(.el-select-dropdown__item:hover) {
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
 }
 
 /* Right Section - Order Summary */
 .order-summary-section {
-  background-color: #ffffff;
+  background-color: #f0f2f5;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   padding: 24px;
@@ -1107,7 +1114,7 @@ const formatPrice = price => {
   height: 60px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1224,7 +1231,7 @@ const formatPrice = price => {
 .tip-item.shipping-tip {
   padding: 8px 12px;
   background-color: #fff3cd;
-  border-left: 3px solid #ffc107;
+  border-left: 3px solid #c49563;
   border-radius: 4px;
   color: #856404;
   font-weight: 500;

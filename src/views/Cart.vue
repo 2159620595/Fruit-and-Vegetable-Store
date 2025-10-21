@@ -410,7 +410,7 @@ const reloadCart = async () => {
 }
 
 .cart-page {
-  background-color: #ffffff;
+  background-color: #dfe3e8;
   min-height: 100vh;
 }
 
@@ -690,7 +690,7 @@ const reloadCart = async () => {
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid #dbe6db;
-  background-color: #ffffff;
+  background-color: #f0f2f5;
 }
 
 .cart-table {
@@ -700,7 +700,7 @@ const reloadCart = async () => {
 }
 
 .cart-table thead tr {
-  background-color: #ffffff;
+  background-color: #e8ebef;
 }
 
 .cart-table th {
@@ -833,7 +833,7 @@ const reloadCart = async () => {
   text-align: center;
   border: 1px solid #dbe6db;
   border-radius: 4px;
-  background-color: #ffffff;
+  background-color: #e8ebef;
   color: #111811;
   font-size: 14px;
   font-weight: 500;

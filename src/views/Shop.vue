@@ -1162,7 +1162,7 @@ watch(
 
 <style scoped>
 .shop {
-  background-color: #ffffff;
+  background-color: #dfe3e8;
   min-height: 100vh;
 }
 
@@ -1210,7 +1210,7 @@ h1 {
 }
 
 .filters {
-  background: white;
+  background: #f0f2f5;
   padding: 0;
   border-radius: 12px;
   height: fit-content;
@@ -1226,7 +1226,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
   color: white;
 }
 
@@ -1259,7 +1259,7 @@ h1 {
 }
 
 .filter-group h3 svg {
-  color: #667eea;
+  color: #5a7a98;
 }
 
 .filter-group .no-data {
@@ -1284,7 +1284,7 @@ h1 {
   cursor: pointer;
   transition: all 0.2s;
   border: 1px solid transparent;
-  background: #f8f9fa;
+  background: #e8ebef;
 }
 
 .category-item:hover {
@@ -1293,8 +1293,8 @@ h1 {
 }
 
 .category-item.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: #667eea;
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
+  border-color: #5a7a98;
   color: white;
 }
 
@@ -1302,7 +1302,7 @@ h1 {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: #5a7a98;
 }
 
 .category-item.active input[type='checkbox'] {
@@ -1318,7 +1318,7 @@ h1 {
 .category-count {
   font-size: 12px;
   color: #999;
-  background: white;
+  background: #e8ebef;
   padding: 2px 8px;
   border-radius: 10px;
 }
@@ -1366,7 +1366,7 @@ h1 {
 }
 
 .products-area {
-  background: white;
+  background: #f0f2f5;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -1378,7 +1378,7 @@ h1 {
   align-items: center;
   margin-bottom: 24px;
   padding: 16px 20px;
-  background: white;
+  background: #e8ebef;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -1394,7 +1394,7 @@ h1 {
   padding: 8px 16px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background: white;
+  background: #f0f2f5;
   cursor: pointer;
   font-size: 14px;
   color: #666;
@@ -1403,12 +1403,12 @@ h1 {
 }
 
 .products-header select:hover {
-  border-color: #667eea;
+  border-color: #5a7a98;
 }
 
 .products-header select:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #5a7a98;
+  box-shadow: 0 0 0 3px rgba(90, 122, 152, 0.1);
 }
 
 .products-grid {
@@ -1425,7 +1425,7 @@ h1 {
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-  background: white;
+  background: #f0f2f5;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1751,7 +1751,7 @@ h1 {
 .view-toggle {
   display: flex;
   gap: 8px;
-  background: white;
+  background: #e8ebef;
   padding: 4px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -1883,7 +1883,7 @@ h1 {
 }
 
 .star.filled {
-  color: #ffc107;
+  color: #c49563;
 }
 
 .rating-value {
@@ -1939,7 +1939,7 @@ h1 {
 
 .stock-info.low-stock {
   color: #ff6b6b;
-  background: #fff5f5;
+  background: #ffe5e5;
 }
 
 /* 分页样式 */
@@ -1962,7 +1962,7 @@ h1 {
   position: fixed;
   top: 80px;
   right: 20px;
-  background: white;
+  background: #f0f2f5;
   padding: 16px 24px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -2061,7 +2061,7 @@ h1 {
 }
 
 .star.filled {
-  color: #ffc107;
+  color: #c49563;
 }
 
 .rating-text {
@@ -2201,7 +2201,7 @@ h1 {
 .sort-btn {
   padding: 4px 8px;
   border: 1px solid #ddd;
-  background: white;
+  background: #e8ebef;
   border-radius: 4px;
   font-size: 12px;
   color: #666;
@@ -2269,7 +2269,7 @@ h1 {
   flex: 1;
   padding: 6px 12px;
   border: 1px solid #ddd;
-  background: white;
+  background: #e8ebef;
   border-radius: 4px;
   font-size: 12px;
   color: #666;
@@ -2298,7 +2298,7 @@ h1 {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  background: white;
+  background: #e8ebef;
   font-size: 14px;
   color: #333;
   cursor: pointer;
@@ -2371,7 +2371,7 @@ h1 {
   appearance: none;
   width: 20px;
   height: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
@@ -2386,7 +2386,7 @@ h1 {
 .price-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
   border-radius: 50%;
   cursor: pointer;
   border: none;
@@ -2410,7 +2410,7 @@ h1 {
 
 .slider-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
   border-radius: 3px;
   transition: width 0.2s ease;
 }
@@ -2424,7 +2424,7 @@ h1 {
   font-size: 14px;
   font-weight: 600;
   color: #333;
-  background: #f8f9fa;
+  background: #e8ebef;
   padding: 8px 16px;
   border-radius: 20px;
   display: inline-block;
@@ -2466,8 +2466,8 @@ h1 {
   appearance: none;
   width: 20px;
   height: 20px;
-  background: white;
-  border: 3px solid #667eea;
+  background: #f0f2f5;
+  border: 3px solid #5a7a98;
   border-radius: 50%;
   cursor: pointer;
   pointer-events: all;
@@ -2505,7 +2505,7 @@ h1 {
 
 .price-tag {
   padding: 6px 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
   color: white;
   border-radius: 6px;
   font-size: 13px;
@@ -2517,7 +2517,7 @@ h1 {
 .price-range-line {
   flex: 1;
   height: 2px;
-  background: linear-gradient(to right, #667eea, #764ba2);
+  background: linear-gradient(to right, #5a7a98, #6a8a9e);
   border-radius: 1px;
   position: relative;
   z-index: 5;
@@ -2526,6 +2526,6 @@ h1 {
 /* 筛选操作 */
 .filter-actions {
   padding: 20px;
-  background: #f8f9fa;
+  background: #e8ebef;
 }
 </style>

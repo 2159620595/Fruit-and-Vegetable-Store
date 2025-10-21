@@ -1231,7 +1231,7 @@ onMounted(() => {
 <style scoped>
 .product-detail-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #dfe3e8;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
     Arial, sans-serif;
@@ -1245,7 +1245,7 @@ onMounted(() => {
   right: 24px;
   padding: 16px 24px;
   border-radius: 12px;
-  background-color: #fff;
+  background-color: #f0f2f5;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
@@ -1264,7 +1264,7 @@ onMounted(() => {
 }
 
 .toast-notification.info {
-  border-left: 4px solid #2196f3;
+  border-left: 4px solid #5a7a98;
 }
 
 .toast-icon {
@@ -1289,7 +1289,7 @@ onMounted(() => {
 }
 
 .toast-notification.info .toast-icon {
-  background-color: #2196f3;
+  background-color: #5a7a98;
   color: white;
 }
 
@@ -1334,7 +1334,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #fff;
+  background-color: #f0f2f5;
   border-radius: 8px;
   margin-top: 16px;
 }
@@ -1400,7 +1400,7 @@ onMounted(() => {
   margin: 60px auto;
   padding: 60px 24px;
   text-align: center;
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -1443,7 +1443,7 @@ onMounted(() => {
   grid-template-columns: 1fr 1fr;
   gap: 40px;
   margin-bottom: 40px;
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1462,7 +1462,7 @@ onMounted(() => {
 .product-image {
   width: 100%;
   aspect-ratio: 1;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -1614,7 +1614,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  background: #f8f9fa;
+  background: #e8ebef;
   padding: 16px;
   border-radius: 10px;
 }
@@ -1736,7 +1736,7 @@ onMounted(() => {
 }
 
 .description-features {
-  background: #f8f9fa;
+  background: #e8ebef;
   padding: 20px;
   border-radius: 12px;
 }
@@ -1772,7 +1772,7 @@ onMounted(() => {
 
 /* Specs Tab */
 .specs-content {
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -1796,14 +1796,14 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 600;
   color: #666;
-  background: #fff;
+  background: #f0f2f5;
 }
 
 .spec-value {
   padding: 16px 20px;
   font-size: 14px;
   color: #333;
-  background: #f8f9fa;
+  background: #e8ebef;
 }
 
 .organic-badge {
@@ -1891,7 +1891,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 20px;
-  background: #f8f9fa;
+  background: #e8ebef;
   border-radius: 12px;
   text-align: center;
   transition: all 0.2s;
@@ -1920,7 +1920,7 @@ onMounted(() => {
 
 /* Product Details Tabs - 全宽横向布局 */
 .product-details-tabs-fullwidth {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   margin-bottom: 32px;
@@ -1952,7 +1952,7 @@ onMounted(() => {
 
 .product-details-tabs-fullwidth .tab-btn:hover {
   color: #618961;
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
 }
 
 .product-details-tabs-fullwidth .tab-btn.active {
@@ -2307,7 +2307,7 @@ onMounted(() => {
 
 /* 收藏按钮样式 */
 .btn-favorite {
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   color: #6c757d;
   border: 2px solid #e9ecef;
   transition: all 0.3s ease;
@@ -2415,7 +2415,7 @@ onMounted(() => {
 }
 
 .btn-secondary {
-  background-color: #fff;
+  background-color: #f0f2f5;
   color: #618961;
   border: 2px solid #618961;
 }
@@ -2426,7 +2426,7 @@ onMounted(() => {
 }
 
 .btn-outline {
-  background-color: #fff;
+  background-color: #f0f2f5;
   color: #666;
   border: 2px solid #e0e0e0;
   flex: 0 0 auto;
@@ -2448,7 +2448,7 @@ onMounted(() => {
 
 /* Reviews Section */
 .reviews-section {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   margin-bottom: 40px;
@@ -2518,7 +2518,7 @@ onMounted(() => {
 }
 
 .review-item {
-  background-color: #f8f9fa;
+  background-color: #e8ebef;
   border-radius: 12px;
   padding: 24px;
   transition: all 0.2s;
@@ -2638,7 +2638,7 @@ onMounted(() => {
 
 /* Related Products */
 .related-products-section {
-  background: #fff;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -2652,7 +2652,7 @@ onMounted(() => {
 }
 
 .related-product {
-  background-color: #fff;
+  background-color: #f0f2f5;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);

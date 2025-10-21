@@ -580,7 +580,7 @@ onMounted(() => {
 <style scoped>
 .address-management-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #dfe3e8;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -609,7 +609,7 @@ onMounted(() => {
 }
 
 .addresses-content {
-  background: white;
+  background: #f0f2f5;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
