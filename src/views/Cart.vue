@@ -42,7 +42,10 @@
           </div>
 
           <!-- 空状态 -->
-          <div v-if="cartItems.length === 0" class="empty-cart-state">
+          <div
+            v-else-if="!cartStore.loading && cartItems.length === 0"
+            class="empty-cart-state"
+          >
             <div class="empty-content">
               <el-icon class="empty-icon" :size="120">
                 <ShoppingCartFull />
@@ -62,7 +65,18 @@
 
           <!-- 购物车表格 -->
           <div v-else class="cart-table-wrapper">
-            <div class="cart-table-container">
+            <!-- 加载状态骨架屏 -->
+            <div v-if="loading" class="cart-table-skeleton">
+              <SkeletonLoader
+                v-for="i in 3"
+                :key="i"
+                type="card"
+                class="cart-row-skeleton"
+              />
+            </div>
+
+            <!-- 购物车表格 -->
+            <div v-else class="cart-table-container">
               <table class="cart-table">
                 <thead>
                   <tr>
@@ -214,7 +228,8 @@ defineOptions({
   name: 'CartPage',
 })
 import router from '@/router'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Plus,
@@ -227,6 +242,7 @@ import {
 } from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cartStore'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import {
   calculateShippingFee,
   formatShippingFee,
@@ -234,11 +250,22 @@ import {
 } from '@/config/shipping'
 
 const cartStore = useCartStore()
+const route = useRoute()
 
 // 组件挂载时加载购物车数据
 onMounted(async () => {
   await cartStore.fetchCartList()
 })
+
+// 监听路由变化，确保返回购物车时重新加载数据
+watch(
+  () => route.path,
+  async newPath => {
+    if (newPath === '/cart') {
+      await cartStore.fetchCartList()
+    }
+  }
+)
 
 // 购物车商品列表（格式化显示）
 const cartItems = computed(() => {
@@ -984,6 +1011,19 @@ const reloadCart = async () => {
   font-weight: 500;
 }
 
+/* 骨架屏样式 */
+.cart-table-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.cart-row-skeleton {
+  height: 80px;
+  margin-bottom: 0;
+}
+
 /* 响应式设计 */
 @media (max-width: 1200px) {
   .main {
@@ -1037,6 +1077,64 @@ const reloadCart = async () => {
 
   .col-product {
     width: 250px;
+  }
+
+  .cart-table {
+    min-width: 500px;
+  }
+
+  .cart-table th,
+  .cart-table td {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .cart-item-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .cart-item-name {
+    font-size: 13px;
+  }
+
+  .cart-item-price {
+    font-size: 13px;
+  }
+
+  .quantity-controls {
+    gap: 6px;
+  }
+
+  .quantity-btn {
+    width: 20px;
+    height: 20px;
+  }
+
+  .quantity-input {
+    width: 35px;
+    height: 20px;
+  }
+
+  .cart-summary {
+    padding: 12px;
+  }
+
+  .summary-title {
+    font-size: 16px;
+  }
+
+  .summary-item {
+    font-size: 13px;
+  }
+
+  .summary-total {
+    font-size: 16px;
+  }
+
+  .checkout-btn {
+    font-size: 13px;
+    padding: 10px 20px;
   }
 }
 </style>

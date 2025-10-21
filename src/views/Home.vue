@@ -12,9 +12,13 @@
             <div class="banner">
               <div class="banner-wrapper">
                 <!-- 加载骨架屏 -->
-                <div class="banner-skeleton" v-if="!bannerImagesLoaded">
-                  <div class="skeleton-shimmer"></div>
-                </div>
+                <SkeletonLoader
+                  v-if="!bannerImagesLoaded"
+                  type="rect"
+                  width="100%"
+                  height="320px"
+                  class="banner-skeleton"
+                />
 
                 <div
                   class="banner-image"
@@ -167,7 +171,17 @@
           <!-- 热门精选开始 -->
           <h2 class="title">热门精选</h2>
           <div class="product">
-            <div class="product-list">
+            <!-- 加载状态骨架屏 -->
+            <div v-if="loading" class="product-list">
+              <SkeletonLoader
+                v-for="i in 4"
+                :key="i"
+                type="product"
+                class="product-skeleton"
+              />
+            </div>
+            <!-- 商品列表 -->
+            <div v-else class="product-list">
               <!-- 显示热门精选商品 -->
               <div
                 class="product-list-item"
@@ -180,7 +194,13 @@
                   :data-bg="item.image_url"
                   v-lazy-bg
                 >
-                  <div class="image-skeleton" v-if="!item.imageLoaded"></div>
+                  <SkeletonLoader
+                    v-if="!item.imageLoaded"
+                    type="rect"
+                    width="100%"
+                    height="100%"
+                    class="image-skeleton"
+                  />
                 </div>
                 <div>
                   <p class="product-name">{{ item.name }}</p>
@@ -194,168 +214,242 @@
           <!-- 客户最爱开始 -->
           <h2 class="title">客户最爱</h2>
           <div class="grid-container">
-            <div
-              class="grid-item"
-              v-for="item in customerFavorites"
-              :key="item.id"
-              @click="click(item.id)"
-            >
+            <!-- 加载状态骨架屏 -->
+            <template v-if="loading">
+              <SkeletonLoader
+                v-for="i in 6"
+                :key="i"
+                type="product"
+                class="grid-skeleton"
+              />
+            </template>
+            <!-- 商品列表 -->
+            <template v-else>
               <div
-                class="grid-item-img lazy-image"
-                :data-bg="item.image_url"
-                v-lazy-bg
+                class="grid-item"
+                v-for="item in customerFavorites"
+                :key="item.id"
+                @click="click(item.id)"
               >
-                <div class="image-skeleton" v-if="!item.imageLoaded"></div>
+                <div
+                  class="grid-item-img lazy-image"
+                  :data-bg="item.image_url"
+                  v-lazy-bg
+                >
+                  <SkeletonLoader
+                    v-if="!item.imageLoaded"
+                    type="rect"
+                    width="100%"
+                    height="100%"
+                    class="image-skeleton"
+                  />
+                </div>
+                <div>
+                  <p class="product-name">{{ item.name }}</p>
+                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                </div>
               </div>
-              <div>
-                <p class="product-name">{{ item.name }}</p>
-                <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+              <!-- 如果没有数据显示提示 -->
+              <div v-if="customerFavorites.length === 0" class="empty-tip">
+                暂无客户最爱商品
               </div>
-            </div>
-            <!-- 如果没有数据显示提示 -->
-            <div v-if="customerFavorites.length === 0" class="empty-tip">
-              暂无客户最爱商品
-            </div>
+            </template>
           </div>
           <!-- 客户最爱结束 -->
 
           <!-- 新品上市开始 -->
           <h2 class="title">新品上市</h2>
           <div class="grid-container">
-            <div
-              class="grid-item"
-              v-for="item in newArrivals"
-              :key="item.id"
-              @click="click(item.id)"
-            >
+            <!-- 加载状态骨架屏 -->
+            <template v-if="loading">
+              <SkeletonLoader
+                v-for="i in 6"
+                :key="i"
+                type="product"
+                class="grid-skeleton"
+              />
+            </template>
+            <!-- 商品列表 -->
+            <template v-else>
               <div
-                class="grid-item-img lazy-image"
-                :data-bg="item.image_url"
-                v-lazy-bg
+                class="grid-item"
+                v-for="item in newArrivals"
+                :key="item.id"
+                @click="click(item.id)"
               >
-                <div class="image-skeleton" v-if="!item.imageLoaded"></div>
-                <!-- 新品标签 -->
-                <span class="new-badge" v-if="item.is_new">新品</span>
+                <div
+                  class="grid-item-img lazy-image"
+                  :data-bg="item.image_url"
+                  v-lazy-bg
+                >
+                  <SkeletonLoader
+                    v-if="!item.imageLoaded"
+                    type="rect"
+                    width="100%"
+                    height="100%"
+                    class="image-skeleton"
+                  />
+                  <!-- 新品标签 -->
+                  <span class="new-badge" v-if="item.is_new">新品</span>
+                </div>
+                <div>
+                  <p class="product-name">{{ item.name }}</p>
+                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                </div>
               </div>
-              <div>
-                <p class="product-name">{{ item.name }}</p>
-                <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
-              </div>
-            </div>
+            </template>
           </div>
           <!-- 新品上市结束 -->
 
           <!-- 限时优惠开始 -->
           <h2 class="title">限时优惠</h2>
           <div class="grid-container">
-            <div
-              class="grid-item"
-              v-for="item in limitedOffers"
-              :key="item.id"
-              @click="click(item.id)"
-            >
+            <!-- 加载状态骨架屏 -->
+            <template v-if="loading">
+              <SkeletonLoader
+                v-for="i in 6"
+                :key="i"
+                type="product"
+                class="grid-skeleton"
+              />
+            </template>
+            <!-- 商品列表 -->
+            <template v-else>
               <div
-                class="grid-item-img lazy-image"
-                :data-bg="item.image_url"
-                v-lazy-bg
+                class="grid-item"
+                v-for="item in limitedOffers"
+                :key="item.id"
+                @click="click(item.id)"
               >
-                <div class="image-skeleton" v-if="!item.imageLoaded"></div>
-                <!-- 显示折扣标签 -->
-                <span
-                  class="discount-badge"
-                  v-if="item.is_discount && item.discount_rate"
+                <div
+                  class="grid-item-img lazy-image"
+                  :data-bg="item.image_url"
+                  v-lazy-bg
                 >
-                  {{ item.discount_rate }}
-                </span>
-              </div>
-              <div>
-                <p class="product-name">{{ item.name }}</p>
-                <div class="price-wrapper">
-                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
-                  <p class="original-price" v-if="item.original_price">
-                    ¥{{ item.original_price }}
-                  </p>
+                  <SkeletonLoader
+                    v-if="!item.imageLoaded"
+                    type="rect"
+                    width="100%"
+                    height="100%"
+                    class="image-skeleton"
+                  />
+                  <!-- 显示折扣标签 -->
+                  <span
+                    class="discount-badge"
+                    v-if="item.is_discount && item.discount_rate"
+                  >
+                    {{ item.discount_rate }}
+                  </span>
+                </div>
+                <div>
+                  <p class="product-name">{{ item.name }}</p>
+                  <div class="price-wrapper">
+                    <p class="product-price">
+                      ¥{{ item.price }}{{ item.unit }}
+                    </p>
+                    <p class="original-price" v-if="item.original_price">
+                      ¥{{ item.original_price }}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <!-- 如果没有优惠商品 -->
-            <div v-if="limitedOffers.length === 0" class="empty-tip">
-              暂无优惠商品
-            </div>
+              <!-- 如果没有优惠商品 -->
+              <div v-if="limitedOffers.length === 0" class="empty-tip">
+                暂无优惠商品
+              </div>
+            </template>
           </div>
           <!-- 限时优惠结束 -->
 
           <!-- 客户评价开始 -->
           <h2 class="title">客户评价</h2>
           <div class="comment-list">
-            <div
-              class="comment-list-item"
-              v-for="review in reviews"
-              :key="review.id"
-            >
-              <div class="comment-list-item-user">
-                <div
-                  class="comment-list-item-user-avatar lazy-image"
-                  :data-bg="review.user_avatar"
-                  v-lazy-bg
-                >
-                  <div class="image-skeleton" v-if="!review.avatarLoaded"></div>
+            <!-- 加载状态骨架屏 -->
+            <template v-if="loading">
+              <SkeletonLoader
+                v-for="i in 3"
+                :key="i"
+                type="card"
+                class="comment-skeleton"
+              />
+            </template>
+            <!-- 评价列表 -->
+            <template v-else>
+              <div
+                class="comment-list-item"
+                v-for="review in reviews"
+                :key="review.id"
+              >
+                <div class="comment-list-item-user">
+                  <div
+                    class="comment-list-item-user-avatar lazy-image"
+                    :data-bg="review.user_avatar"
+                    v-lazy-bg
+                  >
+                    <SkeletonLoader
+                      v-if="!review.avatarLoaded"
+                      type="circle"
+                      width="40px"
+                      height="40px"
+                      class="image-skeleton"
+                    />
+                  </div>
+                  <div class="comment-list-item-user-info">
+                    <p class="comment-list-item-user-info-name">
+                      {{ review.user_name }}
+                    </p>
+                    <p class="comment-list-item-user-info-date">
+                      {{ formatDate(review.created_at) }}
+                    </p>
+                  </div>
                 </div>
-                <div class="comment-list-item-user-info">
-                  <p class="comment-list-item-user-info-name">
-                    {{ review.user_name }}
-                  </p>
-                  <p class="comment-list-item-user-info-date">
-                    {{ formatDate(review.created_at) }}
-                  </p>
+                <!-- 五星评价 -->
+                <div class="comment-list-item-star">
+                  <svg
+                    v-for="n in 5"
+                    :key="n"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20px"
+                    height="20px"
+                    :fill="n <= review.rating ? 'currentColor' : 'none'"
+                    :stroke="n <= review.rating ? 'none' : 'currentColor'"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z"
+                    ></path>
+                  </svg>
+                </div>
+                <!-- 评论内容 -->
+                <p class="comment-list-item-content">{{ review.comment }}</p>
+                <div class="comment-list-item-like">
+                  <!-- 点赞 -->
+                  <el-button
+                    text
+                    :type="review.userAction === 1 ? 'warning' : 'default'"
+                    @click.stop="likeReview(review)"
+                    size="small"
+                  >
+                    <el-icon><Star /></el-icon>
+                    {{ review.likes || 0 }}
+                  </el-button>
+                  <!-- 踩 -->
+                  <el-button
+                    text
+                    :type="review.userAction === -1 ? 'danger' : 'default'"
+                    @click.stop="dislikeReview(review)"
+                    size="small"
+                  >
+                    <el-icon><CircleClose /></el-icon>
+                    {{ review.dislikes || 0 }}
+                  </el-button>
                 </div>
               </div>
-              <!-- 五星评价 -->
-              <div class="comment-list-item-star">
-                <svg
-                  v-for="n in 5"
-                  :key="n"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20px"
-                  height="20px"
-                  :fill="n <= review.rating ? 'currentColor' : 'none'"
-                  :stroke="n <= review.rating ? 'none' : 'currentColor'"
-                  viewBox="0 0 256 256"
-                >
-                  <path
-                    d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z"
-                  ></path>
-                </svg>
+              <!-- 如果没有评价 -->
+              <div v-if="reviews.length === 0" class="empty-tip">
+                暂无客户评价
               </div>
-              <!-- 评论内容 -->
-              <p class="comment-list-item-content">{{ review.comment }}</p>
-              <div class="comment-list-item-like">
-                <!-- 点赞 -->
-                <el-button
-                  text
-                  :type="review.userAction === 1 ? 'warning' : 'default'"
-                  @click.stop="likeReview(review)"
-                  size="small"
-                >
-                  <el-icon><Star /></el-icon>
-                  {{ review.likes || 0 }}
-                </el-button>
-                <!-- 踩 -->
-                <el-button
-                  text
-                  :type="review.userAction === -1 ? 'danger' : 'default'"
-                  @click.stop="dislikeReview(review)"
-                  size="small"
-                >
-                  <el-icon><CircleClose /></el-icon>
-                  {{ review.dislikes || 0 }}
-                </el-button>
-              </div>
-            </div>
-            <!-- 如果没有评价 -->
-            <div v-if="reviews.length === 0" class="empty-tip">
-              暂无客户评价
-            </div>
+            </template>
           </div>
           <!-- 客户评价结束 -->
 
@@ -369,49 +463,26 @@
       </div>
       <!-- 内容区结束 -->
 
-      <!-- 联系我们部分 -->
-      <section id="contact-section" class="contact-section">
-        <div class="contact-content">
-          <h2 class="contact-title">联系我们</h2>
-          <div class="contact-info">
-            <div class="contact-item">
-              <div class="contact-icon">📞</div>
-              <div class="contact-details">
-                <h3>客服热线</h3>
-                <p>400-123-4567</p>
-                <p>工作时间：9:00-18:00</p>
-              </div>
-            </div>
-            <div class="contact-item">
-              <div class="contact-icon">📧</div>
-              <div class="contact-details">
-                <h3>邮箱联系</h3>
-                <p>service@freshharvest.com</p>
-                <p>24小时内回复</p>
-              </div>
-            </div>
-            <div class="contact-item">
-              <div class="contact-icon">📍</div>
-              <div class="contact-details">
-                <h3>公司地址</h3>
-                <p>北京市朝阳区果蔬大厦</p>
-                <p>欢迎预约参观</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- 底部开始 -->
       <footer class="footer">
-        <div class="footer-content">
-          <div class="footer-content-links">
-            <a href="#">关于我们</a>
-            <a href="#">隐私政策</a>
-            <a href="#">服务条款</a>
-            <a href="#">常见问题</a>
+        <div class="footer-bottom">
+          <div class="footer-bottom-content">
+            <div class="copyright-info">
+              <p class="copyright">© 2024 Fresh Harvest. 保留所有权利。</p>
+              <p class="learning-notice">
+                本网站仅用于个人学习交流，非商业用途
+              </p>
+              <p class="icp-info">
+                <a
+                  href="https://beian.miit.gov.cn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  桂ICP备2025071699号
+                </a>
+              </p>
+            </div>
           </div>
-          <p class="copyright">© 2024 Fresh Harvest. 保留所有权利。</p>
         </div>
       </footer>
       <!-- 底部结束 -->
@@ -430,6 +501,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Star, CircleClose } from '@element-plus/icons-vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import { getGoodsList } from '@/api/index.js'
 import {
   likeReview as likeReviewAPI,
@@ -1254,185 +1326,227 @@ onUnmounted(() => {
   padding: 4px 16px 12px;
 }
 
-/* 底部 */
+/* 底部 - 简化版 */
 .footer {
-  background-color: #f8f9fa;
-  border-top: 1px solid #e5e5e5;
+  background: #2d5a27;
+  color: white;
   margin-top: auto;
 }
 
-.footer-content {
+.footer-bottom {
+  padding: 30px 0;
+}
+
+.footer-bottom-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.copyright-info {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 40px 20px;
+  gap: 8px;
   text-align: center;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.footer-content-links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-}
-
-.footer-content-links a {
-  color: #618961;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.5;
-  min-width: 160px;
-  text-decoration: none;
 }
 
 .copyright {
-  color: #618961;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-/* 联系我们部分样式 */
-.contact-section {
-  background-color: #f8f9fa;
-  padding: 60px 20px;
-  margin-top: 40px;
-}
-
-.contact-content {
-  text-align: center;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.contact-title {
-  font-size: 32px;
-  font-weight: 600;
-  color: #2d5a27;
-  margin-bottom: 40px;
-}
-
-.contact-info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 40px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 30px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.contact-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.contact-icon {
-  font-size: 32px;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f8f0;
-  border-radius: 50%;
-}
-
-.contact-details h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2d5a27;
-  margin-bottom: 8px;
-}
-
-.contact-details p {
-  color: #666;
-  margin: 4px 0;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
+  margin: 0;
 }
 
-@media (max-width: 768px) {
-  .contact-info {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
+.learning-notice {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  margin: 0;
+  font-style: italic;
+}
 
-  .contact-item {
-    flex-direction: column;
-    text-align: center;
-    padding: 20px;
-  }
+.icp-info {
+  margin: 0;
+}
 
-  .contact-title {
-    font-size: 24px;
-  }
+.icp-info a {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.icp-info a:hover {
+  color: white;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .footer-bottom {
+    padding: 20px 0;
+  }
+
+  .footer-bottom-content {
+    padding: 0 16px;
+  }
+}
+
+/* 骨架屏样式 */
+.banner-skeleton {
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.product-skeleton,
+.grid-skeleton {
+  margin-bottom: 16px;
+}
+
+.comment-skeleton {
+  margin-bottom: 24px;
+}
+
+.image-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 8px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
   .container {
-    padding: 10px;
+    padding: 16px;
+  }
+
+  .main {
+    padding: 16px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .main {
+    padding: 12px 0;
+  }
+
+  .banner-image {
+    min-height: 280px;
+  }
+
+  .banner-content {
+    padding: 24px;
+  }
+
+  .banner-title {
+    font-size: 24px;
+  }
+
+  .banner-description {
+    font-size: 15px;
   }
 
   .product-list {
     overflow-x: auto;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .product-list-item {
+    min-width: 160px;
   }
 
   .grid-container {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 20px;
+    padding: 0 12px 12px;
+  }
+
+  .bar-item {
+    gap: 20px;
+    padding: 0 12px;
+  }
+
+  .bar-items p {
+    font-size: 13px;
+  }
+
+  .comment-list {
+    padding: 12px;
+  }
+
+  .comment-list-item {
+    padding: 16px;
+    border-radius: 8px;
+    background: #f8f9fa;
+  }
+
+  .story {
+    padding: 4px 12px 12px;
+    font-size: 15px;
+    line-height: 1.6;
   }
 }
 
 @media (max-width: 480px) {
+  .container {
+    padding: 8px;
+  }
+
+  .main {
+    padding: 8px 0;
+  }
+
   .banner-image {
-    min-height: 240px;
+    min-height: 200px;
   }
 
   .banner-arrow {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
   }
 
   .banner-arrow-left {
-    left: 10px;
+    left: 8px;
   }
 
   .banner-arrow-right {
-    right: 10px;
+    right: 8px;
   }
 
   .banner-title {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .banner-description {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .banner-content {
-    padding: 20px;
+    padding: 16px;
   }
 
   .bar-item {
-    gap: 16px;
+    gap: 12px;
+    padding: 0 8px;
   }
 
   .bar-items p {
     font-size: 12px;
+  }
+
+  .product-list {
+    padding: 8px;
+    gap: 6px;
   }
 
   .product-list-item {
@@ -1441,6 +1555,100 @@ onUnmounted(() => {
 
   .grid-container {
     grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .title {
+    font-size: 18px;
+    padding: 0 8px 8px;
+  }
+
+  .comment-list {
+    padding: 8px;
+  }
+
+  .comment-list-item {
+    padding: 12px;
+  }
+
+  .comment-list-item-user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .comment-list-item-user-info-name {
+    font-size: 14px;
+  }
+
+  .comment-list-item-user-info-date {
+    font-size: 12px;
+  }
+
+  .comment-list-item-content {
+    font-size: 14px;
+  }
+
+  .story {
+    padding: 4px 8px 8px;
+    font-size: 14px;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 360px) {
+  .container {
+    padding: 6px;
+  }
+
+  .banner-image {
+    min-height: 180px;
+  }
+
+  .banner-title {
+    font-size: 16px;
+  }
+
+  .banner-description {
+    font-size: 12px;
+  }
+
+  .banner-content {
+    padding: 12px;
+  }
+
+  .bar-item {
+    gap: 8px;
+  }
+
+  .bar-items p {
+    font-size: 11px;
+  }
+
+  .product-list-item {
+    min-width: 120px;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .comment-list-item-user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .comment-list-item-user-info-name {
+    font-size: 13px;
+  }
+
+  .comment-list-item-content {
+    font-size: 13px;
   }
 }
 

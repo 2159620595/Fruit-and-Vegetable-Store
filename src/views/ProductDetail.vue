@@ -8,14 +8,13 @@
       </div>
     </Transition>
 
-    <!-- Loading State -->
     <div v-if="loading" class="loading-container">
+      <!-- Loading State -->
       <div class="loading-spinner"></div>
       <p class="loading-text">加载中...</p>
     </div>
-
-    <!-- Error State -->
     <div v-else-if="error" class="error-container">
+      <!-- Error State -->
       <div class="error-icon">⚠️</div>
       <h2 class="error-title">加载失败</h2>
       <p class="error-message">{{ error }}</p>
@@ -24,9 +23,8 @@
         <el-button @click="router.push('/shop')">返回商城</el-button>
       </div>
     </div>
-
-    <!-- Main Product Section -->
     <div class="main-content" v-else-if="product">
+      <!-- Main Product Section -->
       <!-- Breadcrumbs -->
       <Breadcrumb :current-page="product?.name || '商品详情'" />
 
@@ -37,8 +35,16 @@
           <div class="product-image-wrapper">
             <div class="product-image" :class="{ zoomed: isImageZoomed }">
               <div class="image-container" @click="toggleImageZoom">
+                <!-- 加载状态骨架屏 -->
+                <SkeletonLoader
+                  v-if="loading"
+                  type="rect"
+                  width="100%"
+                  height="100%"
+                  class="main-image-skeleton"
+                />
                 <!-- Placeholder (No Image) -->
-                <div v-if="!product.image_url" class="placeholder-image">
+                <div v-else-if="!product.image_url" class="placeholder-image">
                   <div class="placeholder-icon">
                     {{ getProductIcon(product.category) }}
                   </div>
@@ -124,146 +130,183 @@
 
         <!-- Product Details -->
         <div class="product-details-section">
-          <!-- Product Title & Badges -->
-          <div class="product-header">
-            <h1 class="product-name">{{ product.name }}</h1>
-            <div class="product-badges">
-              <span v-if="product.is_new" class="badge badge-new">新品</span>
-              <span v-if="product.is_hot" class="badge badge-hot">热卖</span>
-              <span v-if="product.is_discount" class="badge badge-discount">
-                促销
-              </span>
-            </div>
+          <!-- 加载状态骨架屏 -->
+          <div v-if="loading" class="product-details-skeleton">
+            <SkeletonLoader
+              type="text"
+              width="80%"
+              height="32px"
+              class="title-skeleton"
+            />
+            <SkeletonLoader
+              type="text"
+              width="60%"
+              height="24px"
+              class="subtitle-skeleton"
+            />
+            <SkeletonLoader
+              type="text"
+              width="100%"
+              height="20px"
+              class="description-skeleton"
+            />
+            <SkeletonLoader
+              type="text"
+              width="40%"
+              height="20px"
+              class="price-skeleton"
+            />
+            <SkeletonLoader
+              type="rect"
+              width="200px"
+              height="40px"
+              class="button-skeleton"
+            />
           </div>
 
-          <p class="product-subtitle" v-if="product.name_en">
-            {{ product.name_en }}
-          </p>
+          <!-- 商品详情 -->
+          <div v-else class="product-details">
+            <!-- Product Title & Badges -->
+            <div class="product-header">
+              <h1 class="product-name">{{ product.name }}</h1>
+              <div class="product-badges">
+                <span v-if="product.is_new" class="badge badge-new">新品</span>
+                <span v-if="product.is_hot" class="badge badge-hot">热卖</span>
+                <span v-if="product.is_discount" class="badge badge-discount">
+                  促销
+                </span>
+              </div>
+            </div>
 
-          <!-- Rating Section -->
-          <div class="rating-section">
-            <div class="star-rating">
-              <span class="stars">
-                <el-icon
-                  v-for="star in renderStars(product.rating || 0)"
-                  :key="star.key"
-                  :size="18"
-                  :color="
-                    star.type === 'full'
-                      ? '#fadb14'
-                      : star.type === 'half'
+            <p class="product-subtitle" v-if="product.name_en">
+              {{ product.name_en }}
+            </p>
+
+            <!-- Rating Section -->
+            <div class="rating-section">
+              <div class="star-rating">
+                <span class="stars">
+                  <el-icon
+                    v-for="star in renderStars(product.rating || 0)"
+                    :key="star.key"
+                    :size="18"
+                    :color="
+                      star.type === 'full'
                         ? '#fadb14'
-                        : '#d9d9d9'
-                  "
-                >
-                  <component
-                    :is="
-                      star.type === 'empty'
-                        ? ElementPlusIconsVue.StarFilled
-                        : ElementPlusIconsVue.StarFilled
+                        : star.type === 'half'
+                          ? '#fadb14'
+                          : '#d9d9d9'
                     "
-                  />
-                </el-icon>
-              </span>
-              <span class="rating-value">
-                {{ formatRating(product.rating) }}
-              </span>
-            </div>
-            <span class="review-count">{{ reviews.length }} 条评价</span>
-            <span class="sales-count" v-if="product.sales_count">
-              已售 {{ product.sales_count }}
-            </span>
-          </div>
-
-          <!-- Price Section -->
-          <div class="price-section">
-            <div class="price-wrapper">
-              <div class="current-price">
-                <span class="currency">¥</span>
-                <span class="amount">{{ formatPrice(product.price) }}</span>
-                <span class="unit">{{ product.unit || '/份' }}</span>
+                  >
+                    <component
+                      :is="
+                        star.type === 'empty'
+                          ? ElementPlusIconsVue.StarFilled
+                          : ElementPlusIconsVue.StarFilled
+                      "
+                    />
+                  </el-icon>
+                </span>
+                <span class="rating-value">
+                  {{ formatRating(product.rating) }}
+                </span>
               </div>
-              <div class="original-price" v-if="product.original_price">
-                ¥{{ formatPrice(product.original_price) }}
+              <span class="review-count">{{ reviews.length }} 条评价</span>
+              <span class="sales-count" v-if="product.sales_count">
+                已售 {{ product.sales_count }}
+              </span>
+            </div>
+
+            <!-- Price Section -->
+            <div class="price-section">
+              <div class="price-wrapper">
+                <div class="current-price">
+                  <span class="currency">¥</span>
+                  <span class="amount">{{ formatPrice(product.price) }}</span>
+                  <span class="unit">{{ product.unit || '/份' }}</span>
+                </div>
+                <div class="original-price" v-if="product.original_price">
+                  ¥{{ formatPrice(product.original_price) }}
+                </div>
+              </div>
+              <div
+                class="promotion-tag"
+                v-if="product.is_discount && product.discount_rate"
+              >
+                {{ product.discount_rate }}
               </div>
             </div>
-            <div
-              class="promotion-tag"
-              v-if="product.is_discount && product.discount_rate"
-            >
-              {{ product.discount_rate }}
+
+            <!-- Stock Info -->
+            <div class="stock-section">
+              <span class="stock-label">库存:</span>
+              <span class="stock-value" :class="stockClass">
+                {{ stockText }}
+              </span>
             </div>
-          </div>
 
-          <!-- Stock Info -->
-          <div class="stock-section">
-            <span class="stock-label">库存:</span>
-            <span class="stock-value" :class="stockClass">
-              {{ stockText }}
-            </span>
-          </div>
-
-          <!-- Quantity Selector -->
-          <div class="quantity-section">
-            <span class="quantity-label">数量:</span>
-            <div class="quantity-selector">
-              <el-button
-                :disabled="quantity <= 1"
-                @click="decreaseQuantity"
-                :icon="Minus"
-                circle
-              />
-              <input
-                type="number"
-                class="quantity-input"
-                v-model.number="quantity"
-                :min="1"
-                :max="maxQuantity"
-                @blur="validateQuantity"
-              />
-              <el-button
-                :disabled="quantity >= maxQuantity"
-                @click="increaseQuantity"
-                :icon="Plus"
-                circle
-              />
+            <!-- Quantity Selector -->
+            <div class="quantity-section">
+              <span class="quantity-label">数量:</span>
+              <div class="quantity-selector">
+                <el-button
+                  :disabled="quantity <= 1"
+                  @click="decreaseQuantity"
+                  :icon="Minus"
+                  circle
+                />
+                <input
+                  type="number"
+                  class="quantity-input"
+                  v-model.number="quantity"
+                  :min="1"
+                  :max="maxQuantity"
+                  @blur="validateQuantity"
+                />
+                <el-button
+                  :disabled="quantity >= maxQuantity"
+                  @click="increaseQuantity"
+                  :icon="Plus"
+                  circle
+                />
+              </div>
             </div>
-          </div>
 
-          <!-- Action Buttons -->
-          <div class="action-buttons">
-            <el-button
-              :disabled="!canAddToCart"
-              @click="addToCart"
-              :icon="ShoppingCart"
-              size="large"
-            >
-              加入购物车
-            </el-button>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+              <el-button
+                :disabled="!canAddToCart"
+                @click="addToCart"
+                :icon="ShoppingCart"
+                size="large"
+              >
+                加入购物车
+              </el-button>
 
-            <!-- 收藏按钮 -->
-            <el-button
-              :type="isFavorite ? 'danger' : 'default'"
-              :disabled="favoriteLoading"
-              @click="toggleFavorite"
-              size="large"
-              :icon="
-                isFavorite
-                  ? ElementPlusIconsVue.StarFilled
-                  : ElementPlusIconsVue.Star
-              "
-            >
-              {{ isFavorite ? '已收藏' : '收藏' }}
-            </el-button>
+              <!-- 收藏按钮 -->
+              <el-button
+                :type="isFavorite ? 'danger' : 'default'"
+                :disabled="favoriteLoading"
+                @click="toggleFavorite"
+                size="large"
+                :icon="
+                  isFavorite
+                    ? ElementPlusIconsVue.StarFilled
+                    : ElementPlusIconsVue.Star
+                "
+              >
+                {{ isFavorite ? '已收藏' : '收藏' }}
+              </el-button>
 
-            <el-button
-              type="success"
-              :disabled="!canAddToCart"
-              @click="buyNow"
-              size="large"
-            >
-              立即购买
-            </el-button>
+              <el-button
+                type="success"
+                :disabled="!canAddToCart"
+                @click="buyNow"
+                size="large"
+              >
+                立即购买
+              </el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -613,7 +656,18 @@
       <!-- Related Products Section -->
       <div class="related-products-section" v-if="relatedProducts.length > 0">
         <h2 class="section-title">相关商品推荐</h2>
-        <div class="related-products-grid">
+        <!-- 加载状态骨架屏 -->
+        <div v-if="loading" class="related-products-skeleton">
+          <SkeletonLoader
+            v-for="i in 4"
+            :key="i"
+            type="product"
+            class="related-product-skeleton"
+          />
+        </div>
+
+        <!-- 相关商品列表 -->
+        <div v-else class="related-products-grid">
           <div
             v-for="item in relatedProducts"
             :key="item.id"
@@ -667,39 +721,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Empty State (if no product after loading) -->
-    <div v-else class="error-container">
-      <div class="error-icon">
-        <el-icon :size="80" color="#909399"><Box /></el-icon>
-      </div>
-      <h2 class="error-title">商品不存在</h2>
-      <p class="error-message">该商品可能已下架或不存在</p>
-      <div class="error-actions">
-        <el-button type="primary" @click="router.push('/shop')">
-          返回商城
-        </el-button>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-links">
-          <a href="#" class="footer-link">About Us</a>
-          <a href="#" class="footer-link">Contact</a>
-          <a href="#" class="footer-link">FAQ</a>
-          <a href="#" class="footer-link">Privacy Policy</a>
-          <a href="#" class="footer-link">Terms of Service</a>
-        </div>
-        <div class="social-links">
-          <a href="#" class="social-link">📷</a>
-          <a href="#" class="social-link">🐦</a>
-          <a href="#" class="social-link">📘</a>
-        </div>
-        <div class="copyright">@2024 Fresh Harvest. All rights reserved.</div>
-      </div>
-    </footer>
   </div>
 </template>
 <script setup>
@@ -711,7 +732,6 @@ import {
   IceCreamRound,
   CircleCheck,
   Apple,
-  Box,
   Document,
   List,
   DataAnalysis,
@@ -724,6 +744,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
 import { useUserStore } from '@/stores/userStore'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import {
   toggleFavorite as toggleFavoriteAPI,
   getFavoritesList,
@@ -2749,60 +2770,49 @@ onMounted(() => {
   text-decoration: line-through;
 }
 
-/* Footer */
-.footer {
-  background-color: #f8f9fa;
-  border-top: 1px solid #e5e5e5;
-  padding: 32px 0;
-  margin-top: 60px;
+/* 骨架屏样式 */
+.main-image-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 12px;
 }
 
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  text-align: center;
-}
-
-.footer-links {
+.product-details-skeleton {
   display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.footer-link {
-  color: #666;
-  text-decoration: none;
-  font-size: 14px;
-  transition: color 0.2s;
-}
-
-.footer-link:hover {
-  color: #618961;
-}
-
-.social-links {
-  display: flex;
-  justify-content: center;
+  flex-direction: column;
   gap: 16px;
+}
+
+.title-skeleton {
+  margin-bottom: 8px;
+}
+
+.subtitle-skeleton {
+  margin-bottom: 12px;
+}
+
+.description-skeleton {
   margin-bottom: 16px;
 }
 
-.social-link {
-  font-size: 24px;
-  text-decoration: none;
-  transition: transform 0.2s;
+.price-skeleton {
+  margin-bottom: 20px;
 }
 
-.social-link:hover {
-  transform: scale(1.2);
+.button-skeleton {
+  margin-top: 8px;
 }
 
-.copyright {
-  font-size: 14px;
-  color: #999;
+.related-products-skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.related-product-skeleton {
+  margin-bottom: 0;
 }
 
 /* Responsive Design */
@@ -2813,6 +2823,10 @@ onMounted(() => {
   }
 
   .related-products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .related-products-skeleton {
     grid-template-columns: repeat(3, 1fr);
   }
 }
@@ -2852,19 +2866,23 @@ onMounted(() => {
     gap: 16px;
   }
 
+  .related-products-skeleton {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
   .reviews-section,
   .related-products-section {
     padding: 20px;
-  }
-
-  .footer-links {
-    flex-direction: column;
-    gap: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .related-products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .related-products-skeleton {
     grid-template-columns: 1fr;
   }
 

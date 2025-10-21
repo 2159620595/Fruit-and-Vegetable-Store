@@ -164,7 +164,18 @@
         class="order-list"
         :key="forceUpdateKey"
       >
-        <transition-group name="order-list" tag="div" :key="activeTab">
+        <!-- 加载状态骨架屏 -->
+        <div v-if="loading" class="order-list-skeleton">
+          <SkeletonLoader
+            v-for="i in 5"
+            :key="i"
+            type="card"
+            class="order-item-skeleton"
+          />
+        </div>
+
+        <!-- 订单列表 -->
+        <transition-group v-else name="order-list" tag="div" :key="activeTab">
           <div
             v-for="order in filteredOrders"
             :key="order.id"
@@ -450,8 +461,6 @@
       </div>
     </div>
 
-    <Footer />
-
     <!-- 评价对话框 -->
     <OrderReviewDialog
       v-model="reviewDialogVisible"
@@ -484,11 +493,11 @@ import { Search } from '@element-plus/icons-vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { useOrderStore } from '@/stores/orderStore'
 import { useLogisticsStore } from '@/stores/logisticsStore'
-import Footer from '@/components/Footer.vue'
 import OrderReviewDialog from '@/components/OrderReviewDialog.vue'
 import ReviewDetailDialog from '@/components/ReviewDetailDialog.vue'
 import LogisticsDialog from '@/components/LogisticsDialog.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import PaymentDialog from '@/components/PaymentDialog.vue'
 import { h } from 'vue'
 
@@ -2012,6 +2021,18 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
+/* 骨架屏样式 */
+.order-list-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-item-skeleton {
+  height: 200px;
+  margin-bottom: 0;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .container {
@@ -2022,40 +2043,151 @@ onUnmounted(() => {
     font-size: 24px;
   }
 
-  .order-tabs {
-    padding: 12px 16px 0;
-  }
-
   .order-card {
     padding: 16px;
   }
 
   .order-header {
     flex-direction: column;
-    align-items: flex-start;
     gap: 12px;
+    align-items: flex-start;
   }
 
-  .order-items {
+  .order-info {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .order-number {
+    font-size: 14px;
+  }
+
+  .order-date {
+    font-size: 12px;
+  }
+
+  .order-status {
+    align-self: flex-start;
+  }
+
+  .order-products {
     gap: 12px;
   }
 
-  .order-total {
-    width: 100%;
-    text-align: left;
-    padding-left: 0;
-    padding-top: 12px;
-    border-top: 1px dashed #e0e0e0;
+  .order-product {
+    gap: 12px;
+  }
+
+  .product-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .product-name {
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 14px;
+  }
+
+  .product-quantity {
+    font-size: 12px;
+  }
+
+  .order-summary {
+    gap: 8px;
+  }
+
+  .total-price {
+    font-size: 16px;
+  }
+
+  .shipping-fee {
+    font-size: 14px;
   }
 
   .order-actions {
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .order-actions .el-button {
-    flex: 1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .order-card {
+    padding: 12px;
+  }
+
+  .order-header {
+    gap: 8px;
+  }
+
+  .order-info {
+    gap: 6px;
+  }
+
+  .order-number {
+    font-size: 13px;
+  }
+
+  .order-date {
+    font-size: 11px;
+  }
+
+  .order-products {
+    gap: 8px;
+  }
+
+  .order-product {
+    gap: 8px;
+  }
+
+  .product-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .product-name {
+    font-size: 13px;
+  }
+
+  .product-price {
+    font-size: 13px;
+  }
+
+  .product-quantity {
+    font-size: 11px;
+  }
+
+  .order-summary {
+    gap: 6px;
+  }
+
+  .total-price {
+    font-size: 15px;
+  }
+
+  .shipping-fee {
+    font-size: 13px;
+  }
+
+  .order-actions {
+    gap: 6px;
+  }
+
+  .order-actions .el-button {
     min-width: 100px;
   }
 

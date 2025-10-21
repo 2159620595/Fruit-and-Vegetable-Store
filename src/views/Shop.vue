@@ -366,8 +366,14 @@
 
           <!-- 加载状态 -->
           <div v-if="productStore.loading" class="loading-state">
-            <div class="spinner"></div>
-            <p>加载中...</p>
+            <div class="products-grid">
+              <SkeletonLoader
+                v-for="i in 12"
+                :key="i"
+                type="product"
+                class="product-skeleton"
+              />
+            </div>
           </div>
 
           <!-- 商品列表 -->
@@ -584,6 +590,7 @@ import { useProductStore } from '../stores/productStore'
 import { useCartStore } from '../stores/cartStore'
 import { useUserStore } from '../stores/userStore'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -1607,6 +1614,21 @@ h1 {
   color: #2d5a27;
 }
 
+/* 骨架屏样式 */
+.product-skeleton {
+  margin-bottom: 20px;
+}
+
+.loading-state {
+  padding: 20px 0;
+}
+
+.loading-state .products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
 @media (max-width: 960px) {
   .shop-layout {
     grid-template-columns: 1fr;
@@ -1617,12 +1639,22 @@ h1 {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
   }
+
+  .loading-state .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+  }
 }
 
 @media (max-width: 640px) {
   .products-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 15px;
+  }
+
+  .loading-state .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
   .product-image {
@@ -1633,6 +1665,35 @@ h1 {
     flex-direction: column;
     align-items: flex-start !important;
     gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .loading-state .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .product-image {
+    height: 120px;
+  }
+
+  .product-name {
+    font-size: 13px;
+  }
+
+  .product-price {
+    font-size: 14px;
+  }
+
+  .add-to-cart-btn {
+    font-size: 11px;
+    padding: 4px 8px;
   }
 }
 
