@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { logisticsApi, logisticsUtils, mockLogisticsData } from '@/api/logistics'
+import {
+  logisticsApi,
+  logisticsUtils,
+  mockLogisticsData,
+} from '@/api/logistics'
 
 export const useLogisticsStore = defineStore('logistics', () => {
   // State
@@ -12,13 +16,13 @@ export const useLogisticsStore = defineStore('logistics', () => {
 
   // Getters
   const getLogisticsByTrackingNumber = computed(() => {
-    return (trackingNumber) => {
+    return trackingNumber => {
       return logisticsData.value.get(trackingNumber) || null
     }
   })
 
   const getLogisticsByOrderId = computed(() => {
-    return (orderId) => {
+    return orderId => {
       for (const [trackingNumber, data] of logisticsData.value) {
         if (data.orderId === orderId) {
           return data
@@ -43,7 +47,7 @@ export const useLogisticsStore = defineStore('logistics', () => {
     trackingNumber,
     carrier = '',
     orderId = null,
-    useMock = true,
+    useMock = true
   ) => {
     if (!trackingNumber) {
       throw new Error('快递单号不能为空')
@@ -57,7 +61,10 @@ export const useLogisticsStore = defineStore('logistics', () => {
 
       if (useMock) {
         // 使用模拟数据
-        data = mockLogisticsData.generateMockLogisticsInfo(trackingNumber, carrier)
+        data = mockLogisticsData.generateMockLogisticsInfo(
+          trackingNumber,
+          carrier
+        )
       } else {
         // 调用真实API
         data = await logisticsApi.getLogisticsInfo(trackingNumber, carrier)
@@ -102,7 +109,10 @@ export const useLogisticsStore = defineStore('logistics', () => {
           orderId,
           trackingNumber: `SF${Date.now()}`,
           carrier: '顺丰速运',
-          ...mockLogisticsData.generateMockLogisticsInfo(`SF${Date.now()}`, '顺丰速运'),
+          ...mockLogisticsData.generateMockLogisticsInfo(
+            `SF${Date.now()}`,
+            '顺丰速运'
+          ),
         }
       } else {
         // 调用真实API
@@ -141,7 +151,7 @@ export const useLogisticsStore = defineStore('logistics', () => {
       trackingNumber,
       existingData.carrier,
       existingData.orderId,
-      useMock,
+      useMock
     )
   }
 
@@ -156,7 +166,7 @@ export const useLogisticsStore = defineStore('logistics', () => {
     trackingNumber,
     carrier = '',
     interval = 30000,
-    useMock = true,
+    useMock = true
   ) => {
     if (!trackingNumber) {
       throw new Error('快递单号不能为空')
@@ -169,8 +179,8 @@ export const useLogisticsStore = defineStore('logistics', () => {
     const timer = setInterval(async () => {
       try {
         await refreshLogisticsInfo(trackingNumber, useMock)
-      } catch (err) {
-        console.error('自动刷新物流信息失败:', err)
+      } catch {
+        // 自动刷新失败时静默处理
       }
     }, interval)
 
@@ -191,7 +201,7 @@ export const useLogisticsStore = defineStore('logistics', () => {
    * 取消物流更新订阅
    * @param {string} trackingNumber - 快递单号
    */
-  const unsubscribeLogisticsUpdates = (trackingNumber) => {
+  const unsubscribeLogisticsUpdates = trackingNumber => {
     const subscription = subscriptions.value.get(trackingNumber)
     if (subscription) {
       clearInterval(subscription.timer)
@@ -259,7 +269,6 @@ export const useLogisticsStore = defineStore('logistics', () => {
         return await logisticsApi.getSupportedCarriers()
       }
     } catch (err) {
-      console.error('获取快递公司列表失败:', err)
       throw err
     }
   }
@@ -277,7 +286,7 @@ export const useLogisticsStore = defineStore('logistics', () => {
    * 格式化物流状态
    * @param {string} status - 状态
    */
-  const formatLogisticsStatus = (status) => {
+  const formatLogisticsStatus = status => {
     return logisticsUtils.formatLogisticsStatus(status)
   }
 
@@ -285,7 +294,7 @@ export const useLogisticsStore = defineStore('logistics', () => {
    * 格式化时间
    * @param {string|Date} time - 时间
    */
-  const formatTime = (time) => {
+  const formatTime = time => {
     return logisticsUtils.formatTime(time)
   }
 
@@ -293,7 +302,7 @@ export const useLogisticsStore = defineStore('logistics', () => {
    * 获取快递公司图标
    * @param {string} carrier - 承运商
    */
-  const getCarrierIcon = (carrier) => {
+  const getCarrierIcon = carrier => {
     return logisticsUtils.getCarrierIcon(carrier)
   }
 
@@ -310,7 +319,7 @@ export const useLogisticsStore = defineStore('logistics', () => {
    * 获取订阅状态
    * @param {string} trackingNumber - 快递单号
    */
-  const getSubscriptionStatus = (trackingNumber) => {
+  const getSubscriptionStatus = trackingNumber => {
     const subscription = subscriptions.value.get(trackingNumber)
     return subscription
       ? {

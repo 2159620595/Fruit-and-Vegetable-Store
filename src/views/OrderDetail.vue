@@ -543,7 +543,6 @@ const orderSteps = computed(() => {
   if (!order.value) return []
 
   const currentStatus = order.value.status
-  // const statusInfo = getStatusInfo(currentStatus) // 暂时未使用
 
   // 定义标准订单流程步骤（与后端状态保持一致）
   const standardSteps = [
@@ -857,14 +856,6 @@ const orderStatusConfig = {
     canCancel: false,
   },
 }
-
-// const getStatusText = status => {
-//   return orderStatusConfig[status]?.text || status || '未知状态'
-// }
-
-// const getStatusClass = status => {
-//   return orderStatusConfig[status]?.class || 'status-default'
-// }
 
 const getStatusInfo = status => {
   return (

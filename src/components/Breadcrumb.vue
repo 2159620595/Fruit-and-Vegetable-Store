@@ -411,8 +411,8 @@ const fetchUserInfo = async () => {
   if (userStore.isLoggedIn && userStore.token) {
     try {
       await userStore.fetchProfile()
-    } catch (error) {
-      console.error('获取用户信息失败:', error)
+    } catch {
+      // 获取用户信息失败时静默处理
     }
   }
 }

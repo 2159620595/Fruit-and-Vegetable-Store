@@ -600,7 +600,6 @@ const productStore = useProductStore()
 const cartStore = useCartStore()
 
 // 筛选状态
-// const minPrice = ref(0) // 暂时未使用
 const maxPrice = ref(1000)
 const priceRangeMax = ref(1000)
 const sortBy = ref('name')
@@ -645,17 +644,6 @@ const toast = ref({
   message: '',
   type: 'success',
 })
-
-// 从商品数据中提取分类
-// const categories = computed(() => {
-//   const cats = new Set()
-//   productStore.productList.forEach(p => {
-//     if (p.category) {
-//       cats.add(p.category)
-//     }
-//   })
-//   return Array.from(cats)
-// })
 
 // 从商品数据中提取品牌
 const brands = computed(() => {

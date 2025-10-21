@@ -253,9 +253,6 @@ const loadFavorites = async () => {
     const response = await getFavoritesList()
     networkStatus.value = 'online'
 
-    // 调试信息：打印API响应
-    // console.log('收藏列表API响应:', response)
-
     // 使用辅助函数安全地提取数组数据
     const favoritesData = extractArrayData(response.data)
 
@@ -265,14 +262,8 @@ const loadFavorites = async () => {
         is_favorite: true, // 收藏列表中的商品都是已收藏状态
         favoriteLoading: false, // 添加加载状态
       }))
-
-      // console.log('处理后的收藏列表:', favorites.value)
     } else {
       favorites.value = []
-      // console.warn(
-      //   '未找到有效的收藏数据，API响应结构:',
-      //   JSON.stringify(response.data, null, 2)
-      // )
 
       if (response.data && response.data.code === 200) {
         ElMessage.info('您还没有收藏任何商品')
@@ -282,7 +273,6 @@ const loadFavorites = async () => {
     }
   } catch {
     networkStatus.value = 'offline'
-    // console.error('加载收藏列表失败:', error)
     ElMessage.error('加载收藏列表失败，请检查网络连接')
     favorites.value = []
   } finally {

@@ -28,13 +28,99 @@
           <h1 class="checkout-title">结账</h1>
 
           <!-- Shipping Address -->
-          <AddressSelector
-            v-model="selectedAddressId"
-            @change="onAddressChange"
-          />
-          <div v-if="errors.address" class="error-message">
-            {{ errors.address }}
+          <div class="form-section">
+            <div class="address-header">
+              <h2 class="section-title">收货地址</h2>
+              <router-link to="/addresses" class="manage-address-link">
+                <el-icon><Setting /></el-icon>
+                管理收货地址
+              </router-link>
+            </div>
+
+            <!-- 已选择的地址显示 -->
+            <div v-if="selectedAddress" class="selected-address-card">
+              <div class="address-content">
+                <div class="address-header-row">
+                  <span class="recipient-name">
+                    {{ selectedAddress.recipient_name }}
+                  </span>
+                  <span class="phone">{{ selectedAddress.phone }}</span>
+                  <span v-if="selectedAddress.is_default" class="default-tag">
+                    默认
+                  </span>
+                </div>
+                <div class="address-detail">
+                  {{ selectedAddress.region }}
+                  {{ selectedAddress.detailed_address }}
+                </div>
+              </div>
+              <el-button
+                type="primary"
+                text
+                @click="showAddressListDialog = true"
+              >
+                更换地址
+              </el-button>
+            </div>
+
+            <!-- 没有地址时的提示 -->
+            <div v-else class="no-address-tip">
+              <el-icon :size="40" color="#909399"><Location /></el-icon>
+              <p>暂无收货地址</p>
+              <el-button type="primary" @click="router.push('/addresses')">
+                去添加收货地址
+              </el-button>
+            </div>
+
+            <div v-if="errors.address" class="error-message">
+              {{ errors.address }}
+            </div>
           </div>
+
+          <!-- 地址选择对话框 -->
+          <el-dialog
+            v-model="showAddressListDialog"
+            title="选择收货地址"
+            width="600px"
+            :close-on-click-modal="false"
+          >
+            <div v-if="addressList.length > 0" class="address-list-dialog">
+              <div
+                v-for="address in addressList"
+                :key="address.id"
+                class="address-item-dialog"
+                :class="{ selected: selectedAddressId === address.id }"
+                @click="selectAddress(address)"
+              >
+                <div class="address-content">
+                  <div class="address-header-row">
+                    <span class="recipient-name">
+                      {{ address.recipient_name }}
+                    </span>
+                    <span class="phone">{{ address.phone }}</span>
+                    <span v-if="address.is_default" class="default-tag">
+                      默认
+                    </span>
+                  </div>
+                  <div class="address-detail">
+                    {{ address.region }} {{ address.detailed_address }}
+                  </div>
+                </div>
+                <div
+                  v-if="selectedAddressId === address.id"
+                  class="selected-icon"
+                >
+                  <el-icon color="#67c23a" :size="20"><CircleCheck /></el-icon>
+                </div>
+              </div>
+            </div>
+            <div v-else class="no-address-in-dialog">
+              <p>暂无收货地址</p>
+              <el-button type="primary" @click="goToAddressManagement">
+                去添加收货地址
+              </el-button>
+            </div>
+          </el-dialog>
 
           <!-- Delivery Method -->
           <div class="form-section">
@@ -307,7 +393,7 @@ defineOptions({
 })
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox, ElSelect, ElOption } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   ChatDotRound,
   Wallet,
@@ -318,13 +404,14 @@ import {
   InfoFilled,
   SuccessFilled,
   Plus,
+  Setting,
+  Location,
 } from '@element-plus/icons-vue'
 import { useCartStore } from '../stores/cartStore'
 import { useOrderStore } from '../stores/orderStore'
 import { useUserStore } from '../stores/userStore'
-// import { useAddressStore } from '../stores/addressStore' // 暂时未使用
-import AddressSelector from '../components/AddressSelector.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import { getAddressList } from '@/api/address'
 import {
   calculateShippingFee,
   calculateFreeShippingRemaining,
@@ -336,13 +423,12 @@ const router = useRouter()
 const cartStore = useCartStore()
 const orderStore = useOrderStore()
 const userStore = useUserStore()
-// const addressStore = useAddressStore() // 暂时未使用
 
-// 选中的地址ID
+// 地址相关
 const selectedAddressId = ref(null)
-
-// 选中的地址对象
 const selectedAddress = ref(null)
+const addressList = ref([])
+const showAddressListDialog = ref(false)
 
 const deliveryMethod = ref('standard')
 const paymentMethod = ref('balance') // 默认选择余额支付
@@ -387,6 +473,52 @@ const totalAmount = computed(() => {
   return subtotal + shipping - discountAmount
 })
 
+// 加载地址列表
+const loadAddresses = async () => {
+  try {
+    const response = await getAddressList()
+    if (response.data && response.data.code === 200) {
+      addressList.value = response.data.data || []
+    } else if (Array.isArray(response.data)) {
+      addressList.value = response.data
+    } else {
+      addressList.value = []
+    }
+
+    // 自动选择默认地址
+    if (addressList.value.length > 0 && !selectedAddressId.value) {
+      const defaultAddr = addressList.value.find(
+        addr => addr.is_default === 1 || addr.is_default === true
+      )
+      if (defaultAddr) {
+        selectedAddress.value = defaultAddr
+        selectedAddressId.value = defaultAddr.id
+      } else {
+        // 如果没有默认地址，选择第一个
+        selectedAddress.value = addressList.value[0]
+        selectedAddressId.value = addressList.value[0].id
+      }
+    }
+  } catch {
+    // 加载失败时使用空数组
+    addressList.value = []
+  }
+}
+
+// 选择地址
+const selectAddress = address => {
+  selectedAddress.value = address
+  selectedAddressId.value = address.id
+  showAddressListDialog.value = false
+  errors.value.address = ''
+}
+
+// 跳转到地址管理页面
+const goToAddressManagement = () => {
+  showAddressListDialog.value = false
+  router.push('/addresses')
+}
+
 // 页面加载时检查购物车并刷新余额
 onMounted(async () => {
   // 如果没有选中的商品，页面会显示UI提示，不需要额外的消息提示
@@ -399,15 +531,13 @@ onMounted(async () => {
   // 刷新用户余额
   try {
     await userStore.fetchUserBalance()
-  } catch {}
-})
+  } catch {
+    // 余额获取失败不影响结账流程
+  }
 
-// 地址选择变化
-const onAddressChange = address => {
-  selectedAddress.value = address
-  // 清空地址错误
-  errors.value.address = ''
-}
+  // 加载地址列表
+  await loadAddresses()
+})
 
 // 表单验证
 const validateForm = () => {
@@ -653,117 +783,6 @@ const formatPrice = price => {
   padding: 20px;
 }
 
-/* Header Styles */
-.header {
-  background-color: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-light);
-  padding: 16px 0;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.leaf-icon {
-  font-size: 16px;
-  color: var(--primary-dark);
-}
-
-.brand-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.nav-links {
-  display: flex;
-  gap: 32px;
-}
-
-.nav-link {
-  color: var(--text-color);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.nav-link:hover {
-  color: var(--primary-dark);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.cart-btn {
-  background-color: rgba(74, 129, 87, 0.1);
-  color: var(--primary-dark);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.cart-btn:hover {
-  background-color: rgba(74, 129, 87, 0.15);
-}
-
-.profile-pic {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.profile-pic img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Breadcrumbs */
-.breadcrumbs {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 24px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.breadcrumb-link {
-  color: var(--primary-dark);
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.breadcrumb-separator {
-  color: var(--text-color);
-  font-size: 14px;
-}
-
-.breadcrumb-current {
-  color: var(--text-color);
-  font-size: 14px;
-}
-
 /* 空购物车提示 */
 .empty-cart-message {
   text-align: center;
@@ -861,6 +880,160 @@ const formatPrice = price => {
   margin-top: -12px;
   margin-bottom: 12px;
   padding-left: 4px;
+}
+
+/* 地址选择区域 */
+.address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.manage-address-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background-color: var(--bg-tertiary);
+  color: var(--primary-color);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.manage-address-link:hover {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.selected-address-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--bg-tertiary);
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.selected-address-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.address-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.address-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.recipient-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.phone {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.default-tag {
+  padding: 2px 8px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.address-detail {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.no-address-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: var(--bg-tertiary);
+  border: 2px dashed var(--border-light);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.no-address-tip p {
+  margin: 12px 0 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* 地址选择对话框 */
+.address-list-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.address-item-dialog {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: var(--bg-tertiary);
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.address-item-dialog:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(103, 194, 58, 0.05);
+}
+
+.address-item-dialog.selected {
+  border-color: var(--primary-color);
+  background-color: rgba(103, 194, 58, 0.1);
+}
+
+.selected-icon {
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.no-address-in-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.no-address-in-dialog p {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
 .full-width {

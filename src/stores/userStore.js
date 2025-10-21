@@ -93,8 +93,8 @@ export const useUserStore = defineStore('user', {
           const { useCartStore } = await import('./cartStore')
           const cartStore = useCartStore()
           await cartStore.syncLocalCartToBackend()
-        } catch (cartError) {
-          console.warn('⚠️ 购物车同步失败（不影响登录）:', cartError)
+        } catch {
+          // 购物车同步失败不影响登录
         }
 
         return response.data
@@ -206,8 +206,7 @@ export const useUserStore = defineStore('user', {
         const { useLogisticsStore } = await import('./logisticsStore')
         const logisticsStore = useLogisticsStore()
         logisticsStore.clearLogisticsData()
-      } catch (error) {
-        console.error('❌ 清除数据时出错:', error)
+      } catch {
         // 即使清除其他数据失败，也要确保用户数据被清除
       }
 
@@ -293,15 +292,9 @@ export const useUserStore = defineStore('user', {
             this.user.membership_level = data.membership_level
             this.user.total_recharge = this.totalRecharge
           }
-
-          console.log('✅ 余额信息已更新:', {
-            balance: this.balance,
-            membershipLevel: this.membershipLevel,
-            totalRecharge: this.totalRecharge,
-          })
         }
-      } catch (error) {
-        console.error('获取用户余额信息失败:', error)
+      } catch {
+        // 获取余额信息失败时静默处理
       }
     },
 
@@ -366,21 +359,12 @@ export const useUserStore = defineStore('user', {
 
         const response = await getRechargeRecordsService(queryParams)
 
-        console.log('🔍 充值记录API响应:', response.data)
-
         if (response.data?.code === 200 && response.data?.data) {
           const records = response.data.data.records || []
           this.rechargeRecords = records
-
-          // 确保时间字段被正确处理
-          if (records.length > 0) {
-            console.log('✅ 第一条记录:', records[0])
-          }
-
           return response.data.data
         }
       } catch (error) {
-        console.error('获取充值记录失败:', error)
         throw error
       }
     },
@@ -395,7 +379,6 @@ export const useUserStore = defineStore('user', {
           return response.data.data
         }
       } catch (error) {
-        console.error('获取充值统计失败:', error)
         throw error
       }
     },
@@ -423,7 +406,6 @@ export const useUserStore = defineStore('user', {
 
         throw new Error('获取充值记录详情失败')
       } catch (error) {
-        console.error('获取充值记录详情失败:', error)
         throw error
       }
     },
@@ -439,8 +421,8 @@ export const useUserStore = defineStore('user', {
           this.balanceTransactions = response.data.data.transactions || []
           return response.data.data
         }
-      } catch (error) {
-        console.error('获取余额变动记录失败:', error)
+      } catch {
+        // 获取余额变动记录失败时静默处理
       }
     },
 
@@ -501,11 +483,8 @@ export const useUserStore = defineStore('user', {
           return data
         }
       } catch (error) {
-        console.error('获取会员折扣信息失败:', error)
-
         // 如果接口不存在，返回默认的会员信息
         if (error.message && error.message.includes('接口不存在')) {
-          console.warn('会员折扣接口不存在，使用默认会员信息')
           const defaultMembership = {
             membership_level: this.membershipLevel || '普通会员',
             discount_rate: 1.0,

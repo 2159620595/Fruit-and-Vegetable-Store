@@ -159,16 +159,14 @@ const loadReviews = async () => {
             product_name: item.product_name,
             product_image: item.product_image,
           }))
-      } catch (error) {
-        console.error(`获取商品 ${item.product_id} 评价失败:`, error)
+      } catch {
         return []
       }
     })
 
     const allReviews = await Promise.all(reviewPromises)
     reviews.value = allReviews.flat()
-  } catch (error) {
-    console.error('获取评价失败:', error)
+  } catch {
     ElMessage.error('获取评价失败')
     reviews.value = []
   } finally {

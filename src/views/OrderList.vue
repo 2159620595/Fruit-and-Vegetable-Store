@@ -1546,14 +1546,6 @@ const startAutoStatusFlow = async order => {
   }
 }
 
-// 停止自动状态流转（暂未使用，但保留供将来使用）
-// const stopAutoStatusFlow = orderId => {
-//   if (autoStatusTimers.value.has(orderId)) {
-//     clearInterval(autoStatusTimers.value.get(orderId))
-//     autoStatusTimers.value.delete(orderId)
-//   }
-// }
-
 // 清理所有定时器
 const clearAllAutoStatusTimers = () => {
   autoStatusTimers.value.forEach(timer => {
@@ -1561,19 +1553,6 @@ const clearAllAutoStatusTimers = () => {
   })
   autoStatusTimers.value.clear()
 }
-
-// 检查并启动待发货订单的自动流转（已禁用）
-// const checkAndStartAutoFlow = () => {
-//   orders.value.forEach(order => {
-//     if (
-//       order.status === 'processing' &&
-//       !autoStatusTimers.value.has(order.id)
-//     ) {
-//       console.log('🔍 发现待发货订单，启动自动流转:', order.id)
-//       startAutoStatusFlow(order.id)
-//     }
-//   })
-// }
 
 // 初始化
 onMounted(() => {
