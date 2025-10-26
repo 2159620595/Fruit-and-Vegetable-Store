@@ -42,6 +42,11 @@ export const useUserStore = defineStore('user', {
     userInfo: state => state.user,
     // 是否已登录
     isLoggedIn: state => state.isAuthenticated && !!state.token,
+    // 是否是管理员
+    isAdmin: state =>
+      state.isAuthenticated &&
+      !!state.token &&
+      (state.user?.role === 'admin' || state.user?.is_admin === true),
   },
 
   actions: {
@@ -81,9 +86,18 @@ export const useUserStore = defineStore('user', {
           throw new Error('登录响应格式错误：未找到token')
         }
 
+        // 确保user对象包含所有必要字段（包括role）
+        if (responseData?.data && !user?.role && responseData.data.role) {
+          user = {
+            ...user,
+            role: responseData.data.role,
+            status: responseData.data.status,
+          }
+        }
+
         // 保存到store
         this.token = token
-        this.user = user
+        this.user = user || {}
         this.isAuthenticated = true
 
         // Pinia持久化插件会自动保存
@@ -144,11 +158,19 @@ export const useUserStore = defineStore('user', {
         if (response.data?.code === 200 && response.data?.data) {
           // 更新用户信息，包含统计数据
           const data = response.data.data
+          
+          // 保留登录时的 role 和 status 字段
+          const currentRole = this.user?.role
+          const currentStatus = this.user?.status
+          
           this.user = {
             ...data.user,
             order_stats: data.order_stats,
             favorite_count: data.favorite_count,
+            role: data.user?.role || currentRole,
+            status: data.user?.status || currentStatus,
           }
+          
           // 更新余额、会员等级和累计充值
           this.balance = data.user?.balance || 0
           this.membershipLevel = data.user?.membership_level || '普通会员'

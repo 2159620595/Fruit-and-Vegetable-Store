@@ -153,6 +153,69 @@ const router = createRouter({
       redirect: '/login',
     },
 
+    // 后台管理系统（使用懒加载优化性能）
+    {
+      path: '/admin',
+      component: () => import('@/views/admin/AdminLayout.vue'),
+      redirect: '/admin/dashboard',
+      meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
+      },
+      children: [
+        {
+          path: 'dashboard',
+          name: 'AdminDashboard',
+          component: () => import('@/views/admin/Dashboard.vue'),
+          meta: {
+            title: '控制台 - 后台管理系统',
+            requiresAuth: true,
+            requiresAdmin: true,
+          },
+        },
+        {
+          path: 'products',
+          name: 'AdminProducts',
+          component: () => import('@/views/admin/ProductManagement.vue'),
+          meta: {
+            title: '商品管理 - 后台管理系统',
+            requiresAuth: true,
+            requiresAdmin: true,
+          },
+        },
+        {
+          path: 'orders',
+          name: 'AdminOrders',
+          component: () => import('@/views/admin/OrderManagement.vue'),
+          meta: {
+            title: '订单管理 - 后台管理系统',
+            requiresAuth: true,
+            requiresAdmin: true,
+          },
+        },
+        {
+          path: 'users',
+          name: 'AdminUsers',
+          component: () => import('@/views/admin/UserManagement.vue'),
+          meta: {
+            title: '用户管理 - 后台管理系统',
+            requiresAuth: true,
+            requiresAdmin: true,
+          },
+        },
+        {
+          path: 'reviews',
+          name: 'AdminReviews',
+          component: () => import('@/views/admin/ReviewManagement.vue'),
+          meta: {
+            title: '评价管理 - 后台管理系统',
+            requiresAuth: true,
+            requiresAdmin: true,
+          },
+        },
+      ],
+    },
+
     // 404页面
     {
       path: '/:pathMatch(.*)*',
@@ -202,6 +265,23 @@ router.beforeEach((to, from, next) => {
         path: '/login',
         query: { redirect: to.fullPath },
       })
+      return
+    }
+  }
+
+  // 检查是否需要管理员权限
+  if (to.meta.requiresAdmin) {
+    if (!userStore.isLoggedIn) {
+      // 未登录，跳转到登录页
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath },
+      })
+      return
+    }
+    if (!userStore.isAdmin) {
+      // 已登录但不是管理员，跳转到首页并提示
+      next('/')
       return
     }
   }

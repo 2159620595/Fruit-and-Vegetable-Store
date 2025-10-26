@@ -17,6 +17,22 @@ onMounted(() => {
   // 初始化主题
   themeStore.loadTheme()
 
+  // 如果 Store 中的 user 没有 role，从 localStorage 恢复
+  if (userStore.token && userStore.user && !userStore.user.role) {
+    try {
+      const localData = JSON.parse(localStorage.getItem('user') || '{}')
+      if (localData.user?.role) {
+        userStore.user = {
+          ...userStore.user,
+          role: localData.user.role,
+          status: localData.user.status,
+        }
+      }
+    } catch (error) {
+      // 静默处理错误
+    }
+  }
+
   // 如果有token，尝试获取用户信息
   if (userStore.token) {
     userStore.fetchProfile().catch(() => {

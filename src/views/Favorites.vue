@@ -290,7 +290,10 @@ const toggleSelect = productId => {
 }
 
 const batchRemove = async () => {
-  if (selectedItems.value.length === 0) return
+  if (selectedItems.value.length === 0) {
+    ElMessage.warning('请先选择要删除的商品')
+    return
+  }
 
   try {
     await ElMessageBox.confirm(
@@ -303,43 +306,58 @@ const batchRemove = async () => {
       }
     )
 
+    // 保存要删除的商品ID
+    const idsToRemove = [...selectedItems.value]
+    
     // 调用批量删除收藏的API
-    await batchRemoveFavorites(selectedItems.value)
+    const result = await batchRemoveFavorites(idsToRemove)
 
     // 更新本地状态
     favorites.value = favorites.value.filter(
-      item => !selectedItems.value.includes(item.id)
+      item => !idsToRemove.includes(item.id)
     )
     selectedItems.value = []
 
-    ElMessage.success('删除成功')
+    ElMessage.success(`成功删除 ${idsToRemove.length} 件商品`)
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('删除失败，请重试')
+      console.error('批量删除错误:', error)
+      ElMessage.error(error.message || '删除失败，请重试')
     }
   }
 }
 
 const clearAll = async () => {
-  if (favorites.value.length === 0) return
+  if (favorites.value.length === 0) {
+    ElMessage.warning('收藏列表已为空')
+    return
+  }
 
   try {
-    await ElMessageBox.confirm('确定要清空所有收藏吗？', '清空收藏', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      `确定要清空所有收藏吗？共 ${favorites.value.length} 件商品将被移除。`,
+      '清空收藏',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    const count = favorites.value.length
 
     // 调用清空收藏的API
     await clearAllFavorites()
 
+    // 清空本地状态
     favorites.value = []
     selectedItems.value = []
 
-    ElMessage.success('清空成功')
+    ElMessage.success(`已清空 ${count} 件收藏商品`)
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('清空失败，请重试')
+      console.error('清空收藏错误:', error)
+      ElMessage.error(error.message || '清空失败，请重试')
     }
   }
 }

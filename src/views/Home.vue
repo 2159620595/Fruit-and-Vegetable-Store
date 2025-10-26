@@ -108,7 +108,29 @@
           <!-- 分类开始 -->
           <div class="bar">
             <div class="bar-item">
-              <a class="bar-items active" href="#">
+              <a
+                class="bar-items"
+                :class="{ active: selectedCategory === '' }"
+                @click.prevent="selectCategory('')"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24px"
+                  height="24px"
+                  fill="currentColor"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    d="M224,177.32V78.68a8,8,0,0,0-4.07-6.97l-88-49.5a8,8,0,0,0-7.86,0l-88,49.5A8,8,0,0,0,32,78.68v98.64a8,8,0,0,0,4.07,6.97l88,49.5a8,8,0,0,0,7.86,0l88-49.5A8,8,0,0,0,224,177.32Z"
+                  ></path>
+                </svg>
+                <p>全部</p>
+              </a>
+              <a
+                class="bar-items"
+                :class="{ active: selectedCategory === '水果' }"
+                @click.prevent="selectCategory('水果')"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24px"
@@ -122,7 +144,11 @@
                 </svg>
                 <p>时令水果</p>
               </a>
-              <a class="bar-items" href="#">
+              <a
+                class="bar-items"
+                :class="{ active: selectedCategory === '蔬菜' }"
+                @click.prevent="selectCategory('蔬菜')"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24px"
@@ -136,7 +162,11 @@
                 </svg>
                 <p>新鲜蔬菜</p>
               </a>
-              <a class="bar-items" href="#">
+              <a
+                class="bar-items"
+                :class="{ active: selectedCategory === '果汁' }"
+                @click.prevent="selectCategory('果汁')"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24px"
@@ -150,7 +180,11 @@
                 </svg>
                 <p>健康果汁</p>
               </a>
-              <a class="bar-items" href="#">
+              <a
+                class="bar-items"
+                :class="{ active: selectedCategory === '有机食品' }"
+                @click.prevent="selectCategory('有机食品')"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24px"
@@ -162,19 +196,24 @@
                     d="M223.45,40.07a8,8,0,0,0-7.52-7.52C139.8,28.08,78.82,51,52.82,94a87.09,87.09,0,0,0-12.76,49c.57,15.92,5.21,32,13.79,47.85l-19.51,19.5a8,8,0,0,0,11.32,11.32l19.5-19.51C81,210.73,97.09,215.37,113,215.94q1.67.06,3.33.06A86.93,86.93,0,0,0,162,203.18C205,177.18,227.93,116.21,223.45,40.07ZM153.75,189.5c-22.75,13.78-49.68,14-76.71.77l88.63-88.62a8,8,0,0,0-11.32-11.32L65.73,179c-13.19-27-13-54,.77-76.71,22.09-36.47,74.6-56.44,141.31-54.06C210.2,114.89,190.22,167.41,153.75,189.5Z"
                   ></path>
                 </svg>
-                <p>有机蔬菜</p>
+                <p>有机食品</p>
               </a>
             </div>
           </div>
           <!-- 分类结束 -->
 
           <!-- 热门精选开始 -->
-          <h2 class="title">热门精选</h2>
+          <h2 class="title">
+            热门精选
+            <span v-if="selectedCategory" class="category-badge">
+              {{ selectedCategory }}
+            </span>
+          </h2>
           <div class="product">
             <!-- 加载状态骨架屏 -->
             <div v-if="loading" class="product-list">
               <SkeletonLoader
-                v-for="i in 4"
+                v-for="i in 5"
                 :key="i"
                 type="product"
                 class="product-skeleton"
@@ -185,39 +224,46 @@
               <!-- 显示热门精选商品 -->
               <div
                 class="product-list-item"
-                v-for="item in popularPicks"
+                :class="{ 'placeholder-item': item.isPlaceholder }"
+                v-for="item in filteredPopularPicks"
                 :key="item.id"
-                @click="click(item.id)"
+                @click="!item.isPlaceholder && click(item.id)"
               >
-                <div
-                  class="product-list-item-img lazy-image"
-                  :data-bg="item.image_url"
-                  v-lazy-bg
-                >
-                  <SkeletonLoader
-                    v-if="!item.imageLoaded"
-                    type="rect"
-                    width="100%"
-                    height="100%"
-                    class="image-skeleton"
-                  />
-                </div>
-                <div>
-                  <p class="product-name">{{ item.name }}</p>
-                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
-                </div>
+                <template v-if="!item.isPlaceholder">
+                  <div
+                    class="product-list-item-img"
+                    :style="{ backgroundImage: `url(${item.image_url || '/placeholder.jpg'})` }"
+                  >
+                  </div>
+                  <div>
+                    <p class="product-name">{{ item.name }}</p>
+                    <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="product-list-item-img placeholder-img"></div>
+                  <div>
+                    <p class="product-name placeholder-text"></p>
+                    <p class="product-price placeholder-text"></p>
+                  </div>
+                </template>
               </div>
             </div>
           </div>
           <!-- 热门精选结束 -->
 
           <!-- 客户最爱开始 -->
-          <h2 class="title">客户最爱</h2>
+          <h2 class="title">
+            客户最爱
+            <span v-if="selectedCategory" class="category-badge">
+              {{ selectedCategory }}
+            </span>
+          </h2>
           <div class="grid-container">
             <!-- 加载状态骨架屏 -->
             <template v-if="loading">
               <SkeletonLoader
-                v-for="i in 6"
+                v-for="i in 5"
                 :key="i"
                 type="product"
                 class="grid-skeleton"
@@ -227,43 +273,46 @@
             <template v-else>
               <div
                 class="grid-item"
-                v-for="item in customerFavorites"
+                :class="{ 'placeholder-item': item.isPlaceholder }"
+                v-for="item in filteredCustomerFavorites"
                 :key="item.id"
-                @click="click(item.id)"
+                @click="!item.isPlaceholder && click(item.id)"
               >
-                <div
-                  class="grid-item-img lazy-image"
-                  :data-bg="item.image_url"
-                  v-lazy-bg
-                >
-                  <SkeletonLoader
-                    v-if="!item.imageLoaded"
-                    type="rect"
-                    width="100%"
-                    height="100%"
-                    class="image-skeleton"
-                  />
-                </div>
-                <div>
-                  <p class="product-name">{{ item.name }}</p>
-                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
-                </div>
-              </div>
-              <!-- 如果没有数据显示提示 -->
-              <div v-if="customerFavorites.length === 0" class="empty-tip">
-                暂无客户最爱商品
+                <template v-if="!item.isPlaceholder">
+                  <div
+                    class="grid-item-img"
+                    :style="{ backgroundImage: `url(${item.image_url || '/placeholder.jpg'})` }"
+                  >
+                  </div>
+                  <div>
+                    <p class="product-name">{{ item.name }}</p>
+                    <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="grid-item-img placeholder-img"></div>
+                  <div>
+                    <p class="product-name placeholder-text"></p>
+                    <p class="product-price placeholder-text"></p>
+                  </div>
+                </template>
               </div>
             </template>
           </div>
           <!-- 客户最爱结束 -->
 
           <!-- 新品上市开始 -->
-          <h2 class="title">新品上市</h2>
+          <h2 class="title">
+            新品上市
+            <span v-if="selectedCategory" class="category-badge">
+              {{ selectedCategory }}
+            </span>
+          </h2>
           <div class="grid-container">
             <!-- 加载状态骨架屏 -->
             <template v-if="loading">
               <SkeletonLoader
-                v-for="i in 6"
+                v-for="i in 5"
                 :key="i"
                 type="product"
                 class="grid-skeleton"
@@ -273,41 +322,48 @@
             <template v-else>
               <div
                 class="grid-item"
-                v-for="item in newArrivals"
+                :class="{ 'placeholder-item': item.isPlaceholder }"
+                v-for="item in filteredNewArrivals"
                 :key="item.id"
-                @click="click(item.id)"
+                @click="!item.isPlaceholder && click(item.id)"
               >
-                <div
-                  class="grid-item-img lazy-image"
-                  :data-bg="item.image_url"
-                  v-lazy-bg
-                >
-                  <SkeletonLoader
-                    v-if="!item.imageLoaded"
-                    type="rect"
-                    width="100%"
-                    height="100%"
-                    class="image-skeleton"
-                  />
-                  <!-- 新品标签 -->
-                  <span class="new-badge" v-if="item.is_new">新品</span>
-                </div>
-                <div>
-                  <p class="product-name">{{ item.name }}</p>
-                  <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
-                </div>
+                <template v-if="!item.isPlaceholder">
+                  <div
+                    class="grid-item-img"
+                    :style="{ backgroundImage: `url(${item.image_url || '/placeholder.jpg'})` }"
+                  >
+                    <!-- 新品标签 -->
+                    <span class="new-badge" v-if="item.is_new">新品</span>
+                  </div>
+                  <div>
+                    <p class="product-name">{{ item.name }}</p>
+                    <p class="product-price">¥{{ item.price }}{{ item.unit }}</p>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="grid-item-img placeholder-img"></div>
+                  <div>
+                    <p class="product-name placeholder-text"></p>
+                    <p class="product-price placeholder-text"></p>
+                  </div>
+                </template>
               </div>
             </template>
           </div>
           <!-- 新品上市结束 -->
 
           <!-- 限时优惠开始 -->
-          <h2 class="title">限时优惠</h2>
+          <h2 class="title">
+            限时优惠
+            <span v-if="selectedCategory" class="category-badge">
+              {{ selectedCategory }}
+            </span>
+          </h2>
           <div class="grid-container">
             <!-- 加载状态骨架屏 -->
             <template v-if="loading">
               <SkeletonLoader
-                v-for="i in 6"
+                v-for="i in 5"
                 :key="i"
                 type="product"
                 class="grid-skeleton"
@@ -317,45 +373,43 @@
             <template v-else>
               <div
                 class="grid-item"
-                v-for="item in limitedOffers"
+                :class="{ 'placeholder-item': item.isPlaceholder }"
+                v-for="item in filteredLimitedOffers"
                 :key="item.id"
-                @click="click(item.id)"
+                @click="!item.isPlaceholder && click(item.id)"
               >
-                <div
-                  class="grid-item-img lazy-image"
-                  :data-bg="item.image_url"
-                  v-lazy-bg
-                >
-                  <SkeletonLoader
-                    v-if="!item.imageLoaded"
-                    type="rect"
-                    width="100%"
-                    height="100%"
-                    class="image-skeleton"
-                  />
-                  <!-- 显示折扣标签 -->
-                  <span
-                    class="discount-badge"
-                    v-if="item.is_discount && item.discount_rate"
+                <template v-if="!item.isPlaceholder">
+                  <div
+                    class="grid-item-img"
+                    :style="{ backgroundImage: `url(${item.image_url || '/placeholder.jpg'})` }"
                   >
-                    {{ item.discount_rate }}
-                  </span>
-                </div>
-                <div>
-                  <p class="product-name">{{ item.name }}</p>
-                  <div class="price-wrapper">
-                    <p class="product-price">
-                      ¥{{ item.price }}{{ item.unit }}
-                    </p>
-                    <p class="original-price" v-if="item.original_price">
-                      ¥{{ item.original_price }}
-                    </p>
+                    <!-- 显示折扣标签 -->
+                    <span
+                      class="discount-badge"
+                      v-if="item.is_discount && item.discount_rate"
+                    >
+                      {{ item.discount_rate }}
+                    </span>
                   </div>
-                </div>
-              </div>
-              <!-- 如果没有优惠商品 -->
-              <div v-if="limitedOffers.length === 0" class="empty-tip">
-                暂无优惠商品
+                  <div>
+                    <p class="product-name">{{ item.name }}</p>
+                    <div class="price-wrapper">
+                      <p class="product-price">
+                        ¥{{ item.price }}{{ item.unit }}
+                      </p>
+                      <p class="original-price" v-if="item.original_price">
+                        ¥{{ item.original_price }}
+                      </p>
+                    </div>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="grid-item-img placeholder-img"></div>
+                  <div>
+                    <p class="product-name placeholder-text"></p>
+                    <p class="product-price placeholder-text"></p>
+                  </div>
+                </template>
               </div>
             </template>
           </div>
@@ -512,7 +566,7 @@ defineOptions({
   name: 'HomePage',
 })
 
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Star, CircleClose } from '@element-plus/icons-vue'
@@ -538,6 +592,175 @@ const newArrivals = ref([])
 const limitedOffers = ref([])
 const reviews = ref([])
 
+// 分类筛选状态
+const selectedCategory = ref('')
+
+// 选择分类
+const selectCategory = category => {
+  selectedCategory.value = category
+}
+
+// 根据分类筛选商品
+const filterByCategory = products => {
+  // 如果没有选择分类，返回所有商品
+  if (!selectedCategory.value || selectedCategory.value === '' || !products) return products
+  
+  // console.log(`🔍 开始筛选，选择分类: "${selectedCategory.value}"，商品数量: ${products.length}`)
+  
+  const filtered = products.filter(product => {
+    const selectedCat = selectedCategory.value.toLowerCase()
+    
+    let match = false
+    
+    // 优先根据 category_id 判断（最准确）
+    if (product.category_id) {
+      const categoryIdMap = {
+        '水果': 1,
+        '蔬菜': 2, 
+        '果汁': 3,
+        '有机食品': 4
+      }
+      
+      const expectedCategoryId = categoryIdMap[selectedCat]
+      
+      if (expectedCategoryId && product.category_id === expectedCategoryId) {
+        match = true
+      }
+    }
+    
+    // 其次根据分类名称匹配（兼容性处理）
+    if (!match && product.category) {
+      const productCategory = product.category.toLowerCase()
+      const categoryNameMap = {
+        '水果': ['水果', '时令水果', 'fruit'],
+        '蔬菜': ['蔬菜', '新鲜蔬菜', 'vegetable', 'vegetables'],
+        '果汁': ['果汁', '饮料', 'juice', 'drink'],
+        '有机食品': ['有机食品', '有机', 'organic']
+      }
+      
+      const keywords = categoryNameMap[selectedCat] || [selectedCat]
+      for (const keyword of keywords) {
+        if (productCategory.includes(keyword)) {
+          match = true
+          break
+        }
+      }
+    }
+    
+    return match
+  })
+  
+  // console.log(`✅ 筛选完成，找到 ${filtered.length} 个商品`)
+  return filtered
+}
+
+// 各板块固定显示数量配置
+const DISPLAY_LIMITS = {
+  popularPicks: 5,        // 热门精选：5个
+  customerFavorites: 5,   // 客户最爱：5个
+  newArrivals: 5,         // 新品上市：5个
+  limitedOffers: 5,       // 限时优惠：5个
+}
+
+// 筛选后的商品数据（带数量限制和占位符）
+const filteredPopularPicks = computed(() => {
+  const filtered = filterByCategory(popularPicks.value)
+  const limited = filtered.slice(0, DISPLAY_LIMITS.popularPicks)
+  
+  // 如果商品不足5个，用占位符填充
+  const placeholders = Array(Math.max(0, DISPLAY_LIMITS.popularPicks - limited.length))
+    .fill(null)
+    .map((_, index) => ({ id: `placeholder-popular-${index}`, isPlaceholder: true }))
+  
+  const result = [...limited, ...placeholders]
+  console.log('🏠 热门精选:', result.length, '个位置 (', limited.length, '真实 +', placeholders.length, '占位)')
+  return result
+})
+
+const filteredCustomerFavorites = computed(() => {
+  const filtered = filterByCategory(customerFavorites.value)
+  const limited = filtered.slice(0, DISPLAY_LIMITS.customerFavorites)
+  
+  const placeholders = Array(Math.max(0, DISPLAY_LIMITS.customerFavorites - limited.length))
+    .fill(null)
+    .map((_, index) => ({ id: `placeholder-favorites-${index}`, isPlaceholder: true }))
+  
+  const result = [...limited, ...placeholders]
+  console.log('❤️ 客户最爱:', result.length, '个位置 (', limited.length, '真实 +', placeholders.length, '占位)')
+  return result
+})
+
+const filteredNewArrivals = computed(() => {
+  const filtered = filterByCategory(newArrivals.value)
+  const limited = filtered.slice(0, DISPLAY_LIMITS.newArrivals)
+  
+  const placeholders = Array(Math.max(0, DISPLAY_LIMITS.newArrivals - limited.length))
+    .fill(null)
+    .map((_, index) => ({ id: `placeholder-new-${index}`, isPlaceholder: true }))
+  
+  const result = [...limited, ...placeholders]
+  console.log('🆕 新品上市:', result.length, '个位置 (', limited.length, '真实 +', placeholders.length, '占位)')
+  return result
+})
+
+const filteredLimitedOffers = computed(() => {
+  const filtered = filterByCategory(limitedOffers.value)
+  const limited = filtered.slice(0, DISPLAY_LIMITS.limitedOffers)
+  
+  const placeholders = Array(Math.max(0, DISPLAY_LIMITS.limitedOffers - limited.length))
+    .fill(null)
+    .map((_, index) => ({ id: `placeholder-offers-${index}`, isPlaceholder: true }))
+  
+  const result = [...limited, ...placeholders]
+  console.log('💰 限时优惠:', result.length, '个位置 (', limited.length, '真实 +', placeholders.length, '占位)')
+  return result
+})
+
+// 计算当前筛选条件下的商品总数（排除占位符）
+const filteredTotalCount = computed(() => {
+  return (
+    filteredPopularPicks.value.filter(item => !item.isPlaceholder).length +
+    filteredCustomerFavorites.value.filter(item => !item.isPlaceholder).length +
+    filteredNewArrivals.value.filter(item => !item.isPlaceholder).length +
+    filteredLimitedOffers.value.filter(item => !item.isPlaceholder).length
+  )
+})
+
+// 计算各分类的商品数量
+const getCategoryCount = category => {
+  if (!category) {
+    // 全部商品数量
+    return (
+      popularPicks.value.length +
+      customerFavorites.value.length +
+      newArrivals.value.length +
+      limitedOffers.value.length
+    )
+  }
+  
+  const allProducts = [
+    ...popularPicks.value,
+    ...customerFavorites.value,
+    ...newArrivals.value,
+    ...limitedOffers.value,
+  ]
+  
+  return allProducts.filter(product => {
+    if (!product.category) return false
+    const productCategory = product.category.toLowerCase()
+    const selectedCat = category.toLowerCase()
+    return (
+      productCategory.includes(selectedCat) ||
+      selectedCat.includes(productCategory) ||
+      (selectedCat === '果汁' && productCategory.includes('饮料')) ||
+      (selectedCat === '果汁' && productCategory.includes('juice')) ||
+      (selectedCat === '有机食品' && productCategory.includes('有机食品')) ||
+      (selectedCat === '有机食品' && productCategory.includes('有机')) ||
+      (selectedCat === '有机食品' && productCategory.includes('organic'))
+    )
+  }).length
+}
+
 // 轮播图相关
 const currentBannerIndex = ref(0)
 const bannerImagesLoaded = ref(false)
@@ -561,13 +784,13 @@ const getHomeData = async () => {
 
       // 热门精选
       popularPicks.value = data.popular_picks || []
-
+      
       // 客户最爱
       customerFavorites.value = data.customer_favorites || []
-
+      
       // 新品上市
       newArrivals.value = data.new_arrivals || []
-
+      
       // 限时优惠
       limitedOffers.value = data.limited_offers || []
 
@@ -1038,8 +1261,8 @@ onUnmounted(() => {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.9);
-  border: none;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-color);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -1050,10 +1273,13 @@ onUnmounted(() => {
   z-index: 3;
   transition: all 0.3s ease;
   color: var(--text-color);
+  box-shadow: var(--shadow);
 }
 
 .banner-arrow:hover {
-  background-color: var(--bg-card);
+  background-color: var(--primary-color);
+  color: var(--text-inverse);
+  border-color: var(--primary-color);
   transform: translateY(-50%) scale(1.1);
 }
 
@@ -1078,20 +1304,25 @@ onUnmounted(() => {
   height: 10px;
   border-radius: 50%;
   background-color: var(--bg-card);
-  opacity: 0.5;
+  border: 2px solid var(--text-color);
+  opacity: 0.6;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .dot:hover {
-  opacity: 0.8;
+  opacity: 0.9;
   transform: scale(1.2);
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 .dot.active {
   opacity: 1;
   width: 24px;
   border-radius: 5px;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 /* 分类栏 */
@@ -1121,11 +1352,39 @@ onUnmounted(() => {
   padding-bottom: 7px;
   padding-top: 10px;
   text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.bar-items:hover {
+  color: var(--text-color);
+  transform: translateY(-2px);
 }
 
 .bar-items.active {
   border-bottom-color: var(--text-color);
   color: var(--text-color);
+}
+
+.bar-items.active::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .bar-items p {
@@ -1146,6 +1405,33 @@ onUnmounted(() => {
   margin: 20px 16px 12px;
   background: var(--bg-tertiary);
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 分类徽章 */
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #5a7a98 0%, #6a8a9e 100%);
+  color: var(--text-inverse);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 16px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* 产品列表 */
@@ -1200,11 +1486,6 @@ onUnmounted(() => {
   flex-direction: column;
   position: relative;
   background-color: var(--bg-input);
-  opacity: 0;
-  transition: opacity 0.3s ease-in;
-}
-
-.product-list-item-img.loaded {
   opacity: 1;
 }
 
@@ -1259,11 +1540,6 @@ onUnmounted(() => {
   border-radius: 8px;
   position: relative;
   background-color: var(--bg-input);
-  opacity: 0;
-  transition: opacity 0.3s ease-in;
-}
-
-.grid-item-img.loaded {
   opacity: 1;
 }
 
@@ -1822,6 +2098,20 @@ onUnmounted(() => {
   font-size: 14px;
 }
 
+.empty-tip-horizontal {
+  width: 100%;
+  text-align: center;
+  padding: 60px 40px;
+  color: var(--text-light);
+  font-size: 14px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .discount-badge {
   position: absolute;
   top: 10px;
@@ -1861,5 +2151,37 @@ onUnmounted(() => {
   color: var(--text-light);
   font-size: 12px;
   text-decoration: line-through;
+}
+
+/* 占位符样式 */
+.placeholder-item {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.placeholder-item:hover {
+  transform: none;
+  opacity: 0.4;
+}
+
+.placeholder-img {
+  background-color: var(--bg-input);
+  border: 2px dashed var(--border-light);
+}
+
+.placeholder-text {
+  background-color: var(--bg-input);
+  border-radius: 4px;
+  height: 1em;
+  opacity: 0.5;
+}
+
+.placeholder-text:first-child {
+  width: 80%;
+  margin-bottom: 8px;
+}
+
+.placeholder-text:last-child {
+  width: 50%;
 }
 </style>
