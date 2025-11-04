@@ -171,7 +171,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, View, Edit, Delete, Loading, Picture } from '@element-plus/icons-vue'
 import { getOrderList, updateOrderStatus, deleteOrder } from '@/api/admin'
 import { useRouter } from 'vue-router'
